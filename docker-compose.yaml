@@ -1,0 +1,56 @@
+services:
+
+  outcomespillar.backend:
+    image: outcomes-pillar-backend:latest
+    build:
+      context: ./backend/
+      dockerfile: Dockerfile.dev
+    container_name: outcomespillar-backend
+    command: npx nest start --watch
+    ports:
+      - "3000:3000"
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    volumes:
+      - './backend:/usr/src/app'
+    networks:
+      - govtool
+
+  outcomespillar.ui:
+    tty: true
+    image: outcomes-pillar-ui:latest
+    build:
+      context: ./ui/
+      dockerfile: Dockerfile.dev
+    container_name: outcomespillar-ui
+    entrypoint: ["sh", "-c", "npm run watch"]
+    environment:
+      - NODE_ENV=development
+      - ROLLUP_WATCH=true
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    volumes:
+      - './ui:/usr/src/app:cached'
+      - './ui:/app/govtool/frontend/node_modules/@lidonation/govtool-outcomes-pillar-ui'
+    networks:
+      - govtool
+
+  govtool.frontend:
+    image: govtool_frontend
+    build:
+      context: ./
+      dockerfile: Dockerfile.govtool
+    container_name: govtool-frontend
+    command: npx vite --host --port 5173
+    ports:
+      - "5173:5173"
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    volumes:
+      - './govtool/frontend:/app/govtool/frontend:cached'
+    networks:
+      - govtool
+  
+networks:
+  govtool:
+    driver: bridge

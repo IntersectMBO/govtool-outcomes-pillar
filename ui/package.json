@@ -10,8 +10,9 @@
     "src"
   ],
   "scripts": {
-    "build": "rollup -c --bundleConfigAsCjs",
-    "prepublishOnly": "npm run build"
+    "build": "rollup -c --bundleConfigAsCjs ",
+    "prepublishOnly": "npm run build",
+    "watch": "rollup -c --bundleConfigAsCjs  --watch"
   },
   "contributors": [
     {
@@ -45,5 +46,9 @@
     "sass": "^1.81.1",
     "tslib": "^2.8.1",
     "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "rollup-plugin-livereload": "^2.0.5",
+    "rollup-plugin-serve": "^1.1.1"
   }
 }

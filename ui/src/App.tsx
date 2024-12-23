@@ -12,7 +12,7 @@ function App({ description }: AppProps) {
         height: "100%",
       }}
     >
-      <h1>govtool-outcomes-pillar-ui</h1>
+      <h1>govtool-outcomes-pillar-ui hel</h1>
       <p>{description}</p>
     </div>
   );
