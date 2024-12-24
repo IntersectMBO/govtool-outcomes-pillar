@@ -1,7 +1,7 @@
 .PHONY: init
 init:
 	make ui-install
-	make backtend-install
+	make backend-install
 	docker compose up -d
 	make govtool-install
 
