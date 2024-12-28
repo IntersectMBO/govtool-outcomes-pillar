@@ -3,7 +3,7 @@ FROM node:20-alpine AS base
 ###################
 # BUILD DEPENDENCIES
 ###################
-FROM base As dependencies
+FROM base AS dependencies
 
 RUN apk add --no-cache libc6-compat
 
@@ -24,7 +24,7 @@ RUN \
 #######################
 # BUILD FOR PRODUCTION
 #######################
-FROM base As build
+FROM base AS build
 
 WORKDIR /usr/src/app
 
@@ -45,7 +45,7 @@ RUN yarn cache clean
 ###################
 # PRODUCTION RUNTIME
 ###################
-FROM base As production
+FROM bSe As production
 
 ENV NODE_ENV production
 
