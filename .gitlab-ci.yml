@@ -105,7 +105,6 @@ build_backend:
 
 deploy_outcome_backend: &deploy_outcome_backend
   image: "${CI_TEMPLATE_REGISTRY_HOST}/gitlab-org/cluster-integration/auto-deploy-image:${AUTO_DEPLOY_IMAGE_VERSION}"
-  stage: sancho
   script:
     - *setup
     - auto-deploy check_kube_domain
