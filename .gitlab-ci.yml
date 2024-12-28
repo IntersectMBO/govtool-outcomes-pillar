@@ -15,8 +15,8 @@ stages:
 - .pre
 - test
 - build
-- sancho
 - preview
+- sancho
 - mainnet
 
 default:
@@ -45,8 +45,8 @@ default:
     when: manual
 
 yarn:
-  stage: .pre
   image: node:20.18.0-alpine
+  stage: .pre
   services: []
   retry: 1
   rules:
@@ -65,11 +65,11 @@ yarn:
     - ./backend/dist
     expire_in: 1 days
 
-test:
+test_outcomes:
   image: node:20.18.0-alpine
+  services: []
+  retry: 1
   stage: test
-  needs:
-  - yarn
   script:
   - cd backend
   - yarn install --ignore-engines
@@ -82,7 +82,7 @@ test:
   #   - application/cypress/videos
   rules:
   - if: '$DEPLOY_WEBSITE == "true"'
-  allow_failure: true # allow failure to not block the pipeline for now
+  allow_failure: true 
 
 
 build_backend:
@@ -104,7 +104,7 @@ build_backend:
   rules:
     - if: '$DEPLOY_WEBSITE == "true"'
 
-deploy_outcome_backend: &deploy_outcome_backend
+.outcomes_backend_deployment: &outcomes_backend_deployment
   image: "${CI_TEMPLATE_REGISTRY_HOST}/gitlab-org/cluster-integration/auto-deploy-image:${AUTO_DEPLOY_IMAGE_VERSION}"
   script:
     - *setup
@@ -112,15 +112,15 @@ deploy_outcome_backend: &deploy_outcome_backend
     - auto-deploy download_chart
     - auto-deploy create_secret
     - |
-      # set secrets 
+      # Set secrets
       cp $ENV_FILE ./chart/app_env 
       cat ./chart/app_env
     
-      DEPLOYMENT_NAME="www-1694-$CI_ENVIRONMENT_SLUG"
+      DEPLOYMENT_NAME="outcome-1694-$CI_ENVIRONMENT_SLUG"
       helm repo add bitnami https://charts.bitnami.com/bitnami
       helm repo update
 
-      echo "install govtool-outcomes-backend"
+      echo "Install govtool-outcomes-backend"
       helm upgrade --install \
           --timeout 300s \
           --wait \
@@ -130,11 +130,12 @@ deploy_outcome_backend: &deploy_outcome_backend
           -f ./chart/values.yaml \
           --set ingress.host="$INGRESS_HOST" \
           --set namespace=$KUBE_NAMESPACE \
-          $DEPLOYMENT_NAME-web-db \
-          bitnami/postgresql
+          $DEPLOYMENT_NAME
+  rules:
+    - if: '$DEPLOY_WEBSITE == "true"'
 
 # outcomes_preview_backend:
-#   <<: *deploy_outcome_backend
+#   <<: *outcomes_backend_deployment
 #   stage: preview
 #   environment:
 #     name: preview
@@ -142,7 +143,7 @@ deploy_outcome_backend: &deploy_outcome_backend
 #   when: manual
 
 # outcomes_sancho_backend:
-#   <<: *deploy_outcome_backend
+#   <<: *outcomes_backend_deployment
 #   stage: sancho
 #   environment:
 #     name: sancho
@@ -150,7 +151,7 @@ deploy_outcome_backend: &deploy_outcome_backend
 #   when: manual
 
 outcomes_mainnet_backend:
-  <<: *deploy_outcome_backend
+  <<: *outcomes_backend_deployment
   stage: mainnet
   environment:
     name: mainnet
