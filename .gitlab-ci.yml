@@ -61,7 +61,7 @@ yarn:
     yarn run build
   artifacts:
     paths:
-    - ./backend/public
+    - ./backend/dist
     expire_in: 1 days
 
 test:
@@ -71,7 +71,6 @@ test:
   - yarn
   script:
   - cd backend
-  - cp "$ENV_FILE" .env
   - NODE_ENV=test yarn test
   # artifacts:
   #   when: on_failure
