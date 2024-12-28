@@ -1,0 +1,161 @@
+variables:
+  AUTO_DEPLOY_IMAGE_VERSION: "v2.104.0"
+  CI_TEMPLATE_REGISTRY_HOST: registry.gitlab.com
+  KUBE_CONTEXT: govtool-outcomes-backend
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_DRIVER: overlay2
+  DEPLOY_WEBSITE:
+    value: "true"
+    description: "Build and deploy outcomes.1694.io"
+
+
+stages:
+- .pre
+- test
+- build
+- sancho
+- preview
+- mainnet
+
+default:
+  services:
+  - name: docker:dind
+    alias: docker
+    command: [ "--tls=false" ]
+  before_script:
+  - |
+    export APP_VERSION=$(awk '/version/{gsub(/("|",)/,"",$2);print $2};' backend/package.json)
+    export APP_VERSION_AND_BUILD="${APP_VERSION}-${CI_PIPELINE_ID}"
+    export CI_APPLICATION_REPOSITORY=$CI_REGISTRY_IMAGE
+    export CI_APPLICATION_TAG=$APP_VERSION_AND_BUILD
+
+.setup: &setup
+  - apk add --no-cache ca-certificates curl bash openssl git
+  - curl -LO https://dl.k8s.io/release/v1.25.9/bin/linux/amd64/kubectl && chmod +x kubectl && mv kubectl /usr/local/bin/kubectl
+  - curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 && chmod 700 get_helm.sh && DESIRED_VERSION=v$HELM_VERSION ./get_helm.sh
+  - kubectl config get-contexts
+  - kubectl config use-context voltaire/outcomes.1694.io:1694
+
+.infra_rules: &infra_rules
+  - if: '$CI_COMMIT_BRANCH == "main" && ($DEPLOY_INFRA == "true")'
+    when: manual
+  - if: '$CI_COMMIT_BRANCH != "main" && ($DEPLOY_INFRA == "true")'
+    when: manual
+
+yarn:
+  stage: .pre
+  image: node:20.18.0-alpine
+  services: []
+  retry: 1
+  rules:
+  - if: '$DEPLOY_WEBSITE == "true"'
+  needs:
+  - composer
+  before_script:
+  - apk add --update curl && rm -rf /var/cache/apk/*
+  script: |-
+    set -vx
+    export PATH=$PATH:/usr/local/bin
+    export NODE_OPTIONS=--max-old-space-size=8192
+    cd ./backend
+    yarn install --ignore-engines
+    yarn run build
+  artifacts:
+    paths:
+    - ./backend/public
+    expire_in: 1 days
+
+test:
+  image: cypress/included:10.3.0
+  stage: test
+  needs:
+  - composer
+  - yarn
+  script:
+  - cd backend
+  - cp "$ENV_FILE" .env
+  - NODE_ENV=test yarn test
+  # artifacts:
+  #   when: on_failure
+  #   expire_in: 2 days
+  #   paths:
+  #   - application/cypress/screenshots
+  #   - application/cypress/videos
+  rules:
+  - if: '$DEPLOY_WEBSITE == "true"'
+  allow_failure: true # allow failure to not block the pipeline for now
+
+
+build_backend:
+  stage: build
+  image: docker:24.0.2-git
+  retry: 1
+  script:
+    - |
+      set -xev
+            
+      docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+      echo "Building Dockerfile with tags $CI_APPLICATION_REPOSITORY/outcomes.1694.io:$CI_APPLICATION_TAG and $CI_APPLICATION_REPOSITORY/outcomes.1694.io:latest ..."
+      
+      docker build --network host -f backend/Dockerfile \
+        -t "$CI_APPLICATION_REPOSITORY/outcomes.1694.io:$CI_APPLICATION_TAG" \
+        -t "$CI_APPLICATION_REPOSITORY/outcomes.1694.io:latest" .
+      docker push "$CI_APPLICATION_REPOSITORY/outcomes.1694.io:$CI_APPLICATION_TAG"
+      docker push "$CI_APPLICATION_REPOSITORY/outcomes.1694.io:latest"
+  rules:
+    - if: '$DEPLOY_WEBSITE == "true"'
+
+deploy_outcome_backend: &deploy_outcome_backend
+  image: "${CI_TEMPLATE_REGISTRY_HOST}/gitlab-org/cluster-integration/auto-deploy-image:${AUTO_DEPLOY_IMAGE_VERSION}"
+  stage: sancho
+  script:
+    - *setup
+    - auto-deploy check_kube_domain
+    - auto-deploy download_chart
+    - auto-deploy create_secret
+    - |
+      # set secrets 
+      cp $ENV_FILE ./chart/app_env 
+      cat ./chart/app_env
+    
+      DEPLOYMENT_NAME="www-1694-$CI_ENVIRONMENT_SLUG"
+      helm repo add bitnami https://charts.bitnami.com/bitnami
+      helm repo update
+
+      echo "install govtool-outcomes-backend"
+      helm upgrade --install \
+          --timeout 300s \
+          --wait \
+          --atomic \
+          --namespace="$KUBE_NAMESPACE" \
+          --create-namespace \
+          -f ./chart/values.yaml \
+          --set ingress.host="$INGRESS_HOST" \
+          --set namespace=$KUBE_NAMESPACE \
+          $DEPLOYMENT_NAME-web-db \
+          bitnami/postgresql
+
+outcomes_preview_backend:
+  <<: *deploy_outcome_backend
+  stage: preview
+  environment:
+    name: preview
+    url: https://$CI_PROJECT_PATH_SLUG.$AUTO_DEVOPS_DOMAIN
+  when: manual
+
+outcomes_sancho_backend:
+  <<: *deploy_outcome_backend
+  stage: sancho
+  environment:
+    name: sancho
+    url: https://$CI_PROJECT_PATH_SLUG.$AUTO_DEVOPS_DOMAIN
+  when: manual
+
+outcomes_mainnet_backend:
+  <<: *deploy_outcome_backend
+  stage: mainnet
+  environment:
+    name: mainnet
+    url: https://$CI_PROJECT_PATH_SLUG.$AUTO_DEVOPS_DOMAIN
+  when: manual
