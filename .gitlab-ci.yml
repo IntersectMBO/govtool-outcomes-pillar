@@ -133,21 +133,21 @@ deploy_outcome_backend: &deploy_outcome_backend
           $DEPLOYMENT_NAME-web-db \
           bitnami/postgresql
 
-outcomes_preview_backend:
-  <<: *deploy_outcome_backend
-  stage: preview
-  environment:
-    name: preview
-    url: https://$CI_PROJECT_PATH_SLUG.$AUTO_DEVOPS_DOMAIN
-  when: manual
+# outcomes_preview_backend:
+#   <<: *deploy_outcome_backend
+#   stage: preview
+#   environment:
+#     name: preview
+#     url: https://$CI_PROJECT_PATH_SLUG.$AUTO_DEVOPS_DOMAIN
+#   when: manual
 
-outcomes_sancho_backend:
-  <<: *deploy_outcome_backend
-  stage: sancho
-  environment:
-    name: sancho
-    url: https://$CI_PROJECT_PATH_SLUG.$AUTO_DEVOPS_DOMAIN
-  when: manual
+# outcomes_sancho_backend:
+#   <<: *deploy_outcome_backend
+#   stage: sancho
+#   environment:
+#     name: sancho
+#     url: https://$CI_PROJECT_PATH_SLUG.$AUTO_DEVOPS_DOMAIN
+#   when: manual
 
 outcomes_mainnet_backend:
   <<: *deploy_outcome_backend
