@@ -36,7 +36,7 @@ default:
   - curl -LO https://dl.k8s.io/release/v1.25.9/bin/linux/amd64/kubectl && chmod +x kubectl && mv kubectl /usr/local/bin/kubectl
   - curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 && chmod 700 get_helm.sh && DESIRED_VERSION=v$HELM_VERSION ./get_helm.sh
   - kubectl config get-contexts
-  - kubectl config use-context voltaire/outcomes.1694.io:1694
+  - kubectl config use-context voltaire/www.1694.io:1694
 
 .infra_rules: &infra_rules
   - if: '$CI_COMMIT_BRANCH == "main" && ($DEPLOY_INFRA == "true")'
@@ -99,7 +99,7 @@ build_backend:
         -t "$CI_APPLICATION_REPOSITORY/outcomes.1694.io:$CI_APPLICATION_TAG" \
         -t "$CI_APPLICATION_REPOSITORY/outcomes.1694.io:latest" ./backend
       docker push "$CI_APPLICATION_REPOSITORY/outcomes.1694.io:$CI_APPLICATION_TAG"
-      docker push "$CI_APPLICATION_REPOSITORY/www.1694.io:latest"
+      docker push "$CI_APPLICATION_REPOSITORY/outcomes.1694.io:latest"
   rules:
     - if: '$DEPLOY_WEBSITE == "true"'
 
