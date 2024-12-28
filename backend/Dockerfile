@@ -1,52 +1,65 @@
+FROM node:20-alpine AS base
+
 ###################
-# BUILD FOR LOCAL DEVELOPMENT
+# BUILD DEPENDENCIES
 ###################
-FROM node:18-alpine AS development
+FROM base As dependencies
+
+RUN apk add --no-cache libc6-compat
+
+ENV NODE_ENV build
 
 WORKDIR /usr/src/app
 
-COPY --chown=node:node package.json ./
-COPY --chown=node:node yarn.lock ./
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
 
-RUN yarn
+RUN \
+    if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
+    elif [ -f package-lock.json ]; then npm ci; \
+    elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
+    else echo "Lockfile not found." && exit 1; \
+    fi
 
-COPY --chown=node:node . .
 
-USER node
-
-
-###################
+#######################
 # BUILD FOR PRODUCTION
-###################
-FROM node:18-alpine AS build
+#######################
+FROM base As build
 
 WORKDIR /usr/src/app
 
-COPY --chown=node:node package.json ./
-COPY --chown=node:node yarn.lock ./
+ENV NODE_ENV build
 
-COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modules
+COPY --chown=node:node ./package.json ./
+COPY --chown=node:node ./yarn.lock ./
+
+COPY --chown=node:node --from=dependencies /usr/src/app/node_modules ./node_modules
 
 COPY --chown=node:node . .
 
-RUN yarn build
+RUN yarn run build
+
+RUN yarn cache clean
+
+
+###################
+# PRODUCTION RUNTIME
+###################
+FROM base As production
 
 ENV NODE_ENV production
 
-RUN yarn install --frozen-lockfile --production && yarn cache clean
+WORKDIR /usr/src/app
+
+COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
+COPY --chown=node:node --from=build /usr/src/app/dist ./
+
+COPY --chown=node:node package.json ./
+
+EXPOSE 8000
+
+ENV HOSTNAME "0.0.0.0"
 
 USER node
 
-
-###################
-# PRODUCTION
-###################
-FROM node:18-alpine AS production
-
-COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
-COPY --chown=node:node --from=build /usr/src/app/dist ./dist
-
-COPY --chown=node:node package.json ./dist/
-COPY --chown=node:node yarn.lock ./dist/
-
-CMD [ "node", "dist/main.js" ]
+CMD [ "node", "main.js" ]
