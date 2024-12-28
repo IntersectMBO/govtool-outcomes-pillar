@@ -113,7 +113,7 @@ build_backend:
     - auto-deploy create_secret
     - |
       # Set secrets
-      echo $ENV_FILE
+      echo "$ENV_FILE"
       # cp "$ENV_FILE" ./charts/app_env 
       # cat ./charts/app_env
     
@@ -122,7 +122,8 @@ build_backend:
       helm repo update
 
       echo "Install govtool-outcomes-backend"
-      helm upgrade --install \
+      helm upgrade $DEPLOYMENT_NAME ./charts \
+          --install \
           --timeout 300s \
           --wait \
           --atomic \
@@ -131,7 +132,7 @@ build_backend:
           -f ./chart/values.yaml \
           --set ingress.host="$INGRESS_HOST" \
           --set namespace=$KUBE_NAMESPACE \
-          $DEPLOYMENT_NAME
+          --create-namespace
   rules:
     - if: '$DEPLOY_WEBSITE == "true"'
 
