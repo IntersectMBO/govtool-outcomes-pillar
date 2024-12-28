@@ -45,7 +45,7 @@ RUN yarn cache clean
 ###################
 # PRODUCTION RUNTIME
 ###################
-FROM bSe As production
+FROM base AS production
 
 ENV NODE_ENV production
 
