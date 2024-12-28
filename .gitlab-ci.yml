@@ -66,12 +66,13 @@ yarn:
     expire_in: 1 days
 
 test:
-  image: cypress/included:10.3.0
+  image: node:20.18.0-alpine
   stage: test
   needs:
   - yarn
   script:
   - cd backend
+  - yarn install --ignore-engines
   - NODE_ENV=test yarn test
   # artifacts:
   #   when: on_failure
