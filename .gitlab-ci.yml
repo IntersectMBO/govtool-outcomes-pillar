@@ -113,8 +113,8 @@ build_backend:
     - auto-deploy create_secret
     - |
       # Set secrets
-      cp $ENV_FILE ./chart/app_env 
-      cat ./chart/app_env
+      cp "$ENV_FILE" ./charts/app_env 
+      cat ./charts/app_env
     
       DEPLOYMENT_NAME="outcome-1694-$CI_ENVIRONMENT_SLUG"
       helm repo add bitnami https://charts.bitnami.com/bitnami
