@@ -11,7 +11,7 @@ spec:
     matchLabels:
       app: "{{ $.Chart.Name }}"
       service: "{{ $.Chart.Name }}"
-  replicas: {{ .Values.services.cardano_backend.replicaCount }}
+  replicas: {{ .Values.image.replicaCount }}
   strategy:
     type: RollingUpdate
     rollingUpdate:

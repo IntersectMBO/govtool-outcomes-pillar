@@ -5,6 +5,7 @@ image:
   tag: 'latest'
   pullPolicy: IfNotPresent
   pullSecret: gitlab-registry-catalystexplorer
+  replicaCount: 1
 
 ingress:
   hosts: ''
