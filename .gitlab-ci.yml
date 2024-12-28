@@ -113,7 +113,7 @@ build_backend:
     - auto-deploy create_secret
     - |
       # Set secrets
-      cp $ENV_FILE ./charts/app_env 
+      cp "$ENV_FILE" ./charts/app_env 
       cat ./charts/app_env
     
       DEPLOYMENT_NAME="outcome-1694-$CI_ENVIRONMENT_SLUG"
