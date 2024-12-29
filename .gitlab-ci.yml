@@ -136,13 +136,13 @@ build_backend:
   rules:
     - if: '$DEPLOY_WEBSITE == "true"'
 
-# outcomes_preview_backend:
-#   <<: *outcomes_backend_deployment
-#   stage: preview
-#   environment:
-#     name: preview
-#     url: https://$CI_PROJECT_PATH_SLUG.$AUTO_DEVOPS_DOMAIN
-#   when: manual
+outcomes_preview_backend:
+  <<: *outcomes_backend_deployment
+  stage: preview
+  environment:
+    name: preview
+    url: https://$CI_PROJECT_PATH_SLUG.$AUTO_DEVOPS_DOMAIN
+  when: manual
 
 # outcomes_sancho_backend:
 #   <<: *outcomes_backend_deployment
