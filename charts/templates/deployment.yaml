@@ -31,13 +31,13 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         livenessProbe:
           httpGet:
-            path: /live
+            path: /
             port: 3000
           initialDelaySeconds: 5
           periodSeconds: 10
         readinessProbe:
           httpGet:
-            path: /ready
+            path: /
             port: 3000
           initialDelaySeconds: 1
           periodSeconds: 10
