@@ -113,11 +113,11 @@ build_backend:
     - auto-deploy create_secret
     - |
       # Set secrets
-      echo "$ENV_FILE"
       cp "$ENV_FILE" ./charts/app_env 
       cat ./charts/app_env
-    
-      DEPLOYMENT_NAME="outcome-1694-$CI_ENVIRONMENT_SLUG"
+      echo "$INGRESS_HOST" "$NAMESPACE"
+
+      DEPLOYMENT_NAME="outcomes-$CI_ENVIRONMENT_SLUG"
       helm repo add bitnami https://charts.bitnami.com/bitnami
       helm repo update
 
@@ -127,7 +127,7 @@ build_backend:
           --timeout 300s \
           --wait \
           --atomic \
-          --namespace="$KUBE_NAMESPACE" \
+          --namespace="$NAMESPACE" \
           --create-namespace \
           -f ./charts/values.yaml \
           --set ingress.host="$INGRESS_HOST" \
