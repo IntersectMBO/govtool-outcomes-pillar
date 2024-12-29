@@ -4,7 +4,7 @@ image:
   repository: registry.lidonation.com/voltaire/govtool-outcomes-pillar/outcomes.1694.io
   tag: 'latest'
   pullPolicy: IfNotPresent
-  pullSecret: '1694-registry-deploy-token'
+  pullSecret: 'outcomes-registry-deploy-token'
   replicaCount: 1
 
 ingress:
