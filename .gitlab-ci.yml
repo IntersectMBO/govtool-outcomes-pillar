@@ -131,7 +131,7 @@ build_backend:
           --create-namespace \
           -f ./charts/values.yaml \
           --set ingress.host="$INGRESS_HOST" \
-          --set namespace=$KUBE_NAMESPACE \
+          --set namespace=$NAMESPACE \
           --create-namespace
   rules:
     - if: '$DEPLOY_WEBSITE == "true"'
