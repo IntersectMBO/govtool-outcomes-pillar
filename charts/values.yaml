@@ -1,7 +1,7 @@
 namespace: outcomes-preview
 
 image:
-  repository: registry.lidonation.com/voltaire/outcomes.1694.io
+  repository: registry.lidonation.com/voltaire/govtool-outcomes-pillar/outcomes.1694.io
   tag: 'latest'
   pullPolicy: IfNotPresent
   pullSecret: gitlab-registry-catalystexplorer
