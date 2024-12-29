@@ -16,15 +16,13 @@ spec:
   tls:
     secretName: wildcard-1694-tls
   routes:
-    - match: Host(`{{ .Values.ingress.host }}`) && PathPrefix(`/api`)
+    - match: Host(`{{ .Values.ingress.host }}`) 
       kind: Rule
       priority: 1
       middlewares:
         - name: traefik-redirect-http-to-https@kubernetescrd
           namespace: traefik
         - name: traefik-default-headers@kubernetescrd
-          namespace: traefik
-        - name: traefik-redirect-to-www@kubernetescrd
           namespace: traefik
       services:
         - name: "{{ $.Chart.Name }}-service"
