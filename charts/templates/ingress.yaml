@@ -16,7 +16,7 @@ spec:
   tls:
     secretName: wildcard-1694-tls
   routes:
-    - match: Host(`{{ .Values.ingress.host }}`) 
+    - match: Host(`outcomes.1694.io`) || Host(`preview.outcomes.1694.io`)
       kind: Rule
       priority: 1
       middlewares:
