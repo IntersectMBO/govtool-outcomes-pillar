@@ -22,8 +22,8 @@ spec:
       secretName: {{ .secretName }}
   {{- end }}
   rules:
-    - host: 
-        - {{ .Values.ingress.host }}
+  {{- range .Values.ingress.hosts }}
+    - host: {{ . }}
       http:
         paths:
           - path: /api
@@ -33,3 +33,4 @@ spec:
                 name: "{{ $.Chart.Name }}-service"
                 port:
                   number: 80
+  {{- end }}
