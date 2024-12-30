@@ -13,8 +13,7 @@ ingress:
     headers:
       HTTPS: "on"
   annotations: { kubernetes.io/ingress.class: traefik, cert-manager.io/cluster-issuer: letsencrypt-issuer, traefik.ingress.kubernetes.io/router.entrypoints: "websecure,web" }
-  hosts:
-  - outcomes.1694.io
+  host: outcomes.1694.io
   tls:
   - hosts:
     - "'*.1694.io'"
