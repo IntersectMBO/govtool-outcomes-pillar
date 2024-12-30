@@ -8,4 +8,15 @@ image:
   replicaCount: 1
 
 ingress:
-  hosts: ''
+  enabled: true
+  controller:
+    headers:
+      HTTPS: "on"
+  annotations: { kubernetes.io/ingress.class: traefik, cert-manager.io/cluster-issuer: letsencrypt-issuer, traefik.ingress.kubernetes.io/router.entrypoints: "websecure,web" }
+  hosts:
+  - outcomes.1694.io
+  - preview.outcomes.1694.io
+  tls:
+  - hosts:
+    - "'*.1694.io'"
+    secretName: wildcard-1694-tls
