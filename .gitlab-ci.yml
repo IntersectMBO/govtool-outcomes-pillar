@@ -155,6 +155,8 @@ outcomes_preview_backend:
 outcomes_mainnet_backend:
   <<: *outcomes_backend_deployment
   stage: mainnet
+  rules:
+    - $CI_COMMIT_BRANCH == "main"
   environment:
     name: mainnet
     url: https://$CI_PROJECT_PATH_SLUG.$AUTO_DEVOPS_DOMAIN
