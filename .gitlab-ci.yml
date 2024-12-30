@@ -130,7 +130,7 @@ build_backend:
           --namespace="$NAMESPACE" \
           --create-namespace \
           -f ./charts/values.yaml \
-          --set ingress.host="$INGRESS_HOST" \
+          --set ingress.hosts="$INGRESS_HOST" \
           --set namespace=$NAMESPACE \
           --create-namespace
   rules:
