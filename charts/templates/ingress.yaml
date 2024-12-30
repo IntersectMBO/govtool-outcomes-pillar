@@ -23,7 +23,10 @@ spec:
   {{- end }}
   rules:
   {{- range .Values.ingress.hosts }}
-    - host: {{ . }}
+    - host: 
+      {{- range .hosts }}
+      - {{ . }}
+      {{- end }}
       http:
         paths:
           - path: /api
