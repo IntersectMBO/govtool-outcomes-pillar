@@ -8,7 +8,9 @@ init:
 .PHONY: up
 up:
 	docker compose up -d
-	make govtool-install
+
+	# run this independently incase govtool has new libraries from the git pull
+	# make govtool-install
 
 .PHONY: down
 down:
