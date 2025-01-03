@@ -36,13 +36,7 @@ default:
   - curl -LO https://dl.k8s.io/release/v1.25.9/bin/linux/amd64/kubectl && chmod +x kubectl && mv kubectl /usr/local/bin/kubectl
   - curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 && chmod 700 get_helm.sh && DESIRED_VERSION=v$HELM_VERSION ./get_helm.sh
   - kubectl config get-contexts
-  # - kubectl config use-context voltaire/www.1694.io:1694
 
-.infra_rules: &infra_rules
-  - if: '$CI_COMMIT_BRANCH == "main" && ($DEPLOY_INFRA == "true")'
-    when: manual
-  - if: '$CI_COMMIT_BRANCH != "main" && ($DEPLOY_INFRA == "true")'
-    when: manual
 
 yarn:
   image: node:20.18.0-alpine
@@ -74,12 +68,6 @@ test_outcomes:
   - cd backend
   - yarn install --ignore-engines
   - NODE_ENV=test yarn test
-  # artifacts:
-  #   when: on_failure
-  #   expire_in: 2 days
-  #   paths:
-  #   - application/cypress/screenshots
-  #   - application/cypress/videos
   rules:
   - if: '$DEPLOY_WEBSITE == "true"'
   allow_failure: true 
@@ -118,8 +106,6 @@ build_backend:
       echo "$INGRESS_HOST" "$NAMESPACE"
 
       DEPLOYMENT_NAME="outcomes-$CI_ENVIRONMENT_SLUG"
-      helm repo add bitnami https://charts.bitnami.com/bitnami
-      helm repo update
 
       echo "Install govtool-outcomes-backend"
       helm upgrade $DEPLOYMENT_NAME ./charts \
@@ -143,14 +129,6 @@ outcomes_preview_backend:
     name: preview
     url: https://$CI_PROJECT_PATH_SLUG.$AUTO_DEVOPS_DOMAIN
   when: manual
-
-# outcomes_sancho_backend:
-#   <<: *outcomes_backend_deployment
-#   stage: sancho
-#   environment:
-#     name: sancho
-#     url: https://$CI_PROJECT_PATH_SLUG.$AUTO_DEVOPS_DOMAIN
-#   when: manual
 
 outcomes_mainnet_backend:
   <<: *outcomes_backend_deployment

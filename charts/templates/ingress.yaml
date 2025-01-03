@@ -11,7 +11,7 @@ metadata:
     {{- range $key, $value := .Values.ingress.annotations }}
       {{ $key }}: {{ $value | quote }}
     {{- end }}
-      traefik.ingress.kubernetes.io/router.middlewares: "traefik-redirect-http-to-https@kubernetescrd,traefik-default-headers@kubernetescrd,traefik-strip-prefix@kubernetescrd"
+      traefik.ingress.kubernetes.io/router.middlewares: "traefik-redirect-http-to-https@kubernetescrd,traefik-default-headers@kubernetescrd,traefik-strip-prefix@kubernetescrd,{{ $.Chart.Name }}-redirect-root@kubernetescrd"
 spec:
   tls:
   {{- range .Values.ingress.tls }}
@@ -27,6 +27,13 @@ spec:
       http:
         paths:
           - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: "{{ $.Chart.Name }}-service"
+                port:
+                  number: 80
+          - path: /
             pathType: Prefix
             backend:
               service:
