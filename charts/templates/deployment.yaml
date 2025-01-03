@@ -80,10 +80,3 @@ spec:
       volumes:
         - name: node-ipc
           emptyDir: {}
-      tolerations:
-        - key: "tier"
-          operator: "Equal"
-          value: "t0"
-        - key: "tier"
-          operator: "Equal"
-          value: "t2"
