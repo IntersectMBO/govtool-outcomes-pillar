@@ -63,9 +63,9 @@ spec:
         image: alpine/socat:1.8.0.0
         env:
         - name: CARDANO_NODE_SOCKET_TCP_HOST
-          value: "lidolovelace-cardano-relay-1-service"
+          value: "{{ .Values.cardano_node.tcp_host }}"
         - name: CARDANO_NODE_SOCKET_TCP_PORT
-          value: "30111"
+          value: "{{ .Values.cardano_node.tcp_port }}"
         - name: SOCAT_TIMEOUT
           value: "3600"
         command: [

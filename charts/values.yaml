@@ -19,3 +19,7 @@ ingress:
   - hosts:
     - "'*.1694.io'"
     secretName: wildcard-1694-tls
+
+cardano_node:
+  - tcp_host: "lidolovelace-cardano-relay-1-service"
+  - tcp_port: "30111"
