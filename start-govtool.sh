@@ -8,7 +8,7 @@ REPO_URL="https://github.com/IntersectMBO/govtool.git"
 HOST_FRONTEND_DIR="./govtool/frontend"
 UPDATE=$1 
 
-if [ "$update" == "true" ]; then
+if [ "$UPDATE" == "true" ]; then
     echo "Update mode enabled."
 else
     echo "Setup mode enabled."
@@ -42,7 +42,6 @@ clone_and_copy() {
     docker stop clone-govtool && docker rm -v clone-govtool || echo "Container already removed."
 }
 
- echo "$UPDATE" ;
 if [ ! -d "$HOST_FRONTEND_DIR" ] || [ "$UPDATE" = true ]; then
     echo "Initial setup or update required..."
     clone_and_copy

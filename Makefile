@@ -2,14 +2,13 @@
 init:
 	make ui-install
 	make backend-install
+	chmod -R 777 ./start-govtool.sh
 	./start-govtool.sh
 	docker compose up 
 
 .PHONY: up
 up:
-	# make symlink
 	docker compose up 
-	# make govtool-install
 
 .PHONY: down
 down:
@@ -18,10 +17,6 @@ down:
 .PHONY: update-govtool
 update-govtool:
 	./start-govtool.sh true
-
-.PHONY: symlink
-symlink:
-	ln -sf /app/ui-dist /app/govtool/frontend/node_modules/@intersect.mbo/govtool-outcomes-pillar-ui/dist
 
 .PHONY: ui-install
 ui-install:
