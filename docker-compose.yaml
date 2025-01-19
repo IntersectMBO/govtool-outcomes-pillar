@@ -38,7 +38,9 @@ services:
     image: node:20-alpine
     container_name: govtool-frontend
     working_dir: /app/govtool/frontend
-    entrypoint: ["sh", "-c", " cd /app/ui && npm link &&  cd /app/govtool/frontend && npm link @intersect.mbo/govtool-outcomes-pillar-ui && npx vite --host --port 5173"]
+    entrypoint: ["sh", "-c", "cd /app/ui && npm link && \
+      cd /app/govtool/frontend && npm link @intersect.mbo/govtool-outcomes-pillar-ui && \
+      npx vite --host --port 5173"]
     ports:
       - "5173:5173"
     environment:
