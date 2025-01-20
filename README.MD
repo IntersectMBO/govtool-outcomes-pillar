@@ -2,7 +2,6 @@
 
 Welcome to the official repository for the Govtool Outcomes Pillar backend.
 
-
 ## Table of content:
 
 - [Boilerplate Project Documents](#boilerplate-project-documents)
@@ -25,6 +24,7 @@ Welcome to the official repository for the Govtool Outcomes Pillar backend.
 ## Introduction
 
 This document serves as a comprehensive guide for setting up the backend and database components of the outcomes pillar.
+
 ## Prerequisites
 
 - Node.js installed - [Download link](https://nodejs.org/en/download/).
@@ -67,12 +67,14 @@ Before you begin setting up the application, you'll need to clone the repository
      ```
      git clone https://github.com/IntersectMBO/boilerplate-project.git
      ```
-
 2. **Navigate to the Project Directory:**
+
    - After cloning, change into the project's root directory:
+
      ```
      cd boilerplate-project
      ```
+
      This directory contains all the files you need to set up the application, including the Docker Compose files and the separate directories for the backend and frontend components.
 
 By cloning the repository, you ensure that you have the latest version of the code and all the necessary files to get started with the application setup.
@@ -99,7 +101,6 @@ To run the application locally, you need to have Node.js installed for the backe
 1. **Navigate to the `frontend` directory** of the project.
 2. **Install dependencies** by running `npm install`.
 3. **Configure Environment Variables:** Create or edit a `.env` file in the frontend directory to include environment variables specific to your Next.js application. For seamless integration with the Strapi backend, add the following line to specify the backend API URL: `NEXT_PUBLIC_API_URL=http://localhost:1337`
-
 4. **Start the Next.js server** with `npm run dev` for development mode. This command serves your frontend application and hot-reloads for any changes.
 
 By following these detailed steps for each part of the stack, you will have a fully functional full-stack application ready for further development and eventual deployment.
@@ -118,20 +119,18 @@ Leverage Docker Compose to simplify the process of deploying the full stack of o
 1. **Prerequisites:**
 
    - Confirm that Docker and Docker Compose are installed on your machine. These tools are essential for creating and managing multi-container Docker applications.
-
 2. **Navigate to your project's root directory:**
 
    - Open a terminal and change your directory to the root of your project where the `docker-compose.yaml` file is located. This file contains the configuration for all the services that make up your application.
-
 3. **Start services with docker compose:**
 
    - Execute the following command to start up all the services as defined in your `docker-compose.yaml` file. The `--build` flag ensures that Docker builds fresh images for your services, reflecting any recent changes you might have made.
      ```
-     docker-compose up --build
+     make init
      ```
    - This command will spin up the backend, frontend, and database containers, linking them together based on your configurations.
-
 4. **Accessing the application:**
+
    - With all services running, your application components should be accessible at the following URLs:
      - **Backend:** `http://localhost:1337` – This is where your Strapi CMS will be accessible for managing content and accessing the API.
      - **Frontend:** `http://localhost:3000` – Your Next.js frontend application will be available here, ready to serve your site's visitors.
@@ -140,9 +139,38 @@ Leverage Docker Compose to simplify the process of deploying the full stack of o
 ### Overview of services in docker compose:
 
 - **Backend service:** Configured to run Strapi on port `1337`, this service automatically connects to the PostgreSQL database, ensuring your CMS has all the data it needs to operate.
-
 - **Database service:** This service runs PostgreSQL and is set to be accessible on port `4321` from the host machine. It's crucial for storing all your application's data securely and efficiently.
-
 - **Frontend service:** Your Next.js application will be served on port `3000`, connecting to the Strapi backend to fetch content and data. This setup provides a seamless experience for developers and users alike.
 
 By following these steps, you can quickly get your full-stack application running using Docker Compose, ensuring each component is correctly configured and interconnected for optimal performance.
+
+### Other Commands
+
+```
+# To update the govtool code base
+make update
+```
+
+```
+#To build/Rebuild individual images 
+
+#backend image 
+make image-build-backend
+
+#ui image 
+make image-build-ui
+
+```
+
+```
+#install dependancies
+
+#ui 
+make ui-install
+
+#backend
+make ui-install
+
+#govtool
+make govtool-install
+```

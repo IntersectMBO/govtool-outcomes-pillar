@@ -66,10 +66,3 @@ image-build-backend:
 	-f backend/Dockerfile.dev \
 	-t outcomes-pillar-backend \
 	backend/.
-
-.PHONY: image-build-govtool
-image-build-govtool:
-	docker build \
-	-f ./Dockerfile.govtool \
-	-t govtool_frontend \
-	.
