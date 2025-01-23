@@ -32,6 +32,9 @@
   },
   "homepage": "https://github.com/IntersectMBO/govtool-outcomes-pillar",
   "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-react": "^7.26.3",
+    "@babel/preset-typescript": "^7.26.0",
     "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-commonjs": "^28.0.2",
     "@rollup/plugin-json": "^6.1.0",
@@ -45,27 +48,31 @@
     "postcss": "^8.4.49",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^7.0.1",
+    "react-router-dom": "^6.23.1",
     "rollup": "^4.28.0",
     "rollup-plugin-dts": "^6.1.1",
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-postcss": "^4.0.2",
-    "sass": "^1.81.1",
     "semantic-release": "^24.2.1",
     "tailwindcss": "^3.4.17",
     "tslib": "^2.8.1",
     "typescript": "^5.7.2"
   },
   "dependencies": {
-    "@fontsource/poppins": "^5.1.1",
-    "@intersect.mbo/intersectmbo.org-icons-set": "^1.1.0"
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@fontsource/poppins": "^5.0.14",
+    "@intersect.mbo/intersectmbo.org-icons-set": "^1.0.8",
+    "@mui/material": "^5.15.18",
+    "sass": "^1.77.2"
   },
   "peerDependencies": {
-    "@emotion/react": "11.11.4",
-    "@emotion/styled": "11.11.5",
-    "@mui/material": "5.15.18",
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@mui/material": "^5.15.18",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^7.0.1"
+    "react-router-dom": "^6.23.1",
+    "sass": "^1.77.2"
   }
 }
