@@ -50,7 +50,10 @@ export default [
     external: [
       "react", 
       "react-dom", 
-      /^@intersect\.mbo\/intersectmbo\.org-icons-set/
+      "@mui/material",
+      "@emotion/react",
+      "@emotion/styled",
+      "react-router-dom",
     ],
   },
   {
