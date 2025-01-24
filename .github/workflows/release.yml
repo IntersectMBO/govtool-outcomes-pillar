@@ -26,69 +26,25 @@ jobs:
       - name: Install dependencies
         run: |
           cd ui
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
           yarn install --frozen-lockfile
-=======
-          npm ci
->>>>>>> 8f6b877 (chore: cleanup)
-=======
-          yarn install --frozen-lockfile
->>>>>>> 97bbd6c (chore: cleanup)
-=======
-          yarn install --frozen-lockfile
->>>>>>> d5010de0e3fd553e78cf7bf103a97e76e5899462
 
       # Build the project
       - name: Build
         run: |
           cd ui
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
           yarn build
-=======
-          npm run build
->>>>>>> 8f6b877 (chore: cleanup)
-=======
-          yarn build
->>>>>>> 97bbd6c (chore: cleanup)
-=======
-          yarn build
->>>>>>> d5010de0e3fd553e78cf7bf103a97e76e5899462
 
       # Audit signatures
       - name: Audit
         run: |
           cd ui
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
           yarn audit --groups dependencies
-=======
-          npm audit signatures
->>>>>>> 8f6b877 (chore: cleanup)
-=======
-          yarn audit --groups dependencies
->>>>>>> 97bbd6c (chore: cleanup)
-=======
-          yarn audit --groups dependencies
->>>>>>> d5010de0e3fd553e78cf7bf103a97e76e5899462
 
       # Release
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-<<<<<<< HEAD
-<<<<<<< HEAD
           NPM_TOKEN: ${{ secrets.NPM_TOKEN_UI_WRITE }}
-=======
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
->>>>>>> 8f6b877 (chore: cleanup)
-=======
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN_UI_WRITE }}
->>>>>>> d5010de0e3fd553e78cf7bf103a97e76e5899462
         run: |
           cd ui
           npx semantic-release
