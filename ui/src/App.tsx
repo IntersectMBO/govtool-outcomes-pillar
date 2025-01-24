@@ -1,5 +1,5 @@
 import { Box, Grid } from "@mui/material";
-import GovernanceActionCard from "./Components/GovernanceActionCard";
+import GovernanceActionCard from "./Components/Molecules/GovernanceActionCard";
 import { IconArrowCircleRight } from "@intersect.mbo/intersectmbo.org-icons-set";
 import "./index.scss";
 
@@ -15,15 +15,12 @@ function App({ description }: AppProps) {
         height: "100%",
       }}
     >
-      <Box 
-      sx={{
-        padding: 2,
-        maxWidth: '1200px',
-        margin: '0 auto', // Center the content
-      }}
-    >
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={6} md={4}>
+      <Grid
+        container
+        spacing={{ xs: 4, sm: 4, lg: 8 }}
+        justifyContent={"center"} 
+      >
+        <Grid item xs={12} sm={12} lg={4}>
           <GovernanceActionCard
             dateSubmitted="18 Jan 2024"
             epoch={430}
@@ -37,7 +34,7 @@ function App({ description }: AppProps) {
             statusEpoch={440}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={12} lg={4}>
           <GovernanceActionCard
             dateSubmitted="18 Jan 2024"
             epoch={430}
@@ -51,7 +48,7 @@ function App({ description }: AppProps) {
             statusEpoch={440}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={12} lg={4}>
           <GovernanceActionCard
             dateSubmitted="18 Jan 2024"
             epoch={430}
@@ -66,7 +63,6 @@ function App({ description }: AppProps) {
           />
         </Grid>
       </Grid>
-    </Box>
     </div>
   );
 }
