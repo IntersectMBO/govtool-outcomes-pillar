@@ -1,6 +1,5 @@
-import { Box, Grid } from "@mui/material";
+import { Grid } from "@mui/material";
 import GovernanceActionCard from "./Components/Molecules/GovernanceActionCard";
-import { IconArrowCircleRight } from "@intersect.mbo/intersectmbo.org-icons-set";
 import "./index.scss";
 
 export type AppProps = {
