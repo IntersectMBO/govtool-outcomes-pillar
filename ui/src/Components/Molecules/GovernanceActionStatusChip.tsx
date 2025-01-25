@@ -6,7 +6,6 @@ interface GovernanceActionStatusChipProps {
 
 export default function GovernanceActionStatusChip({ status }: GovernanceActionStatusChipProps) {
   return (
-    <>
       <Box>
         <Typography
           sx={{
@@ -22,6 +21,5 @@ export default function GovernanceActionStatusChip({ status }: GovernanceActionS
           {status}
         </Typography>
       </Box>
-    </>
   );
 }

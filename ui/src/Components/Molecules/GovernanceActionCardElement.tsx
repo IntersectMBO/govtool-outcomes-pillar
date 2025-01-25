@@ -10,7 +10,6 @@ export default function GovernanceActionCardElement({
   description,
 }: GovernanceActionCardElementProps) {
   return (
-    <>
       <Box>
         <Typography
           sx={{ fontSize: "12px", color: "#8E908E", marginBottom: 1 }}
@@ -30,6 +29,5 @@ export default function GovernanceActionCardElement({
           {description}
         </Typography>
       </Box>
-    </>
   );
 }

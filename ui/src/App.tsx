@@ -1,5 +1,6 @@
 import { Grid } from "@mui/material";
 import GovernanceActionCard from "./Components/Molecules/GovernanceActionCard";
+import { SnackbarProvider } from "./contexts/Snackbar";
 import "./index.scss";
 
 export type AppProps = {
@@ -14,6 +15,7 @@ function App({ description }: AppProps) {
         height: "100%",
       }}
     >
+      <SnackbarProvider>
       <Grid
         container
         spacing={{ xs: 4, sm: 4, lg: 8 }}
@@ -62,6 +64,7 @@ function App({ description }: AppProps) {
           />
         </Grid>
       </Grid>
+      </SnackbarProvider>
     </div>
   );
 }

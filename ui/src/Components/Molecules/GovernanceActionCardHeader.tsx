@@ -15,7 +15,7 @@ export default function GovernanceActionCardHeader({
   title,
 }: GovernanceActionCardHeaderProps) {
   return (
-    <>
+    <Box>
       <Box display="flex" justifyContent="space-between" width="100%">
         <Typography sx={{ fontSize: "12px" }}>
           Submitted:{" "}
@@ -32,6 +32,6 @@ export default function GovernanceActionCardHeader({
       <Box sx={{ marginTop: 3 }}>
         <Typography sx={{ fontWeight: 600 }}>{title}</Typography>
       </Box>
-    </>
+    </Box>
   );
 }

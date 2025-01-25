@@ -1,7 +1,7 @@
 import { Box, Button, Card, CardContent, Typography } from "@mui/material";
 import GovernanceActionCardHeader from "./GovernanceActionCardHeader";
 import GovernanceActionCardElement from "./GovernanceActionCardElement";
-import GovernanceActionCardIDElement from "./GovernanceActionCardIDElement";
+import GovernanceActionCardIdElement from "./GovernanceActionCardIdElement";
 
 interface GovernanceActionCardProps {
   dateSubmitted: string;
@@ -57,13 +57,13 @@ function GovernanceActionCard({
           />
         </Box>
         <Box sx={{ marginTop: 2 }}>
-          <GovernanceActionCardIDElement
+          <GovernanceActionCardIdElement
             title="Governance Action ID"
             id={governanceActionID}
           />
         </Box>
         <Box sx={{ marginTop: 2 }}>
-          <GovernanceActionCardIDElement title="(CIP-129)Governance Action ID" id={cipGovernanceActionID}/>
+          <GovernanceActionCardIdElement title="(CIP-129)Governance Action ID" id={cipGovernanceActionID}/>
         </Box>
         <Box display="flex" justifyContent="center" marginTop={3}>
           <Typography
