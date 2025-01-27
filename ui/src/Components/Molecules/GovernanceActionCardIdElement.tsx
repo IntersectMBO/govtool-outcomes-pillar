@@ -1,8 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import CopyIcon from "../../Assets/Icons/CopyIcon";
 import { useSnackbar } from "../../contexts/Snackbar";
-import { theme } from "../../theme";
-
 interface GovernanceActionCardIdElementProps {
   title: string;
   id: string;
@@ -13,9 +11,6 @@ export default function GovernanceActionCardIdElement({
   id,
 }: GovernanceActionCardIdElementProps) {
 
-  const {
-      palette: { primaryBlue },
-    } = theme;
   const { addSuccessAlert } = useSnackbar();
 
   const handleCopyClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -43,7 +38,7 @@ export default function GovernanceActionCardIdElement({
             textOverflow: "ellipsis",
           }}
         >
-          <Typography sx={{ fontSize: "14px", color: primaryBlue }}>
+          <Typography sx={{ fontSize: "14px", color: "primaryBlue"}}>
             {id}
           </Typography>
         </Box>

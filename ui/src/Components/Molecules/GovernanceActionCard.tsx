@@ -2,7 +2,6 @@ import { Box, Button, Card, CardContent, Typography } from "@mui/material";
 import GovernanceActionCardHeader from "./GovernanceActionCardHeader";
 import GovernanceActionCardElement from "./GovernanceActionCardElement";
 import GovernanceActionCardIdElement from "./GovernanceActionCardIdElement";
-import { theme } from "../../theme";
 interface GovernanceActionCardProps {
   dateSubmitted: string;
   epoch: number;
@@ -28,9 +27,7 @@ function GovernanceActionCard({
   statusDate,
   statusEpoch,
 }: GovernanceActionCardProps) {
-  const {
-    palette: { errorRed, positiveGreen, primaryBlue, neutralWhite },
-  } = theme;
+
   return (
     <Card
       sx={{
@@ -75,7 +72,7 @@ function GovernanceActionCard({
           <Typography
             sx={{
               fontSize: "14px",
-              color: status === "Expired" ? errorRed : positiveGreen,
+              color: status === "Expired" ? "errorRed" : "positiveGreen",
             }}
           >
             {status}:{" "}
@@ -83,7 +80,7 @@ function GovernanceActionCard({
               sx={{
                 fontSize: "14px",
                 fontWeight: "bold",
-                color: status === "Expired" ? errorRed : positiveGreen,
+                color: status === "Expired" ? "errorRed" : "positiveGreen",
               }}
               component="span"
             >
@@ -97,8 +94,8 @@ function GovernanceActionCard({
             variant="contained"
             sx={{
               borderRadius: "50px",
-              color: neutralWhite,
-              backgroundColor: primaryBlue,
+              color: "neutralWhite",
+              backgroundColor: "primaryBlue",
               width: "100%",
             }}
           >
