@@ -19,7 +19,7 @@ export default function GovernanceActionStatusChip({ status }: GovernanceActionS
                 ? positiveGreen
                 : status === "Expired"
                 ? errorRed
-                : "#FFC916",
+                : accentYellow,
           }}
         >
           {status}
