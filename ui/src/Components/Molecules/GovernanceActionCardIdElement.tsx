@@ -1,7 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import CopyIcon from "../../Assets/Icons/CopyIcon";
 import { useSnackbar } from "../../contexts/Snackbar";
-
 interface GovernanceActionCardIdElementProps {
   title: string;
   id: string;
@@ -21,7 +20,7 @@ export default function GovernanceActionCardIdElement({
   };
   return (
     <Box>
-      <Typography sx={{ fontSize: "12px", color: "#8E908E", marginBottom: 1 }}>
+      <Typography sx={{ fontSize: "12px", color: "neutralGray", marginBottom: 1 }}>
         {title}
       </Typography>
       <Box
@@ -39,7 +38,7 @@ export default function GovernanceActionCardIdElement({
             textOverflow: "ellipsis",
           }}
         >
-          <Typography sx={{ fontSize: "14px", color: "#0033AD" }}>
+          <Typography sx={{ fontSize: "14px", color: "primaryBlue"}}>
             {id}
           </Typography>
         </Box>

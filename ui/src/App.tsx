@@ -1,15 +1,14 @@
-import { Grid } from "@mui/material";
+import { Grid, ThemeProvider } from "@mui/material";
 import GovernanceActionCard from "./Components/Molecules/GovernanceActionCard";
 import { SnackbarProvider } from "./contexts/Snackbar";
 import "./index.scss";
-import { Grid } from "@mui/material";
-import GovernanceActionCard from "./Components/GovernanceActionCard";
-
+import { theme } from "./theme";
 
 export type AppProps = {
   description: string;
 };
 function App({ description }: AppProps) {
+
   return (
     <div
       className="App"
@@ -18,6 +17,7 @@ function App({ description }: AppProps) {
         height: "100%",
       }}
     >
+      <ThemeProvider theme={theme}> 
       <SnackbarProvider>
       <Grid
         container
@@ -68,6 +68,7 @@ function App({ description }: AppProps) {
         </Grid>
       </Grid>
       </SnackbarProvider>
+      </ThemeProvider>
     </div>
   );
 }

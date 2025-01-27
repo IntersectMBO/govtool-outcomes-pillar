@@ -12,7 +12,7 @@ export default function GovernanceActionCardElement({
   return (
       <Box>
         <Typography
-          sx={{ fontSize: "12px", color: "#8E908E", marginBottom: 1 }}
+          sx={{ fontSize: "12px", color: "neutralGray", marginBottom: 1 }}
         >
           {title}
         </Typography>
