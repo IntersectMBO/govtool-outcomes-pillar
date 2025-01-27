@@ -1,10 +1,14 @@
 import { Box, Typography } from "@mui/material";
+import { theme } from "../../theme";
 
 interface GovernanceActionStatusChipProps {
   status: string;
 }
 
 export default function GovernanceActionStatusChip({ status }: GovernanceActionStatusChipProps) {
+   const {
+      palette: { errorRed, positiveGreen, accentYellow },
+    } = theme;
   return (
       <Box>
         <Typography
@@ -12,9 +16,9 @@ export default function GovernanceActionStatusChip({ status }: GovernanceActionS
             fontSize: "12px",
             color:
               status === "Ratified"
-                ? "#00B83D"
+                ? positiveGreen
                 : status === "Expired"
-                ? "#FF2616"
+                ? errorRed
                 : "#FFC916",
           }}
         >

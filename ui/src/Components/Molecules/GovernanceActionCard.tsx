@@ -2,7 +2,7 @@ import { Box, Button, Card, CardContent, Typography } from "@mui/material";
 import GovernanceActionCardHeader from "./GovernanceActionCardHeader";
 import GovernanceActionCardElement from "./GovernanceActionCardElement";
 import GovernanceActionCardIdElement from "./GovernanceActionCardIdElement";
-
+import { theme } from "../../theme";
 interface GovernanceActionCardProps {
   dateSubmitted: string;
   epoch: number;
@@ -28,6 +28,9 @@ function GovernanceActionCard({
   statusDate,
   statusEpoch,
 }: GovernanceActionCardProps) {
+  const {
+    palette: { errorRed, positiveGreen, primaryBlue, neutralWhite },
+  } = theme;
   return (
     <Card
       sx={{
@@ -63,13 +66,16 @@ function GovernanceActionCard({
           />
         </Box>
         <Box sx={{ marginTop: 2 }}>
-          <GovernanceActionCardIdElement title="(CIP-129)Governance Action ID" id={cipGovernanceActionID}/>
+          <GovernanceActionCardIdElement
+            title="(CIP-129)Governance Action ID"
+            id={cipGovernanceActionID}
+          />
         </Box>
         <Box display="flex" justifyContent="center" marginTop={3}>
           <Typography
             sx={{
               fontSize: "14px",
-              color: status === "Expired" ? "#900B09" : "#29984E",
+              color: status === "Expired" ? errorRed : positiveGreen,
             }}
           >
             {status}:{" "}
@@ -77,7 +83,7 @@ function GovernanceActionCard({
               sx={{
                 fontSize: "14px",
                 fontWeight: "bold",
-                color: status === "Expired" ? "#900B09" : "#29984E",
+                color: status === "Expired" ? errorRed : positiveGreen,
               }}
               component="span"
             >
@@ -91,8 +97,8 @@ function GovernanceActionCard({
             variant="contained"
             sx={{
               borderRadius: "50px",
-              color: "#FFF",
-              backgroundColor: "#0033AD",
+              color: neutralWhite,
+              backgroundColor: primaryBlue,
               width: "100%",
             }}
           >
