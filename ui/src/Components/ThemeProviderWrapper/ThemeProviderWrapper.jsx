@@ -16,7 +16,6 @@ import {
     createTheme,
     responsiveFontSizes,
 } from '@mui/material/styles';
-import Loader from '../Loader';
 
 let theme = createTheme({
     palette: {
