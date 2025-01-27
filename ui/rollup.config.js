@@ -6,6 +6,7 @@ import json from "@rollup/plugin-json";
 import postcss from "rollup-plugin-postcss";
 import peerDepsExternal from "rollup-plugin-peer-deps-external";
 import dts from "rollup-plugin-dts";
+import babel from "@rollup/plugin-babel";
 
 const packageJson = require("./package.json");
 
@@ -26,8 +27,19 @@ export default [
     ],
     plugins: [
       peerDepsExternal(),
-      resolve(),
-      commonjs(),
+      resolve({
+        extensions: ['.js', '.jsx', '.ts', '.tsx']
+      }),
+      babel({
+        babelHelpers: 'bundled',
+        presets: ['@babel/preset-react', '@babel/preset-typescript'],
+        extensions: ['.js', '.jsx', '.ts', '.tsx']
+      }),
+      commonjs({
+        include: 'node_modules/**',
+        transformMixedEsModules: true,
+        strictRequires: true
+      }),
       typescript({
         tsconfig: "./tsconfig.json",
       }),
@@ -35,7 +47,14 @@ export default [
       postcss({ extract: true, inject: true, use: "sass" }),
       json(),
     ],
-    external: ["react", "react-dom"],
+    external: [
+      "react", 
+      "react-dom", 
+      "@mui/material",
+      "@emotion/react",
+      "@emotion/styled",
+      "react-router-dom",
+    ],
   },
   {
     input: "src/index.ts",

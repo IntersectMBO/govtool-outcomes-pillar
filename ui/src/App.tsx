@@ -1,3 +1,6 @@
+import { Grid } from "@mui/material";
+import GovernanceActionCard from "./Components/Molecules/GovernanceActionCard";
+import { SnackbarProvider } from "./contexts/Snackbar";
 import "./index.scss";
 import { Grid } from "@mui/material";
 import GovernanceActionCard from "./Components/GovernanceActionCard";
@@ -15,8 +18,13 @@ function App({ description }: AppProps) {
         height: "100%",
       }}
     >
-      <Grid container spacing={4} justifyContent="space-between">
-        <Grid item xs={12} sm={6} md={4}>
+      <SnackbarProvider>
+      <Grid
+        container
+        spacing={{ xs: 4, sm: 4, lg: 8 }}
+        justifyContent={"center"} 
+      >
+        <Grid item xs={12} sm={12} lg={4}>
           <GovernanceActionCard
             dateSubmitted="18 Jan 2024"
             epoch={430}
@@ -30,7 +38,7 @@ function App({ description }: AppProps) {
             statusEpoch={440}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={12} lg={4}>
           <GovernanceActionCard
             dateSubmitted="18 Jan 2024"
             epoch={430}
@@ -44,7 +52,7 @@ function App({ description }: AppProps) {
             statusEpoch={440}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={12} lg={4}>
           <GovernanceActionCard
             dateSubmitted="18 Jan 2024"
             epoch={430}
@@ -59,7 +67,7 @@ function App({ description }: AppProps) {
           />
         </Grid>
       </Grid>
-      <p>{description}</p>
+      </SnackbarProvider>
     </div>
   );
 }
