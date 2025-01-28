@@ -1,14 +1,43 @@
 import { Box, Grid } from "@mui/material";
 import SearchFiltersSortBar from "../Components/Molecules/SearchFiltersSortBar";
 import GovernanceActionCard from "../Components/Molecules/GovernanceActionCard";
-import { useSearchFiltersSortBar } from "../contexts/SearchFiltersContext";
+import { GOVERNANCE_ACTION_FILTERS } from "../consts/filters";
+import { GOVERNANCE_ACTION_STATUS_FILTERS } from "../consts/status-filters";
+import { GOVERNANCE_ACTION_SORT_OPTIONS } from "../consts/sort-options";
+import { useState } from "react";
+
 
 export default function OutcomesPage() {
-  const { debouncedSearchText, isAdjusting, ...dataActionsBarProps } =
-    useSearchFiltersSortBar();
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [searchText, setSearchText] = useState("");
+  const [filtersOpen, setFilterOpen] = useState(false)
+  const [sortsOpen, setSortsOpen] = useState(false)
+  const [selectedSorting, setSelectedSorting] = useState("")
+  const closeFilters = () =>{
+    setFilterOpen(false)
+  }
+  const closeSorts = () =>{
+    setSortsOpen(false)
+  }
   return (
     <Box>
-      <SearchFiltersSortBar  {...dataActionsBarProps}/>
+      <SearchFiltersSortBar
+        filterOptions={GOVERNANCE_ACTION_FILTERS}
+        statusOptions={GOVERNANCE_ACTION_STATUS_FILTERS}
+        sortOptions={GOVERNANCE_ACTION_SORT_OPTIONS}
+        searchText={searchText}
+        setSearchText={setSearchText}
+        selectedFilters={selectedFilters}
+        setSelectedFilters={setSelectedFilters}
+        closeFilters={closeFilters}
+        filtersOpen={filtersOpen}
+        setFiltersOpen={setFilterOpen}
+        closeSorts={closeSorts}
+        sortOpen={sortsOpen}
+        selectedSorting={selectedSorting}
+        setSelectedSorting={setSelectedSorting}
+        setSortOpen={setSortsOpen}
+      />
       <Grid
         container
         spacing={{ xs: 4, sm: 4, lg: 8 }}

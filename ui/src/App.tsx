@@ -3,7 +3,6 @@ import { SnackbarProvider } from "./contexts/Snackbar";
 import "./index.scss";
 import { theme } from "./theme";
 import OutcomesPage from "./Pages/Outcomes";
-import { SearchFiltersSortBarProvider } from "./contexts/SearchFiltersContext";
 
 export type AppProps = {
   description: string;
@@ -19,9 +18,7 @@ function App({ description }: AppProps) {
     >
       <ThemeProvider theme={theme}>
         <SnackbarProvider>
-          <SearchFiltersSortBarProvider>
-            <OutcomesPage />
-          </SearchFiltersSortBarProvider>
+          <OutcomesPage />
         </SnackbarProvider>
       </ThemeProvider>
     </div>
