@@ -34,7 +34,7 @@ backend-install:
 		--volume ${PWD}/backend/:/app \
 		--workdir /app \
 		--user root \
-		node:20-alpine yarn install --ignore-engine
+		node:22-alpine yarn install --ignore-engine
 
 .PHONY: govtool-install
 govtool-install:
