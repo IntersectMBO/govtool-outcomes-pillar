@@ -1,3 +1,4 @@
 /govtool/
 .idea
 /node_modules/
+*.cjs

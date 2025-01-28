@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+      - beta
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          cd ui
+          yarn install --frozen-lockfile
+
+      # Build the project
+      - name: Build
+        run: |
+          cd ui
+          yarn build
+
+      # Audit signatures
+      - name: Audit
+        run: |
+          cd ui
+          yarn audit --groups dependencies
+
+      # Release
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN_UI_WRITE }}
+        run: |
+          cd ui
+          npx semantic-release

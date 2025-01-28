@@ -1,6 +1,6 @@
 {
   "name": "@intersect.mbo/govtool-outcomes-pillar-ui",
-  "version": "1.0.7",
+  "version": "0.0.0-development",
   "description": "Governance actions outcomes ui",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -12,7 +12,11 @@
   "scripts": {
     "build": "rollup -c --bundleConfigAsCjs ",
     "prepublishOnly": "npm run build",
+    "semantic-release": "semantic-release",
     "watch": "rollup -c --bundleConfigAsCjs  --watch"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "contributors": [
     {
@@ -28,7 +32,11 @@
   },
   "homepage": "https://github.com/IntersectMBO/govtool-outcomes-pillar",
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^28.0.1",
+    "@babel/core": "^7.26.0",
+    "@babel/preset-react": "^7.26.3",
+    "@babel/preset-typescript": "^7.26.0",
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-commonjs": "^28.0.2",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^15.3.0",
     "@rollup/plugin-terser": "^0.4.4",
@@ -40,18 +48,30 @@
     "postcss": "^8.4.49",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^7.0.1",
+    "react-router-dom": "^6.23.1",
     "rollup": "^4.28.0",
     "rollup-plugin-dts": "^6.1.1",
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-postcss": "^4.0.2",
-    "sass": "^1.81.1",
-    "tailwindcss": "^3.4.17",
+    "semantic-release": "^24.2.1",
     "tslib": "^2.8.1",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@mui/material": "^5.15.18",
+    "sass": "^1.77.2"
   },
   "dependencies": {
-    "rollup-plugin-livereload": "^2.0.5",
-    "rollup-plugin-serve": "^1.1.1"
+    "@fontsource/poppins": "^5.0.14",
+    "@intersect.mbo/intersectmbo.org-icons-set": "^1.0.8"
+  },
+  "peerDependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@mui/material": "^5.15.18",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.23.1",
+    "sass": "^1.77.2"
   }
 }

@@ -1,5 +1,4 @@
 services:
-
   outcomespillar.backend:
     image: outcomes-pillar-backend:latest
     build:
@@ -23,7 +22,7 @@ services:
       context: ./ui/
       dockerfile: Dockerfile.dev
     container_name: outcomespillar-ui
-    entrypoint: ["sh", "-c", "npm run watch"]
+    entrypoint: ["sh", "-c", " npm run watch"]
     environment:
       - NODE_ENV=development
       - ROLLUP_WATCH=true
@@ -31,26 +30,36 @@ services:
       - 'host.docker.internal:host-gateway'
     volumes:
       - './ui:/usr/src/app:cached'
-      - './ui:/app/govtool/frontend/node_modules/@lidonation/govtool-outcomes-pillar-ui'
     networks:
       - govtool
 
   govtool.frontend:
-    image: govtool_frontend
-    build:
-      context: ./
-      dockerfile: Dockerfile.govtool
+    tty: true
+    image: node:20-alpine
     container_name: govtool-frontend
-    command: npx vite --host --port 5173
+    working_dir: /app/govtool/frontend
+    entrypoint: ["sh", "-c", "cd /app/ui && npm link && \
+      cd /app/govtool/frontend && npm link @intersect.mbo/govtool-outcomes-pillar-ui && \
+      npx vite --host --port 5173"]
     ports:
       - "5173:5173"
+    environment:
+      - VITE_IS_PROPOSAL_DISCUSSION_FORUM_ENABLED=true
+      - VITE_IS_GOVERNANCE_OUTCOMES_PILLAR_ENABLED=true
+      - VITE_APP_ENV=development
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     volumes:
-      - './govtool/frontend:/app/govtool/frontend:cached'
+    - './govtool/frontend:/app/govtool/frontend'
+    - './ui/:/app/ui'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     networks:
       - govtool
-  
+
 networks:
   govtool:
     driver: bridge

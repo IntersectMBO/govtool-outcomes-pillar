@@ -1,9 +1,14 @@
+import { ThemeProvider } from "@mui/material";
+import { SnackbarProvider } from "./contexts/Snackbar";
 import "./index.scss";
+import { theme } from "./theme";
+import OutcomesPage from "./Pages/Outcomes";
 
 export type AppProps = {
   description: string;
 };
 function App({ description }: AppProps) {
+
   return (
     <div
       className="App"
@@ -12,8 +17,11 @@ function App({ description }: AppProps) {
         height: "100%",
       }}
     >
-      <h1>govtool-outcomes-pillar-ui hel</h1>
-      <p>{description}</p>
+      <ThemeProvider theme={theme}>
+        <SnackbarProvider>
+          <OutcomesPage />
+        </SnackbarProvider>
+      </ThemeProvider>
     </div>
   );
 }

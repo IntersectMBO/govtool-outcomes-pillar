@@ -1,33 +1,68 @@
 #!/bin/bash
 
-set -e  # Exit immediately if a command exits with a non-zero status
+set -e
 
-echo "Starting repository update process..."
+echo "Starting govtool setup..."
 
-# Ensure the repository is up-to-date
-cd /app
+REPO_URL="https://github.com/IntersectMBO/govtool.git"
+HOST_FRONTEND_DIR="./govtool/frontend"
+UPDATE=$1 
 
-if [ -d ".git" ]; then
-    echo "Resetting repository to a clean state..."
-    git reset --hard HEAD       
-    git clean -fd               
-    echo "Pulling latest changes from the current branch..."
-    git fetch origin           
-    git pull origin $(git rev-parse --abbrev-ref HEAD)  
+if [ "$UPDATE" == "true" ]; then
+    echo "Update mode enabled."
 else
-    echo "Error: Repository is not properly cloned. Exiting."
-    exit 1
+    echo "Setup mode enabled."
 fi
 
-# Navigate to the frontend directory
-cd /app/govtool/frontend
+clone_and_copy() {
+    echo "Cloning repository and copying files..."
 
-# Check if node_modules exists and reinstall dependencies without the lock file
-if [ ! -d "node_modules" ]; then
+    mkdir -p "$(dirname "$HOST_FRONTEND_DIR")"
+
+    docker run --name clone-govtool --interactive --tty \
+        --workdir /app \
+        node:20-alpine sh -c "
+        apk add --no-cache git && \
+        if [ ! -d 'govtool' ]; then \
+            echo 'Cloning repository into container...' ; \
+            git clone ${REPO_URL} ; \
+        else \
+            echo 'Repository already cloned.' ; \
+        fi"
+
+    if docker cp clone-govtool:/app/govtool/govtool/frontend ./govtool/; then
+        echo "Frontend files copied to host."
+        cp govtool/frontend/.env.example govtool/frontend/.env
+    else
+        echo "Error: Frontend directory not found in container. Verify the repository structure."
+        docker stop clone-govtool && docker rm -v clone-govtool
+        exit 1
+    fi
+
+    docker stop clone-govtool && docker rm -v clone-govtool || echo "Container already removed."
+}
+
+if [ ! -d "$HOST_FRONTEND_DIR" ] || [ "$UPDATE" = true ]; then
+    echo "Initial setup or update required..."
+    clone_and_copy
+else
+    echo "Frontend directory already exists. Skipping clone."
+fi
+
+#  install node  dependencies in the frontend directory
+if [ ! -d "$HOST_FRONTEND_DIR/node_modules" ]|| [ "$UPDATE" = true ]; then
     echo "Installing dependencies..."
-    npm install
+    docker run --rm --interactive --tty \
+        --volume "${PWD}/govtool/frontend:/app" \
+        --workdir /app \
+        --user root \
+        node:20-alpine yarn install --ignore-engine
+else
+    echo "Dependencies already installed."
 fi
 
-# Start the application
-echo "Starting the application..."
-exec "$@"
+# Ensure permissions are set correctly
+echo "Adjusting permissions..."
+chmod -R 777 "$HOST_FRONTEND_DIR"
+
+echo "Govtool setup completed!"
