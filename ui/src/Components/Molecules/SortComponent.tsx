@@ -33,6 +33,7 @@ export default function SortComponent({
     closeFilters();
     setSortOpen(!sortOpen);
   };
+
   return (
     <Box
       position="relative"
