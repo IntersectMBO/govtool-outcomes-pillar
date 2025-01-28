@@ -115,7 +115,7 @@ export default function SortComponent({
               }}
               key={index}
             >
-              <FormLabel sx={{ fontSize: "14px", color: "neutralGray" }}>
+              <FormLabel sx={{ fontSize: "14px" }}>
                 {option.label}
               </FormLabel>
               <Checkbox
