@@ -121,7 +121,7 @@ build_govtool:
     cp "$ENV_FILE" ./charts/app_env 
     cat ./charts/app_env
     echo "$INGRESS_HOST" "$NAMESPACE"
-
+    
     DEPLOYMENT_NAME="outcomes-$CI_ENVIRONMENT_SLUG"
 
     echo "Install govtool-outcomes-backend"
@@ -136,21 +136,19 @@ build_govtool:
         --set namespace=$NAMESPACE \
         --set ingress.hosts[0]=$INGRESS_HOST \
         --set cardano_node[0].tcp_host=$NODE_TCP_HOST \
-        --set cardano_node[0].tcp_port=$NODE_TCP_PORT \
-        --create-namespace
+        --set cardano_node[0].tcp_port=$NODE_TCP_PORT
 
     DEPLOYMENT_NAME="govtool-frontend-$CI_ENVIRONMENT_SLUG"
-    helm upgrade $DEPLOYMENT_NAME ./charts/govtool \ 
-      --install \ 
-      --timeout 300s \ 
-      --wait \ 
-      --atomic \ 
-      --namespace="$NAMESPACE" \ 
-      --create-namespace \ 
-      -f ./charts/values.yaml \ 
-      --set namespace=$NAMESPACE \ 
-      --set ingress.hosts[0]=$INGRESS_HOST \ 
-      --create-namespace
+    helm upgrade $DEPLOYMENT_NAME ./charts/govtool \
+        --install \
+        --timeout 300s \
+        --wait \
+        --atomic \
+        --namespace="$NAMESPACE" \
+        --create-namespace \
+        -f ./charts/values.yaml \
+        --set namespace=$NAMESPACE \
+        --set ingress.hosts[0]=$INGRESS_HOST
   rules:
   - if: '$DEPLOY_WEBSITE == "true"'
 
