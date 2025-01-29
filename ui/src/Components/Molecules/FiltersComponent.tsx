@@ -1,7 +1,8 @@
 import { Box, Checkbox, Divider, FormLabel, Typography } from "@mui/material";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useRef, useState } from "react";
 import { IconFilter } from "@intersect.mbo/intersectmbo.org-icons-set";
 import { theme } from "../../theme";
+import { useOnClickOutside } from "../../hooks/useOutsideClick";
 
 interface FilterComponentProps {
   selectedFilters: string[];
@@ -16,7 +17,6 @@ interface FilterComponentProps {
   }[];
   filtersOpen: boolean;
   setFiltersOpen: Dispatch<SetStateAction<boolean>>;
-  closeSorts: () => void;
 }
 export default function FiltersComponent({
   selectedFilters,
@@ -25,41 +25,52 @@ export default function FiltersComponent({
   statusOptions,
   filtersOpen,
   setFiltersOpen,
-  closeSorts,
 }: FilterComponentProps) {
   const {
-    palette: { primaryBlue, boxShadow2 },
+    palette: { primaryBlue, boxShadow2, neutralWhite },
   } = theme;
-
+  const [isHovered, setIsHovered] = useState(false);
   const handleShowFilters = () => {
-    closeSorts();
     setFiltersOpen(!filtersOpen);
   };
 
   const handleFilterChange = (value: string) => {
     setSelectedFilters((prevSelectedFilters) => {
       const updatedFilters = prevSelectedFilters.includes(value)
-        ? prevSelectedFilters.filter((filter) => filter !== value) 
-        : [...prevSelectedFilters, value]; 
+        ? prevSelectedFilters.filter((filter) => filter !== value)
+        : [...prevSelectedFilters, value];
 
       return updatedFilters;
     });
   };
 
+  const closeFilters = () => {
+    setFiltersOpen(false);
+  };
+
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  useOnClickOutside(wrapperRef, closeFilters);
+
   return (
     <Box
       position="relative"
       sx={{
-        backgroundColor: "neutralWhite",
+        backgroundColor: filtersOpen ? "secondary.main" : "neutralWhite",
         border: 1,
-        borderColor: "secondaryBlue",
+        borderColor: filtersOpen ? "secondary.main" : "secondaryBlue",
         borderRadius: 10,
         fontSize: 14,
         fontWeight: 500,
         height: 48,
         padding: "0 16px 0 16px",
         cursor: "pointer",
+        ":hover": {
+          backgroundColor: "secondary.main",
+          borderColor: "secondary.main"
+        },
       }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <Box
         display="flex"
@@ -69,11 +80,19 @@ export default function FiltersComponent({
         height="100%"
         onClick={handleShowFilters}
       >
-        <IconFilter width={18} height={18} fill={primaryBlue} />
+        <IconFilter
+          width={18}
+          height={18}
+          fill={isHovered || filtersOpen ? neutralWhite : primaryBlue}
+        />
         <Typography
-          sx={{ color: "primaryBlue", fontWeight: 500, paddingLeft: 1 }}
+          sx={{
+            color: isHovered || filtersOpen ? "neutralWhite" : "primaryBlue",
+            fontWeight: 500,
+            paddingLeft: 0.5,
+          }}
         >
-          Filters
+          Filter
         </Typography>
       </Box>
       {filtersOpen && (
@@ -88,6 +107,7 @@ export default function FiltersComponent({
             padding: 2,
             right: 10,
           }}
+          ref={wrapperRef}
         >
           <Box display="flex" justifyContent="space-between">
             <Typography

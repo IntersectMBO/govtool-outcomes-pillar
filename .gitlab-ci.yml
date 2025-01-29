@@ -118,8 +118,8 @@ build_backend:
           -f ./charts/values.yaml \
           --set namespace=$NAMESPACE \
           --set ingress.hosts[0]=$INGRESS_HOST \
-          --set cardano_node.tcp_host=$NODE_TCP_HOST \
-          --set cardano_node.tcp_port=$NODE_TCP_PORT \
+        --set cardano_node[0].tcp_host=$NODE_TCP_HOST \
+        --set cardano_node[0].tcp_port=$NODE_TCP_PORT \
           --create-namespace
   rules:
     - if: '$DEPLOY_WEBSITE == "true"'
