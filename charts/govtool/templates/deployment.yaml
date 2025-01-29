@@ -11,7 +11,7 @@ spec:
     matchLabels:
       app: "{{ $.Chart.Name }}"
       service: "{{ $.Chart.Name }}"
-  replicas: {{ .Values.image.replicaCount }}
+  replicas: {{ .Values.image.govtool.replicaCount }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -24,21 +24,21 @@ spec:
         service: "{{ $.Chart.Name }}"
     spec:
       imagePullSecrets:
-        - name: {{ .Values.image.pullSecret }}
+        - name: {{ .Values.image.govtool.pullSecret }}
       containers:
       - name: app
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        image: "{{ .Values.image.govtool.repository }}:{{ .Values.image.govtool.tag }}"
+        imagePullPolicy: {{ .Values.image.govtool.pullPolicy }}
         livenessProbe:
           httpGet:
             path: /
-            port: 3000
+            port: 5173
           initialDelaySeconds: 5
           periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /
-            port: 3000
+            port: 5173
           initialDelaySeconds: 1
           periodSeconds: 10
         resources:
@@ -48,35 +48,15 @@ spec:
           requests:
             cpu: 50m
             memory: 256Mi
-        envFrom:
-          - secretRef:
-              name: "{{ $.Chart.Name }}-secrets"
+        # envFrom:
+        #   - secretRef:
+        #       name: "{{ $.Chart.Name }}-secrets"
         ports:
           - name: node
-            containerPort: 3000
+            containerPort: 5173
             protocol: TCP
         volumeMounts:
           - name: node-ipc
             mountPath: /ipc
             readOnly: false
-      - name: ipc
-        image: alpine/socat:1.8.0.0
-        env:
-        - name: CARDANO_NODE_SOCKET_TCP_HOST
-          value: "{{ index .Values.cardano_node 0 "tcp_host" }}"
-        - name: CARDANO_NODE_SOCKET_TCP_PORT
-          value: "{{ index .Values.cardano_node 0 "tcp_port" }}"
-        - name: SOCAT_TIMEOUT
-          value: "3600"
-        command: [
-            "sh",
-            "-c",
-            "socat UNIX-LISTEN:/ipc/node.socket,fork TCP:${CARDANO_NODE_SOCKET_TCP_HOST}:${CARDANO_NODE_SOCKET_TCP_PORT},ignoreeof"
-        ]
-        volumeMounts:
-        - mountPath: /ipc
-          name: node-ipc
-          readOnly: false
-      volumes:
-        - name: node-ipc
-          emptyDir: {}
+

@@ -1,11 +1,19 @@
 namespace: outcomes-preview
 
+
 image:
-  repository: registry.lidonation.com/voltaire/govtool-outcomes-pillar/outcomes.1694.io
-  tag: 'latest'
-  pullPolicy: Always
-  pullSecret: 'outcomes-registry-deploy-token'
-  replicaCount: 1
+  backend:
+    repository: registry.lidonation.com/voltaire/govtool-outcomes-pillar/outcomes.1694.io
+    tag: 'latest'
+    pullPolicy: Always
+    pullSecret: 'outcomes-registry-deploy-token'
+    replicaCount: 1
+  govtool:
+    repository: registry.lidonation.com/voltaire/govtool-outcomes-pillar/govtool
+    tag: 'latest'
+    pullPolicy: Always
+    pullSecret: 'outcomes-registry-deploy-token'
+    replicaCount: 1
 
 ingress:
   enabled: true
@@ -21,5 +29,5 @@ ingress:
     secretName: wildcard-1694-tls
 
 cardano_node:
-  - tcp_host: "lidolovelace-cardano-relay-1-service"
-  - tcp_port: "30111"
+   tcp_host: "lidolovelace-cardano-relay-1-service"
+   tcp_port: "30111"
