@@ -4,10 +4,7 @@ import "./index.scss";
 import { theme } from "./theme";
 import OutcomesPage from "./Pages/Outcomes";
 
-export type AppProps = {
-  description: string;
-};
-function App({ description }: AppProps) {
+function App() {
 
   return (
     <div
