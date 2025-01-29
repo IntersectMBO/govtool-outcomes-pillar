@@ -68,7 +68,6 @@ export default function SortComponent({
         width="100%"
         height="100%"
         onClick={handleShowSortOptions}
-        ref={wrapperRef}
       >
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <UpDownArrowsIcon
@@ -98,6 +97,7 @@ export default function SortComponent({
             padding: 2,
             zIndex: 10,
           }}
+          ref={wrapperRef}
         >
           <Box display="flex" justifyContent="space-between" marginBottom={1}>
             <Typography

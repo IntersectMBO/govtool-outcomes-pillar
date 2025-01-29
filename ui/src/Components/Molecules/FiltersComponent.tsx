@@ -79,7 +79,6 @@ export default function FiltersComponent({
         width="100%"
         height="100%"
         onClick={handleShowFilters}
-        ref={wrapperRef}
       >
         <IconFilter
           width={18}
@@ -108,6 +107,7 @@ export default function FiltersComponent({
             padding: 2,
             right: 10,
           }}
+          ref={wrapperRef}
         >
           <Box display="flex" justifyContent="space-between">
             <Typography
