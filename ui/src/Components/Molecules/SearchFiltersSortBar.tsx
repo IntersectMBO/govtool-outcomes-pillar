@@ -61,7 +61,7 @@ export default function SearchFiltersSortBar({
   const {isMobile} = useScreenDimension();
 
   return (
-    <Box display="flex" justifyContent="space-between" marginBottom={4} gap={isMobile ? 1 : 2}>
+    <Box display="flex" justifyContent="space-between" marginBottom={4} gap={isMobile ? 1 : 1.5}>
       <InputBase
         inputProps={{ "data-testid": "search-input" }}
         onChange={(e) => setSearchText(e.target.value)}

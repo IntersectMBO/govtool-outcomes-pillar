@@ -96,7 +96,7 @@ export default function FiltersComponent({
             paddingLeft: 0.5,
           }}
         >
-          Filters
+          Filter
         </Typography>
       </Box>
       {filtersOpen && (
