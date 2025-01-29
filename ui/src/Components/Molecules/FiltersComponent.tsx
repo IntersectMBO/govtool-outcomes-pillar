@@ -17,7 +17,6 @@ interface FilterComponentProps {
   }[];
   filtersOpen: boolean;
   setFiltersOpen: Dispatch<SetStateAction<boolean>>;
-  closeSorts: () => void;
 }
 export default function FiltersComponent({
   selectedFilters,
@@ -26,14 +25,12 @@ export default function FiltersComponent({
   statusOptions,
   filtersOpen,
   setFiltersOpen,
-  closeSorts,
 }: FilterComponentProps) {
   const {
     palette: { primaryBlue, boxShadow2, neutralWhite },
   } = theme;
   const [isHovered, setIsHovered] = useState(false);
   const handleShowFilters = () => {
-    closeSorts();
     setFiltersOpen(!filtersOpen);
   };
 

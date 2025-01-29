@@ -11,7 +11,6 @@ interface SortComponentProps {
     value: string;
     label: string;
   }[];
-  closeFilters: () => void;
   sortOpen: boolean;
   setSortOpen: Dispatch<SetStateAction<boolean>>;
 }
@@ -20,7 +19,6 @@ export default function SortComponent({
   selectedSorting,
   setSelectedSorting,
   sortOptions,
-  closeFilters,
   sortOpen,
   setSortOpen,
 }: SortComponentProps) {
@@ -28,7 +26,6 @@ export default function SortComponent({
     palette: { primaryBlue, boxShadow2, neutralWhite },
   } = theme;
   const handleShowSortOptions = () => {
-    closeFilters();
     setSortOpen(!sortOpen);
   };
   const [isHovered, setIsHovered] = useState(false);

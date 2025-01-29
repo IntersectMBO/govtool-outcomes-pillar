@@ -88,13 +88,11 @@ export default function SearchFiltersSortBar({
         setSelectedFilters={setSelectedFilters}
         filtersOpen={filtersOpen}
         setFiltersOpen={setFiltersOpen}
-        closeSorts={closeSorts}
       />
       <SortComponent
         selectedSorting={selectedSorting}
         setSelectedSorting={setSelectedSorting}
         sortOptions={sortOptions}
-        closeFilters={closeFilters}
         sortOpen={sortOpen}
         setSortOpen={setSortOpen}
       />
