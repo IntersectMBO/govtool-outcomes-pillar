@@ -18,4 +18,4 @@ RUN  cp .env.example .env
 
 EXPOSE 5173
 
-ENTRYPOINT ["npx vite --host --port 5173"]
+ENTRYPOINT ["npx", "vite", "--host", "--port", "5173"]
