@@ -14,7 +14,7 @@ COPY ui /app/govtool/frontend/node_modules/@intersect.mbo/govtool-outcomes-pilla
 
 RUN yarn build
 
-COPY .env.example .env
+RUN  cp .env.example .env
 
 EXPOSE 5173
 
