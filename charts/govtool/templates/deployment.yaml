@@ -32,13 +32,13 @@ spec:
         livenessProbe:
           httpGet:
             path: /
-            port: 5173
+            port: 80
           initialDelaySeconds: 5
           periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /
-            port: 5173
+            port: 80
           initialDelaySeconds: 1
           periodSeconds: 10
         resources:
@@ -53,6 +53,6 @@ spec:
         #       name: "{{ $.Chart.Name }}-secrets"
         ports:
           - name: node
-            containerPort: 5173
+            containerPort: 80
             protocol: TCP
 
