@@ -55,8 +55,4 @@ spec:
           - name: node
             containerPort: 5173
             protocol: TCP
-        volumeMounts:
-          - name: node-ipc
-            mountPath: /ipc
-            readOnly: false
 
