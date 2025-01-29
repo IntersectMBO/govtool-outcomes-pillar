@@ -55,9 +55,9 @@ export default function FiltersComponent({
     <Box
       position="relative"
       sx={{
-        backgroundColor: filtersOpen ? "accentOrange" : "neutralWhite",
+        backgroundColor: filtersOpen ? "secondary.main" : "neutralWhite",
         border: 1,
-        borderColor: filtersOpen ? "accentOrange" : "secondaryBlue",
+        borderColor: filtersOpen ? "secondary.main" : "secondaryBlue",
         borderRadius: 10,
         fontSize: 14,
         fontWeight: 500,
@@ -65,10 +65,12 @@ export default function FiltersComponent({
         padding: "0 16px 0 16px",
         cursor: "pointer",
         ":hover": {
-          backgroundColor: "accentOrange",
-          borderColor: "accentOrange"
+          backgroundColor: "secondary.main",
+          borderColor: "secondary.main"
         },
       }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <Box
         display="flex"
@@ -78,8 +80,6 @@ export default function FiltersComponent({
         height="100%"
         onClick={handleShowFilters}
         ref={wrapperRef}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
       >
         <IconFilter
           width={18}

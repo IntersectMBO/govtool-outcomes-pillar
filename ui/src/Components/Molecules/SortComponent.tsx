@@ -30,9 +30,9 @@ export default function SortComponent({
   };
   const [isHovered, setIsHovered] = useState(false);
 
-  const closeSortOptions = () =>{
-    setSortOpen(false)
-  }
+  const closeSortOptions = () => {
+    setSortOpen(false);
+  };
   const wrapperRef = useRef<HTMLDivElement>(null);
   useOnClickOutside(wrapperRef, closeSortOptions);
 
@@ -44,9 +44,9 @@ export default function SortComponent({
       alignItems="center"
       justifyContent="center"
       sx={{
-        backgroundColor: sortOpen ? "accentOrange" : "neutralWhite",
+        backgroundColor: sortOpen ? "secondary.main" : "neutralWhite",
         border: 1,
-        borderColor: sortOpen ? "accentOrange" : "secondaryBlue",
+        borderColor: sortOpen ? "secondary.main" : "secondaryBlue",
         borderRadius: 10,
         fontSize: 14,
         fontWeight: 500,
@@ -54,10 +54,12 @@ export default function SortComponent({
         padding: "0 16px",
         cursor: "pointer",
         ":hover": {
-          backgroundColor: "accentOrange",
-          borderColor: "accentOrange",
+          backgroundColor: "secondary.main",
+          borderColor: "secondary.main",
         },
       }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <Box
         display="flex"
@@ -67,10 +69,8 @@ export default function SortComponent({
         height="100%"
         onClick={handleShowSortOptions}
         ref={wrapperRef}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
       >
-        <Box sx={{ display: "flex", alignItems: "center", color: "oldlace" }}>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
           <UpDownArrowsIcon
             color={isHovered || sortOpen ? neutralWhite : primaryBlue}
           />
