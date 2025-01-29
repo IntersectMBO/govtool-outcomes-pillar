@@ -139,6 +139,7 @@ build_govtool:
         --set cardano_node[0].tcp_port=$NODE_TCP_PORT \
         --create-namespace
 
+    DEPLOYMENT_NAME="govtool-frontend-$CI_ENVIRONMENT_SLUG"
     helm upgrade $DEPLOYMENT_NAME ./charts/govtool \ 
       --install \ 
       --timeout 300s \ 
