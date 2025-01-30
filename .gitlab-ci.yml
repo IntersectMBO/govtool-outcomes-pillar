@@ -52,6 +52,9 @@ yarn:
     cd ./backend
     yarn install --ignore-engines
     yarn run build
+    cd ../ui
+    yarn install --ignore-engines
+    yarn run build
   artifacts:
     paths:
     - ./backend/dist
