@@ -9,10 +9,9 @@ import {
   MenuItem,
   Typography,
 } from "@mui/material";
-import { Dispatch, SetStateAction, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { IconFilter } from "@intersect.mbo/intersectmbo.org-icons-set";
 import { theme } from "../../theme";
-import { useOnClickOutside } from "../../hooks/useOutsideClick";
 
 interface FilterComponentProps {
   selectedFilters: string[];
@@ -153,11 +152,11 @@ export default function FiltersComponent({
             <Box
               sx={{
                 width: "100%",
-                marginBottom: 2,
+                marginBottom: 1,
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                gap: 2,
+                gap: 1,
               }}
               key={index}
             >
@@ -196,11 +195,11 @@ export default function FiltersComponent({
             <Box
               sx={{
                 width: "100%",
-                marginBottom: 2,
+                marginBottom: 1,
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                gap: 2,
+                gap: 1,
               }}
               key={index}
             >

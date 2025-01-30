@@ -10,7 +10,7 @@ import {
   Fade,
 } from "@mui/material";
 import { theme } from "../../theme";
-import { Dispatch, SetStateAction, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import UpDownArrowsIcon from "../../Assets/Icons/UpdownArrows";
 import React from "react";
 
@@ -35,7 +35,7 @@ export default function SortComponent({
   setAnchorEl,
 }: SortComponentProps) {
   const {
-    palette: { primaryBlue, boxShadow2, neutralWhite },
+    palette: { primaryBlue, neutralWhite },
   } = theme;
 
   const [isHovered, setIsHovered] = useState(false);
@@ -132,11 +132,11 @@ export default function SortComponent({
             <Box
               sx={{
                 width: "100%",
-                marginBottom: 2,
+                marginBottom: 1,
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                gap: 2,
+                gap: 1,
               }}
               key={index}
             >
