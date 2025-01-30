@@ -10,7 +10,6 @@ variables:
     value: "true"
     description: "Build and deploy outcomes.1694.io"
 
-
 stages:
 - .pre
 - test
@@ -37,7 +36,6 @@ default:
   - curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 && chmod 700 get_helm.sh && DESIRED_VERSION=v$HELM_VERSION ./get_helm.sh
   - kubectl config get-contexts
 
-
 yarn:
   image: node:20.18.0-alpine
   stage: .pre
@@ -54,9 +52,13 @@ yarn:
     cd ./backend
     yarn install --ignore-engines
     yarn run build
+    cd ../ui
+    yarn install --ignore-engines
+    yarn run build
   artifacts:
     paths:
     - ./backend/dist
+    - ./ui/dist
     expire_in: 1 days
 
 test_outcomes:
@@ -70,59 +72,88 @@ test_outcomes:
   - NODE_ENV=test yarn test
   rules:
   - if: '$DEPLOY_WEBSITE == "true"'
-  allow_failure: true 
-
+  allow_failure: true
 
 build_backend:
   stage: build
   image: docker:24.0.2-git
   retry: 1
   script:
-    - |
-      set -xev
-            
-      docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
-      echo "Building Dockerfile with tags $CI_APPLICATION_REPOSITORY/outcomes.1694.io:$CI_APPLICATION_TAG and $CI_APPLICATION_REPOSITORY/outcomes.1694.io:latest ..."
-      
-      docker build --network host -f backend/Dockerfile \
-        -t "$CI_APPLICATION_REPOSITORY/outcomes.1694.io:$CI_APPLICATION_TAG" \
-        -t "$CI_APPLICATION_REPOSITORY/outcomes.1694.io:latest" ./backend
-      docker push "$CI_APPLICATION_REPOSITORY/outcomes.1694.io:$CI_APPLICATION_TAG"
-      docker push "$CI_APPLICATION_REPOSITORY/outcomes.1694.io:latest"
+  - |
+    set -xev
+          
+    docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    echo "Building Dockerfile with tags $CI_APPLICATION_REPOSITORY/outcomes.1694.io:$CI_APPLICATION_TAG and $CI_APPLICATION_REPOSITORY/outcomes.1694.io:latest ..."
+
+    docker build --network host -f backend/Dockerfile \
+      -t "$CI_APPLICATION_REPOSITORY/outcomes.1694.io:$CI_APPLICATION_TAG" \
+      -t "$CI_APPLICATION_REPOSITORY/outcomes.1694.io:latest" ./backend
+    docker push "$CI_APPLICATION_REPOSITORY/outcomes.1694.io:$CI_APPLICATION_TAG"
+    docker push "$CI_APPLICATION_REPOSITORY/outcomes.1694.io:latest"
   rules:
-    - if: '$DEPLOY_WEBSITE == "true"'
+  - if: '$DEPLOY_WEBSITE == "true"'
+
+build_govtool:
+  stage: build
+  image: docker:24.0.2-git
+  retry: 1
+  script:
+  - |
+    set -xev
+          
+    docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    echo "Building Dockerfile with tags $CI_APPLICATION_REPOSITORY/govtool:$CI_APPLICATION_TAG and $CI_APPLICATION_REPOSITORY/govtool:latest ..."
+
+    docker build --network host -f Dockerfile.govtool \
+      -t "$CI_APPLICATION_REPOSITORY/govtool:$CI_APPLICATION_TAG" \
+      -t "$CI_APPLICATION_REPOSITORY/govtool:latest" .
+    docker push "$CI_APPLICATION_REPOSITORY/govtool:$CI_APPLICATION_TAG"
+    docker push "$CI_APPLICATION_REPOSITORY/govtool:latest"
+  rules:
+  - if: '$DEPLOY_WEBSITE == "true"'
 
 .outcomes_backend_deployment: &outcomes_backend_deployment
   image: "${CI_TEMPLATE_REGISTRY_HOST}/gitlab-org/cluster-integration/auto-deploy-image:${AUTO_DEPLOY_IMAGE_VERSION}"
   script:
-    - *setup
-    - auto-deploy check_kube_domain
-    - auto-deploy download_chart
-    - auto-deploy create_secret
-    - |
-      # Set secrets
-      cp "$ENV_FILE" ./charts/app_env 
-      cat ./charts/app_env
-      echo "$INGRESS_HOST" "$NAMESPACE"
+  - *setup
+  - auto-deploy check_kube_domain
+  - auto-deploy download_chart
+  - auto-deploy create_secret
+  - |
+    # Set secrets
+    cp "$ENV_FILE" ./charts/app_env 
+    cat ./charts/app_env
+    echo "$INGRESS_HOST" "$NAMESPACE"
+    
+    DEPLOYMENT_NAME="outcomes-$CI_ENVIRONMENT_SLUG"
 
-      DEPLOYMENT_NAME="outcomes-$CI_ENVIRONMENT_SLUG"
+    echo "Install govtool-outcomes-backend"
+    helm upgrade $DEPLOYMENT_NAME ./charts/backend \
+        --install \
+        --timeout 300s \
+        --wait \
+        --atomic \
+        --namespace="$NAMESPACE" \
+        --create-namespace \
+        -f ./charts/values.yaml \
+        --set namespace=$NAMESPACE \
+        --set ingress.hosts[0]=$INGRESS_HOST \
+        --set cardano_node[0].tcp_host=$NODE_TCP_HOST \
+        --set cardano_node[0].tcp_port=$NODE_TCP_PORT
 
-      echo "Install govtool-outcomes-backend"
-      helm upgrade $DEPLOYMENT_NAME ./charts \
-          --install \
-          --timeout 300s \
-          --wait \
-          --atomic \
-          --namespace="$NAMESPACE" \
-          --create-namespace \
-          -f ./charts/values.yaml \
-          --set namespace=$NAMESPACE \
-          --set ingress.hosts[0]=$INGRESS_HOST \
-          --set cardano_node.tcp_host=$NODE_TCP_HOST \
-          --set cardano_node.tcp_port=$NODE_TCP_PORT \
-          --create-namespace
+    DEPLOYMENT_NAME="govtool-frontend-$CI_ENVIRONMENT_SLUG"
+    helm upgrade $DEPLOYMENT_NAME ./charts/govtool \
+        --install \
+        --timeout 300s \
+        --wait \
+        --atomic \
+        --namespace="$NAMESPACE" \
+        --create-namespace \
+        -f ./charts/values.yaml \
+        --set namespace=$NAMESPACE \
+        --set ingress.hosts[0]=$INGRESS_HOST
   rules:
-    - if: '$DEPLOY_WEBSITE == "true"'
+  - if: '$DEPLOY_WEBSITE == "true"'
 
 outcomes_preview_backend:
   <<: *outcomes_backend_deployment
@@ -136,7 +167,7 @@ outcomes_mainnet_backend:
   <<: *outcomes_backend_deployment
   stage: mainnet
   rules:
-    - if: $CI_COMMIT_BRANCH == "main"
+  - if: $CI_COMMIT_BRANCH == "main"
   environment:
     name: mainnet
     url: https://$CI_PROJECT_PATH_SLUG.$AUTO_DEVOPS_DOMAIN
