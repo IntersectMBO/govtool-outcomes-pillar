@@ -1,10 +1,8 @@
 import { Box, Checkbox, Divider, FormLabel, Typography } from "@mui/material";
-import {
-  IconArrowUp,
-  IconArrowDown,
-} from "@intersect.mbo/intersectmbo.org-icons-set";
 import { theme } from "../../theme";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useRef, useState } from "react";
+import UpDownArrowsIcon from "../../Assets/Icons/UpdownArrows";
+import { useOnClickOutside } from "../../hooks/useOutsideClick";
 
 interface SortComponentProps {
   selectedSorting: string;
@@ -13,7 +11,6 @@ interface SortComponentProps {
     value: string;
     label: string;
   }[];
-  closeFilters: () => void;
   sortOpen: boolean;
   setSortOpen: Dispatch<SetStateAction<boolean>>;
 }
@@ -22,17 +19,22 @@ export default function SortComponent({
   selectedSorting,
   setSelectedSorting,
   sortOptions,
-  closeFilters,
   sortOpen,
   setSortOpen,
 }: SortComponentProps) {
   const {
-    palette: { primaryBlue, boxShadow2 },
+    palette: { primaryBlue, boxShadow2, neutralWhite },
   } = theme;
   const handleShowSortOptions = () => {
-    closeFilters();
     setSortOpen(!sortOpen);
   };
+  const [isHovered, setIsHovered] = useState(false);
+
+  const closeSortOptions = () => {
+    setSortOpen(false);
+  };
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  useOnClickOutside(wrapperRef, closeSortOptions);
 
   return (
     <Box
@@ -42,16 +44,22 @@ export default function SortComponent({
       alignItems="center"
       justifyContent="center"
       sx={{
-        backgroundColor: "neutralWhite",
+        backgroundColor: sortOpen ? "secondary.main" : "neutralWhite",
         border: 1,
-        borderColor: "secondaryBlue",
+        borderColor: sortOpen ? "secondary.main" : "secondaryBlue",
         borderRadius: 10,
         fontSize: 14,
         fontWeight: 500,
         height: 48,
         padding: "0 16px",
         cursor: "pointer",
+        ":hover": {
+          backgroundColor: "secondary.main",
+          borderColor: "secondary.main",
+        },
       }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <Box
         display="flex"
@@ -62,11 +70,16 @@ export default function SortComponent({
         onClick={handleShowSortOptions}
       >
         <Box sx={{ display: "flex", alignItems: "center" }}>
-          <IconArrowDown fill={primaryBlue} />
-          <IconArrowUp fill={primaryBlue} />
+          <UpDownArrowsIcon
+            color={isHovered || sortOpen ? neutralWhite : primaryBlue}
+          />
         </Box>
         <Typography
-          sx={{ color: "primaryBlue", fontWeight: 500, paddingLeft: 1 }}
+          sx={{
+            color: isHovered || sortOpen ? "neutralWhite" : "primaryBlue",
+            fontWeight: 500,
+            paddingLeft: 0.5,
+          }}
         >
           Sort
         </Typography>
@@ -84,6 +97,7 @@ export default function SortComponent({
             padding: 2,
             zIndex: 10,
           }}
+          ref={wrapperRef}
         >
           <Box display="flex" justifyContent="space-between" marginBottom={1}>
             <Typography
@@ -115,9 +129,7 @@ export default function SortComponent({
               }}
               key={index}
             >
-              <FormLabel sx={{ fontSize: "14px" }}>
-                {option.label}
-              </FormLabel>
+              <FormLabel sx={{ fontSize: "14px" }}>{option.label}</FormLabel>
               <Checkbox
                 sx={{
                   padding: 0,

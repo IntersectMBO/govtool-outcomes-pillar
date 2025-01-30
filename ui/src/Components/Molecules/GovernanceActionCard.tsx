@@ -31,7 +31,6 @@ function GovernanceActionCard({
   return (
     <Card
       sx={{
-        width: "100%",
         backgroundColor: "transparent",
         padding: 2,
         borderRadius: "20px",
