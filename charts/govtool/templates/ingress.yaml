@@ -11,8 +11,7 @@ metadata:
     {{- range $key, $value := .Values.ingress.annotations }}
       {{ $key }}: {{ $value | quote }}
     {{- end }}
-      traefik.ingress.kubernetes.io/router.middlewares: "traefik-redirect-http-to-https@kubernetescrd,traefik-default-headers@kubernetescrd,traefik-strip-prefix@kubernetescrd"
-      # traefik.ingress.kubernetes.io/middlewares: "{{ $.Chart.Name }}-redirect-root@kubernetescrd"
+      traefik.ingress.kubernetes.io/router.middlewares: "traefik-redirect-http-to-https@kubernetescrd,traefik-default-headers@kubernetescrd"
 spec:
   tls:
   {{- range .Values.ingress.tls }}
