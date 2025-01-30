@@ -10,17 +10,9 @@ import { useState } from "react";
 export default function OutcomesPage() {
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [searchText, setSearchText] = useState("");
-  // const [filtersOpen, setFilterOpen] = useState(false)
-  // const [sortsOpen, setSortsOpen] = useState(false)
   const [selectedSorting, setSelectedSorting] = useState("")
   const [anchorElSort, setAnchorElSort] = useState<null | HTMLElement>(null);
   const [anchorElFilters, setAnchorElFilters] = useState<null | HTMLElement>(null);
-  const closeFilters = () =>{
-    // setFilterOpen(false)
-  }
-  const closeSorts = () =>{
-    // setSortsOpen(false)
-  }
   const sortsOpen = Boolean(anchorElSort)
   const filtersOpen = Boolean(anchorElFilters)
   return (
