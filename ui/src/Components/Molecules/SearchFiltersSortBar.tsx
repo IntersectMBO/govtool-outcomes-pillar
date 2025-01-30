@@ -26,11 +26,11 @@ interface SearchFiltersSortBarProps {
   selectedSorting: string;
   setSelectedSorting: Dispatch<SetStateAction<string>>;
   sortOpen: boolean;
-  setSortOpen: Dispatch<SetStateAction<boolean>>;
-  closeFilters: () => void;
   filtersOpen: boolean;
-  setFiltersOpen: Dispatch<SetStateAction<boolean>>;
-  closeSorts: () => void;
+  anchorElFilters: null | HTMLElement;
+  setAnchorElFilters: Dispatch<SetStateAction<null | HTMLElement>>;
+  anchorElSort: null | HTMLElement;
+  setAnchorElSort: Dispatch<SetStateAction<null | HTMLElement>>;
 }
 
 export default function SearchFiltersSortBar({
@@ -47,11 +47,11 @@ export default function SearchFiltersSortBar({
     selectedSorting,
     setSelectedSorting,
     sortOpen,
-    setSortOpen,
-    closeFilters,
     filtersOpen,
-    setFiltersOpen,
-    closeSorts,
+    anchorElFilters,
+    setAnchorElFilters,
+    anchorElSort,
+    setAnchorElSort
   } = props;
 
   const {
@@ -87,14 +87,16 @@ export default function SearchFiltersSortBar({
         selectedFilters={selectedFilters}
         setSelectedFilters={setSelectedFilters}
         filtersOpen={filtersOpen}
-        setFiltersOpen={setFiltersOpen}
+        anchorEl={anchorElFilters}
+        setAnchorEl={setAnchorElFilters}
       />
       <SortComponent
         selectedSorting={selectedSorting}
         setSelectedSorting={setSelectedSorting}
         sortOptions={sortOptions}
         sortOpen={sortOpen}
-        setSortOpen={setSortOpen}
+        anchorEl={anchorElSort}
+        setAnchorEl={setAnchorElSort}
       />
     </Box>
   );

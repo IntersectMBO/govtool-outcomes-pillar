@@ -9,6 +9,6 @@ export const GOVERNANCE_ACTION_SORT_OPTIONS = [
       },
       {
         value: "highestAmountsOfYesVotes",
-        label: "Highest amaount of yes votes",
+        label: "Highest amount of yes votes",
       }
 ];

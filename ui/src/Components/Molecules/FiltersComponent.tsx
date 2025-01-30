@@ -1,4 +1,14 @@
-import { Box, Checkbox, Divider, FormLabel, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Checkbox,
+  Divider,
+  Fade,
+  FormLabel,
+  Menu,
+  MenuItem,
+  Typography,
+} from "@mui/material";
 import { Dispatch, SetStateAction, useRef, useState } from "react";
 import { IconFilter } from "@intersect.mbo/intersectmbo.org-icons-set";
 import { theme } from "../../theme";
@@ -16,7 +26,8 @@ interface FilterComponentProps {
     label: string;
   }[];
   filtersOpen: boolean;
-  setFiltersOpen: Dispatch<SetStateAction<boolean>>;
+  anchorEl: null | HTMLElement;
+  setAnchorEl: Dispatch<SetStateAction<null | HTMLElement>>;
 }
 export default function FiltersComponent({
   selectedFilters,
@@ -24,15 +35,13 @@ export default function FiltersComponent({
   options,
   statusOptions,
   filtersOpen,
-  setFiltersOpen,
+  anchorEl,
+  setAnchorEl,
 }: FilterComponentProps) {
   const {
-    palette: { primaryBlue, boxShadow2, neutralWhite },
+    palette: { primaryBlue, neutralWhite },
   } = theme;
   const [isHovered, setIsHovered] = useState(false);
-  const handleShowFilters = () => {
-    setFiltersOpen(!filtersOpen);
-  };
 
   const handleFilterChange = (value: string) => {
     setSelectedFilters((prevSelectedFilters) => {
@@ -44,78 +53,84 @@ export default function FiltersComponent({
     });
   };
 
-  const closeFilters = () => {
-    setFiltersOpen(false);
+  const handleShowOptions = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
   };
 
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  useOnClickOutside(wrapperRef, closeFilters);
-
   return (
-    <Box
-      position="relative"
-      sx={{
-        backgroundColor: filtersOpen ? "secondary.main" : "neutralWhite",
-        border: 1,
-        borderColor: filtersOpen ? "secondary.main" : "secondaryBlue",
-        borderRadius: 10,
-        fontSize: 14,
-        fontWeight: 500,
-        height: 48,
-        padding: "0 16px 0 16px",
-        cursor: "pointer",
-        ":hover": {
-          backgroundColor: "secondary.main",
-          borderColor: "secondary.main"
-        },
-      }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        width="100%"
-        height="100%"
-        onClick={handleShowFilters}
+    <Box>
+      <Button
+        id="fade-button"
+        aria-controls={filtersOpen ? "fade-menu" : undefined}
+        aria-haspopup="true"
+        aria-expanded={filtersOpen ? "true" : undefined}
+        sx={{
+          backgroundColor: filtersOpen ? "secondary.main" : "neutralWhite",
+          border: 1,
+          borderColor: filtersOpen ? "secondary.main" : "secondaryBlue",
+          borderRadius: 10,
+          fontSize: 14,
+          fontWeight: 500,
+          height: 48,
+          padding: "0 16px",
+          cursor: "pointer",
+          ":hover": {
+            backgroundColor: "secondary.main",
+            borderColor: "secondary.main",
+          },
+        }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onClick={handleShowOptions}
       >
-        <IconFilter
-          width={18}
-          height={18}
-          fill={isHovered || filtersOpen ? neutralWhite : primaryBlue}
-        />
-        <Typography
-          sx={{
-            color: isHovered || filtersOpen ? "neutralWhite" : "primaryBlue",
-            fontWeight: 500,
-            paddingLeft: 0.5,
-          }}
-        >
-          Filter
-        </Typography>
-      </Box>
-      {filtersOpen && (
         <Box
-          sx={{
-            backgroundColor: "neutralWhite",
-            borderRadius: 5,
-            width: 250,
-            boxShadow: `${boxShadow2} 0px 8px 24px`,
-            position: "absolute",
-            top: 50,
-            padding: 2,
-            right: 10,
-          }}
-          ref={wrapperRef}
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          width="100%"
+          height="100%"
         >
-          <Box display="flex" justifyContent="space-between">
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <IconFilter
+              width={18}
+              height={18}
+              fill={isHovered || filtersOpen ? neutralWhite : primaryBlue}
+            />
+          </Box>
+          <Typography
+            sx={{
+              color: isHovered || filtersOpen ? "neutralWhite" : "primaryBlue",
+              fontWeight: 500,
+              paddingLeft: 0.5,
+            }}
+          >
+            Filter
+          </Typography>
+        </Box>
+      </Button>
+      <Menu
+        id="fade-menu"
+        MenuListProps={{
+          "aria-labelledby": "fade-button",
+        }}
+        anchorEl={anchorEl}
+        open={filtersOpen}
+        onClose={handleClose}
+        TransitionComponent={Fade}
+        sx={{ marginTop: 1 }}
+      >
+        <MenuItem>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            marginBottom={1}
+            width={250}
+          >
             <Typography
-              sx={{
-                color: "neutralGray",
-                fontWeight: 500,
-                fontSize: "14px",
-              }}
+              sx={{ color: "neutralGray", fontWeight: 500, fontSize: "14px" }}
             >
               Governance Action Type
             </Typography>
@@ -124,26 +139,25 @@ export default function FiltersComponent({
                 color: "primaryBlue",
                 fontWeight: 500,
                 fontSize: "14px",
+                cursor: "pointer",
               }}
               onClick={() => setSelectedFilters([])}
             >
-              clear
+              Clear
             </Typography>
           </Box>
-          <Divider
-            sx={{
-              marginBottom: 1,
-              marginTop: 1,
-              backgroundColor: "neutralGray",
-            }}
-          />
-          {options.map((option, index) => (
+          <Divider sx={{ marginBottom: 2, backgroundColor: "neutralGray" }} />
+        </MenuItem>
+        {options.map((option, index) => (
+          <MenuItem>
             <Box
               sx={{
                 width: "100%",
                 marginBottom: 2,
                 display: "flex",
                 justifyContent: "space-between",
+                alignItems: "center",
+                gap: 2,
               }}
               key={index}
             >
@@ -160,32 +174,33 @@ export default function FiltersComponent({
                 onChange={() => handleFilterChange(option.value)}
               />
             </Box>
-          ))}
-          <Divider
-            sx={{
-              marginBottom: 1,
-              marginTop: 1,
-              backgroundColor: "neutralGray",
-            }}
-          />
-          <Typography
-            sx={{
-              color: "neutralGray",
-              fontWeight: 500,
-              fontSize: "14px",
-              marginBottom: 1,
-            }}
+          </MenuItem>
+        ))}
+        <MenuItem>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            marginBottom={1}
+            width={250}
           >
-            status
-          </Typography>
-
-          {statusOptions.map((option, index) => (
+            <Typography
+              sx={{ color: "neutralGray", fontWeight: 500, fontSize: "14px" }}
+            >
+              Status
+            </Typography>
+          </Box>
+          <Divider sx={{ marginBottom: 2, backgroundColor: "neutralGray" }} />
+        </MenuItem>
+        {statusOptions.map((option, index) => (
+          <MenuItem>
             <Box
               sx={{
                 width: "100%",
                 marginBottom: 2,
                 display: "flex",
                 justifyContent: "space-between",
+                alignItems: "center",
+                gap: 2,
               }}
               key={index}
             >
@@ -202,9 +217,9 @@ export default function FiltersComponent({
                 onChange={() => handleFilterChange(option.value)}
               />
             </Box>
-          ))}
-        </Box>
-      )}
+          </MenuItem>
+        ))}
+      </Menu>
     </Box>
   );
 }
