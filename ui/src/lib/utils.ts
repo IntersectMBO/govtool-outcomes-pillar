@@ -27,6 +27,7 @@ export const encodeCIP129Identifier = ({
   index?: string;
   bech32Prefix: string;
 }) => {
+  if (!txID) return '';
   const govActionBytes = Buffer.from(index ? txID + index : txID, "hex");
   const words = bech32.toWords(govActionBytes);
   return bech32.encode(bech32Prefix, words);

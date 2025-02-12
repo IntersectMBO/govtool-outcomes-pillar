@@ -21,7 +21,7 @@ export default function GovernanceActionCardIdElement({
     <Box>
       <Typography
         sx={{
-          fontSize: "12px",
+          fontSize: "0.875rem",
           color: "neutralGray",
           marginBottom: 1,
           fontWeight: 500,
@@ -43,7 +43,7 @@ export default function GovernanceActionCardIdElement({
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
-            fontSize: "14px",
+            fontSize: "1rem",
             color: "primaryBlue",
           }}
         >

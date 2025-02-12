@@ -246,10 +246,12 @@ SELECT
     COALESCE(cv.ccAbstainVotes, 0) cc_abstain_votes,
     prev_gov_action.index as prev_gov_action_index,
     encode(prev_gov_action_tx.hash, 'hex') as prev_gov_action_tx_hash,
-    gov_action_proposal.ratified_epoch,
-    gov_action_proposal.enacted_epoch,
-    gov_action_proposal.dropped_epoch,
-    gov_action_proposal.expired_epoch
+    JSON_BUILD_OBJECT(
+        'ratified_epoch', gov_action_proposal.ratified_epoch,
+        'enacted_epoch', gov_action_proposal.enacted_epoch,
+        'dropped_epoch', gov_action_proposal.dropped_epoch,
+        'expired_epoch', gov_action_proposal.expired_epoch
+    ) AS status
 FROM
     gov_action_proposal
     CROSS JOIN LatestEpoch AS latest_epoch

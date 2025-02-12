@@ -13,8 +13,9 @@ export default function GovernanceActionCardElement({
     <Box>
       <Typography
         sx={{
-          fontSize: "12px",
+          fontSize: "0.875rem",
           color: "neutralGray",
+          lineHeight: "1rem",
           marginBottom: 1,
           fontWeight: 500,
         }}
@@ -23,10 +24,11 @@ export default function GovernanceActionCardElement({
       </Typography>
       <Typography
         sx={{
-          fontSize: "14px",
+          fontSize: "1rem",
           display: "-webkit-box",
           WebkitBoxOrient: "vertical",
           overflow: "hidden",
+          lineHeight: "1.5rem",
           WebkitLineClamp: 2,
           width: "100%",
         }}

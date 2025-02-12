@@ -10,49 +10,20 @@ import {
 import GovernanceActionCardHeader from "./GovernanceActionCardHeader";
 import GovernanceActionCardElement from "./GovernanceActionCardElement";
 import GovernanceActionCardIdElement from "./GovernanceActionCardIdElement";
-import { useEffect, useState } from "react";
-import { getGovActionMetadata } from "../../services/requests/getGovActionMetadata";
-import { encodeCIP129Identifier, getProposalStatus } from "../../lib/utils";
+import {
+  encodeCIP129Identifier,
+  getFullGovActionId,
+  getProposalStatus,
+} from "../../lib/utils";
 import GovernanceActionStatus from "../Atoms/GovernanceActionStatus";
-import { urls } from "../../consts/urls";
+import { useMetadata } from "../../hooks/useMetadata";
 
 interface GovernanceActionCardProps {
   action: GovernanceAction;
 }
 
 function GovernanceActionCard({ action }: GovernanceActionCardProps) {
-  const [metadata, setMetadata] = useState<any>(null);
-  const [metadataValid, setMetadataValid] = useState<any>(true);
-
-  useEffect(() => {
-    setMetadata(null);
-    setMetadataValid(true);
-
-    const fetchMetadata = async () => {
-      if (action.title === null && action.url) {
-        try {
-          const fetchedMetadata = await getGovActionMetadata(action?.url);
-          const isValid =
-            (fetchedMetadata?.body?.title !== "" &&
-              fetchedMetadata?.body?.title != null) ||
-            (fetchedMetadata?.body?.abstract !== "" &&
-              fetchedMetadata?.body?.abstract != null);
-          setMetadataValid(isValid);
-          setMetadata(fetchedMetadata);
-        } catch (error) {
-          console.error("Error fetching metadata:", error);
-          setMetadataValid(false);
-          setMetadata(null);
-        }
-      }
-    };
-
-    fetchMetadata();
-  }, [action]);
-
-  const idCIP105 = () => {
-    return `${action?.tx_hash}#${action?.index}`;
-  };
+  const { metadata, metadataValid } = useMetadata(action);
 
   const idCIP129 = encodeCIP129Identifier({
     txID: action?.tx_hash,
@@ -124,7 +95,7 @@ function GovernanceActionCard({ action }: GovernanceActionCardProps) {
         <Box sx={{ marginTop: 2 }}>
           <GovernanceActionCardIdElement
             title="Governance Action ID"
-            id={idCIP105()}
+            id={getFullGovActionId(action?.tx_hash, action?.index)}
           />
         </Box>
         <Box sx={{ marginTop: 2 }}>
@@ -139,10 +110,11 @@ function GovernanceActionCard({ action }: GovernanceActionCardProps) {
       </CardContent>
       <CardActions>
         <Link
-          href={`${urls.govtools}/governance_actions/${idCIP105()}`}
+          href={`outcomes/governance_actions/${getFullGovActionId(
+            action?.tx_hash,
+            action?.index
+          )}`}
           color="inherit"
-          target="_blank"
-          rel="noreferrer"
           sx={{
             width: "100%",
           }}

@@ -1,65 +1,70 @@
 import { Box, Typography } from "@mui/material";
-import GovernanceActionStatusChip from "../Atoms/GovernanceActionStatusChip";
 import { formatTimeStamp } from "../../lib/utils";
+import StatusChip from "./StatusChip";
 
-interface GovernanceActionCardHeaderProps {
+interface HeaderProps {
   dateSubmitted: string;
   epochSubmitted: number;
   status: Status;
 }
 
-export default function GovernanceActionCardHeader({
+export default function Header({
   dateSubmitted,
   epochSubmitted,
   status,
-}: GovernanceActionCardHeaderProps) {
+}: HeaderProps) {
   const getStatusChips = () => {
     const { ratified_epoch, enacted_epoch, dropped_epoch, expired_epoch } =
       status;
 
     if (!ratified_epoch && !enacted_epoch && !dropped_epoch && !expired_epoch) {
-      return <GovernanceActionStatusChip status="Live" />;
+      return <StatusChip status="Live" />;
     }
 
     if (ratified_epoch && enacted_epoch) {
       return (
-        <Box>
-          <GovernanceActionStatusChip status="Ratified" />
-          <GovernanceActionStatusChip status="Enacted" />
+        <Box display="flex" flexDirection="row" gap="4px">
+          <StatusChip status="Ratified" />
+          <StatusChip status="Enacted" />
         </Box>
       );
     }
 
     if (ratified_epoch && !enacted_epoch) {
-      return <GovernanceActionStatusChip status="Ratified" />;
+      return <StatusChip status="Ratified" />;
     }
 
     if (!ratified_epoch && enacted_epoch) {
-      return <GovernanceActionStatusChip status="Enacted" />;
+      return <StatusChip status="Enacted" />;
     }
 
     if (expired_epoch && dropped_epoch) {
       return (
-        <Box>
-          <GovernanceActionStatusChip status="Expired" />
-          <GovernanceActionStatusChip status="Dropped" />
+        <Box display="flex" flexDirection="row" gap="4px">
+          <StatusChip status="Expired" />
+          <StatusChip status="Dropped" />
         </Box>
       );
     }
 
     if (dropped_epoch) {
-      return <GovernanceActionStatusChip status="Dropped" />;
+      return <StatusChip status="Dropped" />;
     }
 
     if (expired_epoch) {
-      return <GovernanceActionStatusChip status="Expired" />;
+      return <StatusChip status="Expired" />;
     }
 
     return null;
   };
   return (
     <Box>
-      <Box display="flex" justifyContent="space-between" width="100%">
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        width="100%"
+        alignItems="center"
+      >
         <Typography sx={{ fontSize: "12px" }}>
           Submitted:{" "}
           <Typography
