@@ -104,6 +104,11 @@ build_govtool:
       set -xev
             
       docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+      
+      if [[ "$CI_COMMIT_REF_NAME" == "main" || "$CI_COMMIT_REF_NAME" == "beta" ]]; then
+        export CARDANO_NETWORK="mainnet"
+      fi
+
       echo "Building Dockerfile with CARDANO_NETWORK=${CARDANO_NETWORK}"
 
       docker build --network host -f Dockerfile.govtool \
@@ -184,6 +189,8 @@ outcomes_preview_backend:
 outcomes_preview_govtool:
   <<: *outcomes_govtool_deployment
   stage: preview
+  rules:
+    - if: $CI_COMMIT_BRANCH != "beta" || $CI_COMMIT_BRANCH != "main"
   environment:
     name: preview
     url: https://$CI_PROJECT_PATH_SLUG.$AUTO_DEVOPS_DOMAIN
@@ -191,7 +198,7 @@ outcomes_preview_govtool:
 
 outcomes_mainnet_backend:
   <<: *outcomes_backend_deployment
-  stage: mainnet
+  stage: mainnet 
   rules:
     - if: $CI_COMMIT_BRANCH == "beta" || $CI_COMMIT_BRANCH == "main"
   environment:

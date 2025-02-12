@@ -14,7 +14,17 @@ WORKDIR /app/govtool/frontend
 
 RUN yarn install
 
-COPY ./ui/dist /app/govtool/frontend/node_modules/@intersect.mbo/govtool-outcomes-pillar-ui/dist
+COPY ./ui/dist /app/govtool/frontend/ui/dist
+
+# Conditionally install the package or copy UI files
+RUN if [ "$CARDANO_NETWORK" = "mainnet" ]; then \
+    echo "Installing latest @intersect.mbo/govtool-outcomes-pillar-ui via yarn..."; \
+    yarn cache clean; \
+    yarn add @intersect.mbo/govtool-outcomes-pillar-ui@latest; \
+    else \
+    echo "Copying UI files for non-mainnet environment..."; \
+    cp -r /app/govtool/frontend/ui/dist /app/govtool/frontend/node_modules/@intersect.mbo/govtool-outcomes-pillar-ui/dist; \
+    fi
 
 # Copy environment variables and build the project
 RUN cp .env.example .env
