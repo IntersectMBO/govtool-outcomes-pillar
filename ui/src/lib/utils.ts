@@ -158,7 +158,6 @@ export const getGovActionVotingThresholdKey = ({
   protocolParams?: Partial<EpochParams> | null;
   voterType?: VoterType;
 }) => {
-  console.log({ govActionType, protocolParams, voterType });
   switch (govActionType) {
     case GovernanceActionType.NewCommittee: {
       // TODO: handle dvt_committee_normal and pvt_committee_normal
