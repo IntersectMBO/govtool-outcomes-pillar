@@ -17,6 +17,7 @@ import {
 } from "../../lib/utils";
 import GovernanceActionStatus from "../Atoms/GovernanceActionStatus";
 import { useMetadata } from "../../hooks/useMetadata";
+import { GovernanceAction } from "../../types/api";
 
 interface GovernanceActionCardProps {
   action: GovernanceAction;

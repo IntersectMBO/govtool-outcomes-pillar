@@ -4,6 +4,7 @@ import {
   getProposalStatus,
   getStatusDetails,
 } from "../../lib/utils";
+import { GovernanceAction } from "../../types/api";
 
 type GovernanceActionStatusProps = {
   action: GovernanceAction;

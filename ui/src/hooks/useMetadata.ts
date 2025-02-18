@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getGovActionMetadata } from "../services/requests/getGovActionMetadata";
+import { GovActionMetadata } from "../types/api";
 
 type UseMetadataOptions = {
   skipConditionCheck?: boolean;
@@ -55,5 +56,5 @@ export function useMetadata(action: any, options: UseMetadataOptions = {}) {
     };
   }, [action, options.skipConditionCheck]);
 
-  return { metadata, metadataValid, isMetadataLoading };
+  return { metadata: metadata as GovActionMetadata, metadataValid, isMetadataLoading };
 }

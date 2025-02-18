@@ -21,6 +21,7 @@ export class GovernanceActionsService {
     const filterArray = filters?.length > 0 ? filters : null;
     const sortOption = sort || "newestFirst";
 
+
     return this.cexplorerService.manager.query(getGovernanceActions, [
       searchTerm,
       filterArray,

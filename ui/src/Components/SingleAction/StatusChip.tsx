@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
 
 type StatusChip = {
-  status: "Live" | "Ratified" | "Enacted" | "Expired" | "Dropped";
+  status: "Live" | "Ratified" | "Enacted" | "Expired" | "Dropped" 
 };
 
 function StatusChip({ status }: StatusChip) {

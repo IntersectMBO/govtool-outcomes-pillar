@@ -28,3 +28,13 @@ export const GOVERNANCE_ACTION_FILTERS = [
     label: "Protocol Parameter Change",
   },
 ];
+
+export enum GOVERNANCE_ACTION_FILTERS_ENUM {
+  InfoAction = "InfoAction",
+  TreasuryWithdrawals = "TreasuryWithdrawals",
+  HardForkInitiation = "HardForkInitiation",
+  NewCommittee = "NewCommittee",
+  NoConfidence = "NoConfidence",
+  NewConstitution = "NewConstitution",
+  ParameterChange = "ParameterChange",
+}

@@ -1,12 +1,14 @@
 import { Box, Typography } from "@mui/material";
 import { formatTimeStamp } from "../../lib/utils";
 import StatusChip from "./StatusChip";
+import { Status } from "../../types/api";
 
 interface HeaderProps {
   dateSubmitted: string;
   epochSubmitted: number;
   status: Status;
 }
+
 
 export default function Header({
   dateSubmitted,

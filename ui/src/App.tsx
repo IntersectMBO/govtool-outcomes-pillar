@@ -5,6 +5,7 @@ import { theme } from "./theme";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { setAxiosBaseURL } from "./services/axiosInstance";
 import GlobalWrapper from "./Components/GlobalWrapper";
+import { AppContextProvider } from "./contexts/AppContext";
 
 export type AppProps = {
   apiUrl?: string;
@@ -25,9 +26,11 @@ function App({ apiUrl }: AppProps) {
     >
       <QueryClientProvider client={queryClient}>
         <ThemeProvider theme={theme}>
-          <SnackbarProvider>
-            <GlobalWrapper/>
-          </SnackbarProvider>
+          <AppContextProvider>
+            <SnackbarProvider>
+              <GlobalWrapper />
+            </SnackbarProvider>
+          </AppContextProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </div>

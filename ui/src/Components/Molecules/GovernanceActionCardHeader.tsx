@@ -1,6 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import GovernanceActionStatusChip from "../Atoms/GovernanceActionStatusChip";
 import { formatTimeStamp } from "../../lib/utils";
+import { Status } from "../../types/api";
 
 interface GovernanceActionCardHeaderProps {
   dateSubmitted: string;

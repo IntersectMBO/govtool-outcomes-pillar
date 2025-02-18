@@ -2,6 +2,7 @@ import { useQuery } from "react-query";
 import { queryKeys } from "../consts/queryKeys";
 import { getGovernanceActions } from "../services/requests/getGovernanceActions";
 import { decodeCIP129Identifier, getFullGovActionId } from "../lib/utils";
+import { GovernanceAction } from "../types/api";
 
 export const useGetGovernanceActions = (
   search: string,

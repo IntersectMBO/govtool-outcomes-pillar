@@ -89,7 +89,7 @@ EnrichedCurrentMembers AS (
     LEFT JOIN LATERAL
         json_array_elements(pcm.current_members) AS member ON true
     LEFT JOIN
-        CommitteeData cm ON cm.hash = encode(decode(member->>'hash', 'hex'), 'hex')
+        CommitteeData cm ON cm.hash = member->>'hash'
     GROUP BY
         pcm.id
 ),
@@ -146,7 +146,7 @@ SELECT
                             'tag', pd.tag,
                             'members', em.enriched_members,
                             'membersToBeRemoved', mtr.members_to_be_removed,
-                            'threshold', pd.threshold::float
+                            'threshold', (pd.threshold->'contents'->3)::float
                         )
                     FROM
                         ParsedDescription pd

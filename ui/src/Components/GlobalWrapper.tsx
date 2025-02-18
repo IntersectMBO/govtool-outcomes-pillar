@@ -1,8 +1,8 @@
 import { useLocation } from "react-router-dom";
 import Outcomes from "../Pages/Outcomes";
-import GovernanceAction from "../Pages/GovernanceAction";
 import VotesAndFavorites from "../Pages/VotesAndFavorites";
 import { Box } from "@mui/material";
+import GovActionWrapper from "../Pages/GovActionLegacyWrapper";
 
 function GlobalWrapper() {
   const location = useLocation();
@@ -18,7 +18,7 @@ function GlobalWrapper() {
       location.pathname.includes("outcomes/governance_actions/") &&
       getActionId()
     ) {
-      return <GovernanceAction id={getActionId()} />;
+      return <GovActionWrapper id={getActionId()} />;
     } else if (location.pathname.includes("my/votes_and_favorites")) {
       return <VotesAndFavorites />;
     } else {

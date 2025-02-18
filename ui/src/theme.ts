@@ -170,3 +170,4 @@ theme.shadows[4] =
   "0px 2px 3px 0px rgba(0, 51, 173, 0.08), 0px 6px 14px 4px rgba(0, 51, 173, 0.15)";
 theme.shadows[5] =
   "0px 4px 4px 0px rgba(0, 51, 173, 0.08), 0px 8px 20px 6px rgba(0, 51, 173, 0.15)";
+theme.shadows[6] = "rgba(47, 98, 220, 0.2) 2px 2px 20px 0px";

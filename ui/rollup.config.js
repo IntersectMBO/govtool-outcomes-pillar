@@ -7,6 +7,7 @@ import postcss from "rollup-plugin-postcss";
 import peerDepsExternal from "rollup-plugin-peer-deps-external";
 import dts from "rollup-plugin-dts";
 import babel from "@rollup/plugin-babel";
+import image from '@rollup/plugin-image';
 
 const packageJson = require("./package.json");
 
@@ -31,6 +32,7 @@ export default [
         extensions: [".js", ".jsx", ".ts", ".tsx"],
         browser: true,
       }),
+      image(),
       babel({
         babelHelpers: "bundled",
         include: [
@@ -62,6 +64,6 @@ export default [
     input: "src/index.ts",
     output: [{ file: packageJson.types }],
     plugins: [dts.default()],
-    external: [/\.scss$/],
-  },
+    external: [/\.scss$/, /\.png$/],
+  }
 ];
