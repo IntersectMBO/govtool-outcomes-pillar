@@ -3,7 +3,7 @@ import { GovActionWithMetadata, GovernanceActionType } from "../../types/api";
 import GovActionVoteElement from "./GovActionVoteElement";
 import { useAppContext } from "../../contexts/AppContext";
 import { getGovActionVotingThresholdKey } from "../../lib/utils";
-import GovActionListImage from "../../assets/img/GovActionList.png";
+import GovActionListImage from "../../Assets/img/GovActionList.png";
 
 const GovActionVotesLegacy = ({
   abstain_votes: dRepAbstainVotes,
