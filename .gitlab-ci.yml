@@ -191,7 +191,7 @@ outcomes_preview_govtool:
   <<: *outcomes_govtool_deployment
   stage: preview
   rules:
-    - if: $CI_COMMIT_BRANCH != "beta" || $CI_COMMIT_BRANCH != "main"
+    - if: $CI_COMMIT_BRANCH != "beta" && $CI_COMMIT_BRANCH != "main"
   environment:
     name: preview
     url: https://$CI_PROJECT_PATH_SLUG.$AUTO_DEVOPS_DOMAIN
