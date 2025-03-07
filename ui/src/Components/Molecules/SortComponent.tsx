@@ -1,150 +1,171 @@
-import { Box, Checkbox, Divider, FormLabel, Typography } from "@mui/material";
+import {
+  Box,
+  Divider,
+  Typography,
+  Button,
+  Menu,
+  Fade,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+} from "@mui/material";
 import { theme } from "../../theme";
-import { Dispatch, SetStateAction, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import UpDownArrowsIcon from "../../Assets/Icons/UpdownArrows";
-import { useOnClickOutside } from "../../hooks/useOutsideClick";
+import React from "react";
+import { useSearchParams } from "react-router-dom";
+import { GOVERNANCE_ACTION_SORT_OPTIONS } from "../../consts/sort-options";
 
-interface SortComponentProps {
-  selectedSorting: string;
-  setSelectedSorting: Dispatch<SetStateAction<string>>;
-  sortOptions: {
-    value: string;
-    label: string;
-  }[];
-  sortOpen: boolean;
-  setSortOpen: Dispatch<SetStateAction<boolean>>;
-}
-
-export default function SortComponent({
-  selectedSorting,
-  setSelectedSorting,
-  sortOptions,
-  sortOpen,
-  setSortOpen,
-}: SortComponentProps) {
-  const {
-    palette: { primaryBlue, boxShadow2, neutralWhite },
-  } = theme;
-  const handleShowSortOptions = () => {
-    setSortOpen(!sortOpen);
-  };
+export default function SortComponent() {
   const [isHovered, setIsHovered] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [sortParams, setSortParams] = useSearchParams();
 
-  const closeSortOptions = () => {
-    setSortOpen(false);
+  useEffect(() => {
+    const currentSort = sortParams.get("sort");
+    if (!currentSort) {
+      const newParams = new URLSearchParams(sortParams);
+      newParams.set("sort", "newestFirst");
+      setSortParams(newParams);
+    }
+  }, []);
+
+  const handleShowOptions = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
   };
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  useOnClickOutside(wrapperRef, closeSortOptions);
+
+  const setSorts = (option: string) => {
+    const newParams = new URLSearchParams(sortParams);
+    if (option) {
+      newParams.set("sort", option);
+    } else {
+      newParams.delete("sort");
+    }
+    setSortParams(newParams);
+  };
+
+  const sortValue = () => {
+    return sortParams.get("sort")?.toString() || "";
+  };
+
+  const getDisplayLabel = (value: string) => {
+    const option = GOVERNANCE_ACTION_SORT_OPTIONS.find(
+      (opt) => opt.value === value
+    );
+    return option?.displayLabel || value;
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
 
   return (
-    <Box
-      position="relative"
-      display="flex"
-      flexDirection="row"
-      alignItems="center"
-      justifyContent="center"
-      sx={{
-        backgroundColor: sortOpen ? "secondary.main" : "neutralWhite",
-        border: 1,
-        borderColor: sortOpen ? "secondary.main" : "secondaryBlue",
-        borderRadius: 10,
-        fontSize: 14,
-        fontWeight: 500,
-        height: 48,
-        padding: "0 16px",
-        cursor: "pointer",
-        ":hover": {
-          backgroundColor: "secondary.main",
-          borderColor: "secondary.main",
-        },
-      }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        width="100%"
-        height="100%"
-        onClick={handleShowSortOptions}
+    <Box>
+      <Button
+        id="sort-button"
+        data-testid="sort-button"
+        aria-controls={open ? "sort-menu" : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? "true" : undefined}
+        sx={{
+          backgroundColor: open ? "secondary.main" : "neutralWhite",
+          border: 1,
+          borderColor: open ? "secondary.main" : "secondaryBlue",
+          borderRadius: 10,
+          fontSize: 14,
+          fontWeight: 500,
+          height: 48,
+          padding: "0 16px",
+          cursor: "pointer",
+          ":hover": {
+            backgroundColor: "secondary.main",
+            borderColor: "secondary.main",
+          },
+        }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onClick={handleShowOptions}
       >
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          <UpDownArrowsIcon
-            color={isHovered || sortOpen ? neutralWhite : primaryBlue}
-          />
-        </Box>
         <Typography
           sx={{
-            color: isHovered || sortOpen ? "neutralWhite" : "primaryBlue",
+            color: isHovered || open ? "neutralWhite" : "primaryBlue",
             fontWeight: 500,
-            paddingLeft: 0.5,
+            paddingX: 0.5,
+            whiteSpace: "nowrap",
           }}
         >
-          Sort
+          Sort{sortValue() ? `: ${getDisplayLabel(sortValue())}` : ""}
         </Typography>
-      </Box>
-      {sortOpen && (
-        <Box
-          sx={{
-            backgroundColor: "neutralWhite",
-            borderRadius: 5,
-            width: 250,
-            boxShadow: `${boxShadow2} 0px 8px 24px`,
-            position: "absolute",
-            top: 50,
-            right: 10,
-            padding: 2,
-            zIndex: 10,
-          }}
-          ref={wrapperRef}
-        >
-          <Box display="flex" justifyContent="space-between" marginBottom={1}>
+      </Button>
+      <Menu
+        id="sort-menu"
+        data-testid="sort-menu"
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        TransitionComponent={Fade}
+        sx={{ marginTop: 1 }}
+      >
+        <FormControl>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            px="20px"
+            alignItems="center"
+          >
             <Typography
-              sx={{ color: "neutralGray", fontWeight: 500, fontSize: "14px" }}
+              sx={{ fontSize: 14, fontWeight: 500, color: "#9792B5" }}
             >
-              Sort by
-            </Typography>
-            <Typography
-              sx={{
-                color: "primaryBlue",
-                fontWeight: 500,
-                fontSize: "14px",
-                cursor: "pointer",
-              }}
-              onClick={() => setSelectedSorting("")}
-            >
-              Clear
+              Sort Governance Actions
             </Typography>
           </Box>
-          <Divider sx={{ marginBottom: 2, backgroundColor: "neutralGray" }} />
-          {sortOptions.map((option, index) => (
-            <Box
-              sx={{
-                width: "100%",
-                marginBottom: 2,
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-              key={index}
-            >
-              <FormLabel sx={{ fontSize: "14px" }}>{option.label}</FormLabel>
-              <Checkbox
+          <Divider sx={{ marginTop: 1, backgroundColor: "neutralGray" }} />
+          <RadioGroup
+            id="sort-radio-buttons-group"
+            data-testid="sort-radio-buttons-group"
+            aria-labelledby="sort-radio-buttons-group"
+            name="sort-radio-buttons-group"
+            value={sortValue()}
+          >
+            {GOVERNANCE_ACTION_SORT_OPTIONS.map((option, index) => (
+              <Box
+                id={`${option.dataTestId}-radio-wrapper`}
+                data-testid={`${option.dataTestId}-radio-wrapper`}
+                key={index}
+                paddingX="20px"
                 sx={{
-                  padding: 0,
-                  "& .MuiSvgIcon-root": {
-                    fontSize: 18,
-                  },
+                  cursor: "pointer",
+                  "&:hover": { bgcolor: "#E6EBF7" },
                 }}
-                name={option.value}
-                checked={selectedSorting === option.value}
-                onChange={() => setSelectedSorting(option.value)}
-              />
-            </Box>
-          ))}
-        </Box>
-      )}
+                bgcolor={
+                  sortValue() === option.value ? "#FFF0E7" : "transparent"
+                }
+                onClick={() => setSorts(option.value)}
+              >
+                <FormControlLabel
+                  value={option.value}
+                  control={
+                    <Radio
+                      id={`${option.dataTestId}-radio`}
+                      data-testid={`${option.value.toLocaleLowerCase()}-radio`}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        setSorts(option.value);
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  }
+                  label={option.label}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </Box>
+            ))}
+          </RadioGroup>
+        </FormControl>
+      </Menu>
     </Box>
   );
 }

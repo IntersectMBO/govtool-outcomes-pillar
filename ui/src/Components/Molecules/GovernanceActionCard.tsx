@@ -1,94 +1,132 @@
-import { Box, Button, Card, CardContent, Typography } from "@mui/material";
-import GovernanceActionCardHeader from "./GovernanceActionCardHeader";
-import GovernanceActionCardElement from "./GovernanceActionCardElement";
-import GovernanceActionCardIdElement from "./GovernanceActionCardIdElement";
+import { Box, Card, CardContent, CardActions } from "@mui/material";
+import GovernanceActionCardElement from "../ActionCard/GovernanceActionCardElement";
+import GovernanceActionCardIdElement from "../ActionCard/GovernanceActionCardIdElement";
+import {
+  encodeCIP129Identifier,
+  getFullGovActionId,
+  getProposalStatus,
+} from "../../lib/utils";
+import { useMetadata } from "../../hooks/useMetadata";
+import { GovernanceAction } from "../../types/api";
+import GovActionDatesInfo from "./GovActionDatesInfo";
+import GovernanceActionStatus from "./GovernanceActionStatus";
+import { GOVERNANCE_ACTION_FILTERS } from "../../consts/filters";
+import { GovernanceActionCardHeader } from "../ActionCard/GovernanceActionCardHeader";
+import { NavLink } from "react-router-dom";
+import { Button } from "../Atoms/Button";
+
 interface GovernanceActionCardProps {
-  dateSubmitted: string;
-  epoch: number;
-  status: string;
-  title: string;
-  abstract: string;
-  governanceActionType: string;
-  governanceActionID: string;
-  cipGovernanceActionID: string;
-  statusDate: string;
-  statusEpoch: Number;
+  action: GovernanceAction;
 }
 
-function GovernanceActionCard({
-  dateSubmitted,
-  epoch,
-  status,
-  title,
-  abstract,
-  governanceActionType,
-  governanceActionID,
-  cipGovernanceActionID,
-  statusDate,
-  statusEpoch,
-}: GovernanceActionCardProps) {
+function GovernanceActionCard({ action }: GovernanceActionCardProps) {
+  const { metadata, metadataValid } = useMetadata(action);
+
+  const idCIP129 = encodeCIP129Identifier({
+    txID: action?.tx_hash,
+    index: action?.index.toString(16).padStart(2, "0"),
+    bech32Prefix: "gov_action",
+  });
+  const fullGovActionId = getFullGovActionId(action?.tx_hash, action?.index);
+
+  const status = getProposalStatus(action?.status);
+
+  const typeInWords =
+    GOVERNANCE_ACTION_FILTERS.find((filter) => filter.value === action?.type)
+      ?.label || action?.type;
 
   return (
     <Card
+      id={`${idCIP129}-outcome-card`}
+      data-testid={`${idCIP129}-outcome-card`}
       sx={{
-        backgroundColor: "transparent",
-        padding: 2,
+        width: "100%",
+        height: "100%",
         borderRadius: "20px",
+        display: "flex",
+        padding: { xs: 1, sm: 2 },
+        flexDirection: "column",
+        justifyContent: "space-between",
+        flexGrow: 1,
+        boxShadow: "0px 4px 15px 0px #DDE3F5",
+        backgroundColor: !metadataValid
+          ? "rgba(251, 235, 235, 0.50)"
+          : "rgba(255, 255, 255, 0.3)",
+        ...(!metadataValid && {
+          border:
+            status === "Live"
+              ? "1px solid #FFCBAD"
+              : !metadataValid
+              ? "1px solid #F6D5D5"
+              : "1px solid #C0E4BA",
+        }),
       }}
     >
-      <CardContent>
+      <CardContent
+        id={`${idCIP129}-outcome-card-content`}
+        data-testid={`${idCIP129}-outcome-card-content`}
+        sx={{ flexGrow: 1 }}
+      >
         <GovernanceActionCardHeader
-          dateSubmitted={dateSubmitted}
-          epochSubmitted={epoch}
-          status={status}
-          title={title}
+          title={action.title || metadata?.data?.title}
+          isDataMissing={metadata?.metadataStatus || null}
+          dataTestId={`${idCIP129}-card-title`}
         />
-        <Box sx={{ marginTop: 2 }}>
-          <GovernanceActionCardElement
-            title="Abstract"
-            description={abstract}
-          />
+        <Box sx={{ marginTop: 2.5 }}>
+          <GovActionDatesInfo action={action} />
         </Box>
-        <Box sx={{ marginTop: 2 }}>
+        {metadataValid && (
+          <Box sx={{ marginTop: 2.5 }}>
+            <GovernanceActionCardElement
+              title="Abstract"
+              description={
+                action.abstract || (metadata?.data?.abstract as string)
+              }
+              dataTestId={`${idCIP129}-abstract`}
+            />
+          </Box>
+        )}
+        <Box
+          display="flex"
+          flexDirection="column"
+          gap={2.5}
+          sx={{ marginTop: 2.5 }}
+        >
           <GovernanceActionCardElement
-            title=" Governance Action Type"
-            description={governanceActionType}
+            title="Governance Action Type"
+            description={typeInWords}
+            dataTestId={`${idCIP129}-type`}
           />
-        </Box>
-        <Box sx={{ marginTop: 2 }}>
+
+          <GovernanceActionStatus status={action?.status} actionId={idCIP129} />
+
           <GovernanceActionCardIdElement
             title="Governance Action ID"
-            id={governanceActionID}
+            id={fullGovActionId}
+            dataTestId={`${fullGovActionId}-CIP-105-id`}
           />
-        </Box>
-        <Box sx={{ marginTop: 2 }}>
+
           <GovernanceActionCardIdElement
-            title="(CIP-129)Governance Action ID"
-            id={cipGovernanceActionID}
+            title="(CIP-129) Governance Action ID"
+            id={idCIP129}
+            dataTestId={`${idCIP129}-CIP-129-id`}
           />
         </Box>
-        <Box display="flex" justifyContent="center" marginTop={3}>
-          <Typography
-            sx={{
-              fontSize: "14px",
-              color: status === "Expired" ? "errorRed" : "positiveGreen",
-            }}
-          >
-            {status}:{" "}
-            <Typography
-              sx={{
-                fontSize: "14px",
-                fontWeight: "bold",
-                color: status === "Expired" ? "errorRed" : "positiveGreen",
-              }}
-              component="span"
-            >
-              {statusDate}
-            </Typography>{" "}
-            {`(Epoch ${statusEpoch})`}
-          </Typography>
-        </Box>
-        <Box display="flex" justifyContent="center" marginTop={3}>
+      </CardContent>
+      <CardActions
+        id={`${idCIP129}-outcome-card-actions`}
+        data-testid={`${idCIP129}-outcome-card-actions`}
+      >
+        <NavLink
+          data-testid={`${idCIP129}-view-details`}
+          to={`/outcomes/governance_actions/${fullGovActionId}`}
+          color="inherit"
+          style={{
+            display: "block",
+            width: "100%",
+            textDecoration: "none",
+          }}
+        >
           <Button
             variant="contained"
             sx={{
@@ -97,11 +135,12 @@ function GovernanceActionCard({
               backgroundColor: "primaryBlue",
               width: "100%",
             }}
+            aria-label={`${idCIP129}-view-details`}
           >
             View Details
           </Button>
-        </Box>
-      </CardContent>
+        </NavLink>
+      </CardActions>
     </Card>
   );
 }

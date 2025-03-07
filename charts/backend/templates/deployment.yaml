@@ -11,7 +11,7 @@ spec:
     matchLabels:
       app: "{{ $.Chart.Name }}"
       service: "{{ $.Chart.Name }}"
-  replicas: {{ .Values.image.replicaCount }}
+  replicas: {{ .Values.image.backend.replicaCount }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -24,11 +24,11 @@ spec:
         service: "{{ $.Chart.Name }}"
     spec:
       imagePullSecrets:
-        - name: {{ .Values.image.pullSecret }}
+        - name: {{ .Values.image.backend.pullSecret }}
       containers:
       - name: app
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        image: "{{ .Values.image.backend.repository }}:{{ .Values.image.backend.tag }}"
+        imagePullPolicy: {{ .Values.image.backend.pullPolicy }}
         livenessProbe:
           httpGet:
             path: /
@@ -63,9 +63,9 @@ spec:
         image: alpine/socat:1.8.0.0
         env:
         - name: CARDANO_NODE_SOCKET_TCP_HOST
-          value: "{{ .Values.cardano_node.tcp_host }}"
+          value: "{{ index .Values.cardano_node 0 "tcp_host" }}"
         - name: CARDANO_NODE_SOCKET_TCP_PORT
-          value: "{{ .Values.cardano_node.tcp_port }}"
+          value: "{{ index .Values.cardano_node 0 "tcp_port" }}"
         - name: SOCAT_TIMEOUT
           value: "3600"
         command: [

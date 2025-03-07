@@ -22,7 +22,7 @@ DRepVotingPower AS (
         SUM(CASE WHEN drep_hash.view = 'drep_always_abstain' THEN amount ELSE 0 END) AS abstain
     FROM
         drep_hash
-    LEFT JOIN drep_distr ON drep_hash.id = drep_distr.hash_id
+    LEFT JOIN drep_distr ON drep_hash.id = drep_distr.hash_id AND drep_distr.epoch_no = (SELECT MAX(no) FROM epoch)
     WHERE drep_hash.view IN ('drep_always_no_confidence', 'drep_always_abstain')
 ),
 CommitteeData AS (
@@ -87,9 +87,13 @@ EnrichedCurrentMembers AS (
     FROM
         ProcessedCurrentMembers pcm
     LEFT JOIN
-        json_array_elements(pcm.current_members) AS member ON true
-    LEFT JOIN
-        CommitteeData cm ON cm.hash = encode(decode(member->>'hash', 'hex'), 'hex')
+     json_array_elements(pcm.current_members) AS member ON true
+    LEFT JOIN CommitteeData cm 
+        ON (CASE 
+            WHEN (member->>'hash') ~ '^[0-9a-fA-F]+$' 
+            THEN encode(decode(member->>'hash', 'hex'), 'hex') 
+            ELSE NULL 
+        END) = cm.hash
     GROUP BY
         pcm.id
 ),
@@ -101,24 +105,43 @@ RankedPoolVotes AS (
         voting_procedure vp
 ),
 PoolVotes AS (
-	SELECT
-		rpv.gov_action_proposal_id,
-		ps.epoch_no,
-		COUNT(DISTINCT CASE WHEN vote = 'Yes' THEN rpv.pool_voter ELSE 0 END) AS total_unique_votes,
-		COUNT(DISTINCT CASE WHEN vote = 'No' THEN rpv.pool_voter ELSE 0 END) AS total_unique_votes,
-		COUNT(DISTINCT CASE WHEN vote = 'Abstain' THEN rpv.pool_voter ELSE 0 END) AS total_unique_votes,
-		SUM(CASE WHEN rpv.vote = 'Yes' THEN ps.voting_power ELSE 0 END) AS poolYesVotes,
-		SUM(CASE WHEN rpv.vote = 'No' THEN ps.voting_power ELSE 0 END) AS poolNoVotes,
-		SUM(CASE WHEN rpv.vote = 'Abstain' THEN ps.voting_power ELSE 0 END) AS poolAbstainVotes
-	FROM
-		RankedPoolVotes rpv
-	JOIN
-		pool_stat ps
-	ON rpv.pool_voter = ps.pool_hash_id
-	WHERE
-		rpv.rn = 1 AND ps.epoch_no = (SELECT MAX(no) FROM epoch)
-	GROUP BY
-		rpv.gov_action_proposal_id, ps.epoch_no
+    SELECT
+        rpv.gov_action_proposal_id,
+        ps.epoch_no,
+        COUNT(DISTINCT CASE WHEN vote = 'Yes' THEN rpv.pool_voter ELSE 0 END) AS total_unique_votes,
+        COUNT(DISTINCT CASE WHEN vote = 'No' THEN rpv.pool_voter ELSE 0 END) AS total_unique_votes,
+        COUNT(DISTINCT CASE WHEN vote = 'Abstain' THEN rpv.pool_voter ELSE 0 END) AS total_unique_votes,
+        SUM(CASE WHEN rpv.vote = 'Yes' THEN ps.voting_power ELSE 0 END) AS poolYesVotes,
+        SUM(CASE WHEN rpv.vote = 'No' THEN ps.voting_power ELSE 0 END) AS poolNoVotes,
+        SUM(CASE WHEN rpv.vote = 'Abstain' THEN ps.voting_power ELSE 0 END) AS poolAbstainVotes
+    FROM 
+        RankedPoolVotes rpv
+    JOIN 
+        pool_stat ps
+        ON rpv.pool_voter = ps.pool_hash_id
+    WHERE
+        rpv.rn = 1 AND ps.epoch_no = (SELECT MAX(no) FROM epoch)
+    GROUP BY
+        rpv.gov_action_proposal_id, ps.epoch_no
+),
+RankedDRepVotes AS (
+    SELECT DISTINCT ON (vp.drep_voter, vp.gov_action_proposal_id)
+        *
+    FROM 
+        voting_procedure vp
+    ORDER BY 
+        vp.drep_voter,
+        vp.gov_action_proposal_id,
+        vp.tx_id DESC
+),
+RankedDRepRegistration AS (
+    SELECT DISTINCT ON (dr.drep_hash_id)
+        *
+    FROM 
+        drep_registration dr
+    ORDER BY 
+        dr.drep_hash_id,
+        dr.tx_id DESC
 ),
 CommitteeVotes AS (
     SELECT
@@ -176,7 +199,8 @@ SELECT
 
             WHEN gov_action_proposal.type::text = 'NewConstitution' THEN
             json_build_object(
-                'anchor', gov_action_proposal.description->'contents'->1->'anchor'
+                'anchor', gov_action_proposal.description->'contents'->1->'anchor',
+                'script', gov_action_proposal.description->'contents'->1->'script'
             )
             WHEN gov_action_proposal.type::text = 'NewCommittee' THEN
             (
@@ -185,7 +209,13 @@ SELECT
                         'tag', pd.tag,
                         'members', em.enriched_members,
                         'membersToBeRemoved', mtr.members_to_be_removed,
-                        'threshold', pd.threshold::float
+                        'threshold', 
+                            CASE 
+                                WHEN (pd.threshold->>'numerator') IS NOT NULL 
+                                AND (pd.threshold->>'denominator') IS NOT NULL 
+                                THEN (pd.threshold->>'numerator')::float / (pd.threshold->>'denominator')::float
+                                ELSE NULL 
+                            END
                     )
                 FROM
                     ParsedDescription pd
@@ -225,19 +255,19 @@ SELECT
     off_chain_vote_gov_action_data.abstract,
     off_chain_vote_gov_action_data.motivation,
     off_chain_vote_gov_action_data.rationale,
-    COALESCE(SUM(ldd_drep.amount) FILTER (WHERE voting_procedure.vote::text = 'Yes'), 0) yes_votes,
-    COALESCE(SUM(ldd_drep.amount) FILTER (WHERE voting_procedure.vote::text = 'No'), 0) + (
-        CASE WHEN gov_action_proposal.type = 'NoConfidence' OR gov_action_proposal.type = 'HardForkInitiation' THEN
+    COALESCE(SUM(ldd_drep.amount) FILTER (WHERE rdv.vote::text = 'Yes'), 0) + (
+        CASE WHEN gov_action_proposal.type = 'NoConfidence' THEN
+            drep_voting_power.no_confidence
+        ELSE
+            0
+        END) yes_votes,
+    COALESCE(SUM(ldd_drep.amount) FILTER (WHERE rdv.vote::text = 'No'), 0) + (
+        CASE WHEN gov_action_proposal.type = 'NoConfidence' THEN
             0
         ELSE
             drep_voting_power.no_confidence
         END) no_votes,
-    COALESCE(SUM(ldd_drep.amount) FILTER (WHERE voting_procedure.vote::text = 'Abstain'), 0) + (
-        CASE WHEN gov_action_proposal.type = 'NoConfidence' OR gov_action_proposal.type = 'HardForkInitiation' THEN
-            0
-        ELSE
-            drep_voting_power.abstain
-        END) abstain_votes,
+    COALESCE(SUM(ldd_drep.amount) FILTER (WHERE rdv.vote::text = 'Abstain'), 0) abstain_votes,
 	COALESCE(ps.poolYesVotes, 0) pool_yes_votes,
 	COALESCE(ps.poolNoVotes, 0) pool_no_votes,
 	COALESCE(ps.poolAbstainVotes, 0) pool_abstain_votes,
@@ -246,10 +276,12 @@ SELECT
     COALESCE(cv.ccAbstainVotes, 0) cc_abstain_votes,
     prev_gov_action.index as prev_gov_action_index,
     encode(prev_gov_action_tx.hash, 'hex') as prev_gov_action_tx_hash,
-    gov_action_proposal.ratified_epoch,
-    gov_action_proposal.enacted_epoch,
-    gov_action_proposal.dropped_epoch,
-    gov_action_proposal.expired_epoch
+    JSON_BUILD_OBJECT(
+        'ratified_epoch', gov_action_proposal.ratified_epoch,
+        'enacted_epoch', gov_action_proposal.enacted_epoch,
+        'dropped_epoch', gov_action_proposal.dropped_epoch,
+        'expired_epoch', gov_action_proposal.expired_epoch
+    ) AS status
 FROM
     gov_action_proposal
     CROSS JOIN LatestEpoch AS latest_epoch
@@ -264,8 +296,9 @@ FROM
     LEFT JOIN cost_model AS cost_model ON proposal_params.cost_model_id = cost_model.id
 	LEFT JOIN PoolVotes ps ON gov_action_proposal.id = ps.gov_action_proposal_id
     LEFT JOIN CommitteeVotes cv ON gov_action_proposal.id = cv.gov_action_proposal_id
-	LEFT JOIN voting_procedure ON voting_procedure.gov_action_proposal_id = gov_action_proposal.id
-	LEFT JOIN LatestDrepDistr ldd_drep ON ldd_drep.hash_id = voting_procedure.drep_voter
+    LEFT JOIN RankedDRepVotes rdv ON rdv.gov_action_proposal_id = gov_action_proposal.id
+    LEFT JOIN RankedDRepRegistration rdr ON rdr.drep_hash_id = rdv.drep_voter AND COALESCE(rdr.deposit, 0) >= 0
+	LEFT JOIN LatestDrepDistr ldd_drep ON ldd_drep.hash_id = rdr.drep_hash_id
         AND ldd_drep.epoch_no = latest_epoch.no
     LEFT JOIN gov_action_proposal AS prev_gov_action ON gov_action_proposal.prev_gov_action_proposal = prev_gov_action.id
     LEFT JOIN tx AS prev_gov_action_tx ON prev_gov_action.tx_id = prev_gov_action_tx.id
@@ -294,5 +327,5 @@ GROUP BY
     off_chain_vote_gov_action_data.title,
     off_chain_vote_gov_action_data.abstract,
     off_chain_vote_gov_action_data.motivation,
-    off_chain_vote_gov_action_data.rationale
+    off_chain_vote_gov_action_data.rationale;
 `;

@@ -1,72 +1,50 @@
 import { Box, InputBase } from "@mui/material";
-import { Dispatch, SetStateAction } from "react";
+import { useEffect, useState } from "react";
 import { IconSearch } from "@intersect.mbo/intersectmbo.org-icons-set";
 import { theme } from "../../theme";
 import FiltersComponent from "./FiltersComponent";
 import SortComponent from "./SortComponent";
 import { useScreenDimension } from "../../hooks/useDimensions";
+import { useSearchParams } from "react-router-dom";
 
-interface SearchFiltersSortBarProps {
-  searchText: string;
-  selectedFilters: string[];
-  setSearchText: Dispatch<SetStateAction<string>>;
-  setSelectedFilters: Dispatch<SetStateAction<string[]>>;
-  filterOptions: {
-    value: string;
-    label: string;
-  }[];
-  statusOptions: {
-    value: string;
-    label: string;
-  }[];
-  sortOptions: {
-    value: string;
-    label: string;
-  }[];
-  selectedSorting: string;
-  setSelectedSorting: Dispatch<SetStateAction<string>>;
-  sortOpen: boolean;
-  setSortOpen: Dispatch<SetStateAction<boolean>>;
-  closeFilters: () => void;
-  filtersOpen: boolean;
-  setFiltersOpen: Dispatch<SetStateAction<boolean>>;
-  closeSorts: () => void;
-}
-
-export default function SearchFiltersSortBar({
-  ...props
-}: SearchFiltersSortBarProps) {
-  const {
-    searchText,
-    setSearchText,
-    selectedFilters,
-    setSelectedFilters,
-    filterOptions,
-    statusOptions,
-    sortOptions,
-    selectedSorting,
-    setSelectedSorting,
-    sortOpen,
-    setSortOpen,
-    closeFilters,
-    filtersOpen,
-    setFiltersOpen,
-    closeSorts,
-  } = props;
-
+export default function SearchFiltersSortBar() {
   const {
     palette: { neutralGray },
   } = theme;
 
-  const {isMobile} = useScreenDimension();
+  const { isMobile } = useScreenDimension();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const newParams = new URLSearchParams(searchParams);
+      if (searchTerm) {
+        newParams.set("q", searchTerm);
+      } else {
+        newParams.delete("q");
+      }
+      setSearchParams(newParams);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, setSearchParams, searchParams]);
 
   return (
-    <Box display="flex" justifyContent="space-between" marginBottom={4} gap={isMobile ? 1 : 1.5}>
+    <Box
+      display="flex"
+      flexDirection={isMobile ? "column" : "row"}
+      alignItems={isMobile ? "stretch" : "center"}
+      justifyContent="space-between"
+      gap={isMobile ? 1 : 1.5}
+    >
       <InputBase
+        id="search-input"
         inputProps={{ "data-testid": "search-input" }}
-        onChange={(e) => setSearchText(e.target.value)}
+        onChange={(e) => setSearchTerm(e.target.value)}
         placeholder="Search Action..."
-        value={searchText}
+        value={searchTerm}
         startAdornment={
           <IconSearch width={18} height={18} fill={neutralGray} />
         }
@@ -75,27 +53,24 @@ export default function SearchFiltersSortBar({
           border: 1,
           borderColor: "secondaryBlue",
           borderRadius: 50,
-          fontSize: 14,
+          fontSize: 11,
           fontWeight: 500,
           height: 48,
           padding: "16px 24px",
+          "& .MuiInputBase-input": {
+            paddingLeft: "4px",
+          },
         }}
       />
-      <FiltersComponent
-        options={filterOptions}
-        statusOptions={statusOptions}
-        selectedFilters={selectedFilters}
-        setSelectedFilters={setSelectedFilters}
-        filtersOpen={filtersOpen}
-        setFiltersOpen={setFiltersOpen}
-      />
-      <SortComponent
-        selectedSorting={selectedSorting}
-        setSelectedSorting={setSelectedSorting}
-        sortOptions={sortOptions}
-        sortOpen={sortOpen}
-        setSortOpen={setSortOpen}
-      />
+      <Box
+        display="flex"
+        flexDirection="row"
+        justifyContent="flex-start"
+        gap={isMobile ? 1 : 1.5}
+      >
+        <FiltersComponent />
+        <SortComponent />
+      </Box>
     </Box>
   );
 }

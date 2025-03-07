@@ -7,6 +7,7 @@ import postcss from "rollup-plugin-postcss";
 import peerDepsExternal from "rollup-plugin-peer-deps-external";
 import dts from "rollup-plugin-dts";
 import babel from "@rollup/plugin-babel";
+import image from '@rollup/plugin-image';
 
 const packageJson = require("./package.json");
 
@@ -28,17 +29,28 @@ export default [
     plugins: [
       peerDepsExternal(),
       resolve({
-        extensions: ['.js', '.jsx', '.ts', '.tsx']
+        extensions: [".js", ".jsx", ".ts", ".tsx"],
+        browser: true,
       }),
+      image(),
       babel({
-        babelHelpers: 'bundled',
-        presets: ['@babel/preset-react', '@babel/preset-typescript'],
-        extensions: ['.js', '.jsx', '.ts', '.tsx']
+        babelHelpers: "bundled",
+        include: [
+          "src/**",
+          "node_modules/@intersect.mbo/intersectmbo.org-icons-set/**",
+        ],
+        presets: [
+          "@babel/preset-env",
+          "@babel/preset-typescript",
+          ["@babel/preset-react", { runtime: "automatic" }],
+        ],
+        extensions: [".js", ".jsx", ".ts", ".tsx"],
       }),
       commonjs({
-        include: 'node_modules/**',
+        include: "node_modules/**",
+        exclude: ["node_modules/@babel/runtime/**"],
         transformMixedEsModules: true,
-        strictRequires: true
+        strictRequires: true,
       }),
       typescript({
         tsconfig: "./tsconfig.json",
@@ -47,19 +59,11 @@ export default [
       postcss({ extract: true, inject: true, use: "sass" }),
       json(),
     ],
-    external: [
-      "react", 
-      "react-dom", 
-      "@mui/material",
-      "@emotion/react",
-      "@emotion/styled",
-      "react-router-dom",
-    ],
   },
   {
     input: "src/index.ts",
     output: [{ file: packageJson.types }],
     plugins: [dts.default()],
-    external: [/\.scss$/],
-  },
+    external: [/\.scss$/, /\.png$/],
+  }
 ];

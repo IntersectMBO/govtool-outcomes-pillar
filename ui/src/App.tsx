@@ -2,9 +2,20 @@ import { ThemeProvider } from "@mui/material";
 import { SnackbarProvider } from "./contexts/Snackbar";
 import "./index.scss";
 import { theme } from "./theme";
-import OutcomesPage from "./Pages/Outcomes";
+import { QueryClient, QueryClientProvider } from "react-query";
+import { setAxiosBaseURL } from "./services/axiosInstance";
+import GlobalWrapper from "./Components/GlobalWrapper";
+import { AppContextProvider } from "./contexts/AppContext";
 
-function App() {
+export type AppProps = {
+  apiUrl?: string;
+  ipfsGateway?: string;
+};
+
+const queryClient = new QueryClient();
+
+function App({ apiUrl, ipfsGateway }: AppProps) {
+  setAxiosBaseURL(apiUrl);
 
   return (
     <div
@@ -14,11 +25,15 @@ function App() {
         height: "100%",
       }}
     >
-      <ThemeProvider theme={theme}>
-        <SnackbarProvider>
-          <OutcomesPage />
-        </SnackbarProvider>
-      </ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider theme={theme}>
+          <AppContextProvider ipfsGateway={ipfsGateway}>
+            <SnackbarProvider>
+              <GlobalWrapper />
+            </SnackbarProvider>
+          </AppContextProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
     </div>
   );
 }

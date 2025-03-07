@@ -1,0 +1,74 @@
+name: Sync tags and releases to GitLab
+
+on:
+  release:
+    types: [published, edited, deleted]
+  push:
+    tags:
+      - "*"
+  delete:
+  workflow_run:
+    workflows: ["Release"]
+    types:
+      - completed
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+
+      - name: Add GitLab remote
+        run: |
+          git remote add gitlab "https://oauth2:${GITLAB_TOKEN}@gitlab.lidonation.com/voltaire/govtool-outcomes-pillar.git"
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+
+      # Sync tags including deletions
+      - name: Sync tags
+        run: |
+          if [[ "${{ github.event_name }}" == "delete" && "${{ github.event.ref_type }}" == "tag" ]]; then
+            # Delete tag from GitLab
+            git push gitlab :refs/tags/${{ github.event.ref }}
+          else
+            # Push all tags
+            git fetch origin --tags
+            git push gitlab --tags --force
+          fi
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+
+      # Sync releases using GitLab API
+      - name: Sync releases
+        if: github.event_name == 'release'
+        run: |
+          if [[ "${{ github.event.action }}" == "published" || "${{ github.event.action }}" == "edited" ]]; then
+            # Get release info from GitHub
+            RELEASE_TAG="${{ github.event.release.tag_name }}"
+            RELEASE_NAME="${{ github.event.release.name }}"
+            RELEASE_DESC="${{ github.event.release.body }}"
+            
+            # Create/Update release in GitLab using API
+            curl --request POST "https://gitlab.lidonation.com/api/v4/projects/${GITLAB_PROJECT_ID}/releases" \
+              --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
+              --header "Content-Type: application/json" \
+              --data "{
+                \"tag_name\": \"${RELEASE_TAG}\",
+                \"name\": \"${RELEASE_NAME}\",
+                \"description\": \"${RELEASE_DESC}\"
+              }"
+          elif [[ "${{ github.event.action }}" == "deleted" ]]; then
+            # Delete release in GitLab
+            curl --request DELETE "https://gitlab.lidonation.com/api/v4/projects/${GITLAB_PROJECT_ID}/releases/${{ github.event.release.tag_name }}" \
+              --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}"
+          fi
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+          GITLAB_PROJECT_ID: ${{ secrets.GITLAB_PROJECT_ID }}

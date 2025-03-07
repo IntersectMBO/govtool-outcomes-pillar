@@ -56,7 +56,7 @@ COPY --chown=node:node --from=build /usr/src/app/dist ./
 
 COPY --chown=node:node package.json ./
 
-EXPOSE 8000
+EXPOSE 3000
 
 ENV HOSTNAME "0.0.0.0"
 

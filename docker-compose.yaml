@@ -1,5 +1,6 @@
 services:
   outcomespillar.backend:
+    tty: true
     image: outcomes-pillar-backend:latest
     build:
       context: ./backend/
@@ -11,7 +12,7 @@ services:
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     volumes:
-      - './backend:/usr/src/app'
+      - './backend:/usr/src/app:delegated'
     networks:
       - govtool
 
@@ -29,7 +30,7 @@ services:
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     volumes:
-      - './ui:/usr/src/app:cached'
+      - './ui:/usr/src/app:delegated'
     networks:
       - govtool
 

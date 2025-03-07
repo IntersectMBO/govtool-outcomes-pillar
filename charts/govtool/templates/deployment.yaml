@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ $.Chart.Name }}"
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: "{{ $.Chart.Name }}"
+    service: "{{ $.Chart.Name }}"
+spec:
+  selector:
+    matchLabels:
+      app: "{{ $.Chart.Name }}"
+      service: "{{ $.Chart.Name }}"
+  replicas: {{ .Values.image.govtool.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: "{{ $.Chart.Name }}"
+        service: "{{ $.Chart.Name }}"
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.image.govtool.pullSecret }}
+      containers:
+      - name: app
+        image: "{{ .Values.image.govtool.repository }}:{{ .Values.image.govtool.tag }}"
+        imagePullPolicy: {{ .Values.image.govtool.pullPolicy }}
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 1
+          periodSeconds: 10
+        resources:
+          limits:
+            memory: 8192Mi
+            cpu: 1
+          requests:
+            cpu: 50m
+            memory: 256Mi
+        # envFrom:
+        #   - secretRef:
+        #       name: "{{ $.Chart.Name }}-secrets"
+        ports:
+          - name: node
+            containerPort: 80
+            protocol: TCP
+

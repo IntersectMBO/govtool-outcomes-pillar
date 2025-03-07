@@ -1,16 +1,18 @@
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import CopyIcon from "../../Assets/Icons/CopyIcon";
 import { useSnackbar } from "../../contexts/Snackbar";
+import { Typography } from "../Atoms/Typography";
 interface GovernanceActionCardIdElementProps {
   title: string;
   id: string;
+  dataTestId: string;
 }
 
 export default function GovernanceActionCardIdElement({
   title,
   id,
+  dataTestId,
 }: GovernanceActionCardIdElementProps) {
-
   const { addSuccessAlert } = useSnackbar();
 
   const handleCopyClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -19,8 +21,15 @@ export default function GovernanceActionCardIdElement({
     addSuccessAlert("Copied to clipboard!");
   };
   return (
-    <Box>
-      <Typography sx={{ fontSize: "12px", color: "neutralGray", marginBottom: 1 }}>
+    <Box data-testid={dataTestId}>
+      <Typography
+        sx={{
+          fontSize: 12,
+          color: "textGray",
+          marginBottom: "4px",
+          fontWeight: 500,
+        }}
+      >
         {title}
       </Typography>
       <Box
@@ -31,35 +40,39 @@ export default function GovernanceActionCardIdElement({
           gap: 1,
         }}
       >
-        <Box
+        <Typography
           sx={{
-            maxWidth: "100%",
+            maxWidth: "85%",
             overflow: "hidden",
             textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            fontSize: 14,
+            color: "primaryBlue",
+            lineHeight: "20px",
+            fontWeight: 400,
           }}
         >
-          <Typography sx={{ fontSize: "14px", color: "primaryBlue"}}>
-            {id}
-          </Typography>
-        </Box>
+          {id}
+        </Typography>
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
           }}
         >
-            <Box
-              sx={{
-                justifyContent: "center",
-                alignItems: "center",
-                cursor: "pointer",
-                display: "flex",
-              }}
-              onClick={handleCopyClick}
-              aria-label="Copy to clipboard"
-            >
-              <CopyIcon width={24} height={24} />
-            </Box>
+          <Box
+            sx={{
+              justifyContent: "center",
+              alignItems: "center",
+              cursor: "pointer",
+              display: "flex",
+            }}
+            onClick={handleCopyClick}
+            aria-label="Copy to clipboard"
+            data-testid="copy-button"
+          >
+            <CopyIcon width={24} height={24} />
+          </Box>
         </Box>
       </Box>
     </Box>

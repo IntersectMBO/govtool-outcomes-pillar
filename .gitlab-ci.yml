@@ -10,26 +10,25 @@ variables:
     value: "true"
     description: "Build and deploy outcomes.1694.io"
 
-
 stages:
-- .pre
-- test
-- build
-- preview
-- sancho
-- mainnet
+  - .pre
+  - test
+  - build
+  - preview
+  - sancho
+  - mainnet
 
 default:
   services:
-  - name: docker:dind
-    alias: docker
-    command: [ "--tls=false" ]
+    - name: docker:dind
+      alias: docker
+      command: ["--tls=false"]
   before_script:
-  - |
-    export APP_VERSION=$(awk '/version/{gsub(/("|",)/,"",$2);print $2};' backend/package.json)
-    export APP_VERSION_AND_BUILD="${APP_VERSION}-${CI_PIPELINE_ID}"
-    export CI_APPLICATION_REPOSITORY=$CI_REGISTRY_IMAGE
-    export CI_APPLICATION_TAG=$APP_VERSION_AND_BUILD
+    - |
+      export APP_VERSION=$(awk '/version/{gsub(/("|",)/,"",$2);print $2};' backend/package.json)
+      export APP_VERSION_AND_BUILD="${APP_VERSION}-${CI_PIPELINE_ID}"
+      export CI_APPLICATION_REPOSITORY=$CI_REGISTRY_IMAGE
+      export CI_APPLICATION_TAG=$APP_VERSION_AND_BUILD
 
 .setup: &setup
   - apk add --no-cache ca-certificates curl bash openssl git
@@ -37,26 +36,30 @@ default:
   - curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 && chmod 700 get_helm.sh && DESIRED_VERSION=v$HELM_VERSION ./get_helm.sh
   - kubectl config get-contexts
 
-
 yarn:
   image: node:20.18.0-alpine
   stage: .pre
   services: []
   retry: 1
   rules:
-  - if: '$DEPLOY_WEBSITE == "true"'
+    - if: '$DEPLOY_WEBSITE == "true"'
   before_script:
-  - apk add --update curl && rm -rf /var/cache/apk/*
+    - apk add --update curl && rm -rf /var/cache/apk/*
   script: |-
     set -vx
     export PATH=$PATH:/usr/local/bin
     export NODE_OPTIONS=--max-old-space-size=8192
+
     cd ./backend
+    yarn install --ignore-engines
+    yarn run build
+    cd ../ui
     yarn install --ignore-engines
     yarn run build
   artifacts:
     paths:
-    - ./backend/dist
+      - ./backend/dist
+      - ./ui/dist
     expire_in: 1 days
 
 test_outcomes:
@@ -65,13 +68,12 @@ test_outcomes:
   retry: 1
   stage: test
   script:
-  - cd backend
-  - yarn install --ignore-engines
-  - NODE_ENV=test yarn test
+    - cd backend
+    - yarn install --ignore-engines
+    - NODE_ENV=test yarn test
   rules:
-  - if: '$DEPLOY_WEBSITE == "true"'
-  allow_failure: true 
-
+    - if: '$DEPLOY_WEBSITE == "true"'
+  allow_failure: true
 
 build_backend:
   stage: build
@@ -83,12 +85,40 @@ build_backend:
             
       docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
       echo "Building Dockerfile with tags $CI_APPLICATION_REPOSITORY/outcomes.1694.io:$CI_APPLICATION_TAG and $CI_APPLICATION_REPOSITORY/outcomes.1694.io:latest ..."
-      
+
+
       docker build --network host -f backend/Dockerfile \
         -t "$CI_APPLICATION_REPOSITORY/outcomes.1694.io:$CI_APPLICATION_TAG" \
         -t "$CI_APPLICATION_REPOSITORY/outcomes.1694.io:latest" ./backend
+        
       docker push "$CI_APPLICATION_REPOSITORY/outcomes.1694.io:$CI_APPLICATION_TAG"
       docker push "$CI_APPLICATION_REPOSITORY/outcomes.1694.io:latest"
+  rules:
+    - if: '$DEPLOY_WEBSITE == "true"'
+
+build_govtool:
+  stage: build
+  image: docker:24.0.2-git
+  retry: 1
+  script:
+    - |
+      set -xev
+            
+      docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+      
+      if [[ "$CI_COMMIT_REF_NAME" == "main" || "$CI_COMMIT_REF_NAME" == "beta" ]]; then
+        export CARDANO_NETWORK="mainnet"
+      fi
+
+      echo "Building Dockerfile with CARDANO_NETWORK=${CARDANO_NETWORK}"
+
+      docker build --network host -f Dockerfile.govtool \
+        --build-arg CARDANO_NETWORK="${CARDANO_NETWORK}" \
+        -t "$CI_APPLICATION_REPOSITORY/govtool:$CI_APPLICATION_TAG" \
+        -t "$CI_APPLICATION_REPOSITORY/govtool:latest" .
+        
+      docker push "$CI_APPLICATION_REPOSITORY/govtool:$CI_APPLICATION_TAG"
+      docker push "$CI_APPLICATION_REPOSITORY/govtool:latest"
   rules:
     - if: '$DEPLOY_WEBSITE == "true"'
 
@@ -101,14 +131,15 @@ build_backend:
     - auto-deploy create_secret
     - |
       # Set secrets
-      cp "$ENV_FILE" ./charts/app_env 
-      cat ./charts/app_env
+      cp "$ENV_FILE" ./charts/backend/app_env 
+
+      cat ./charts/backend/app_env
       echo "$INGRESS_HOST" "$NAMESPACE"
 
       DEPLOYMENT_NAME="outcomes-$CI_ENVIRONMENT_SLUG"
 
       echo "Install govtool-outcomes-backend"
-      helm upgrade $DEPLOYMENT_NAME ./charts \
+      helm upgrade $DEPLOYMENT_NAME ./charts/backend \
           --install \
           --timeout 300s \
           --wait \
@@ -118,9 +149,34 @@ build_backend:
           -f ./charts/values.yaml \
           --set namespace=$NAMESPACE \
           --set ingress.hosts[0]=$INGRESS_HOST \
-        --set cardano_node[0].tcp_host=$NODE_TCP_HOST \
-        --set cardano_node[0].tcp_port=$NODE_TCP_PORT \
-          --create-namespace
+          --set image.backend.tag=$CI_APPLICATION_TAG \
+          --set image.backend.replicaCount=$REPLICACOUNT \
+          --set cardano_node[0].tcp_host=$NODE_TCP_HOST \
+          --set cardano_node[0].tcp_port=$NODE_TCP_PORT
+  rules:
+    - if: '$DEPLOY_WEBSITE == "true"'
+
+.outcomes_govtool_deployment: &outcomes_govtool_deployment
+  image: "${CI_TEMPLATE_REGISTRY_HOST}/gitlab-org/cluster-integration/auto-deploy-image:${AUTO_DEPLOY_IMAGE_VERSION}"
+  script:
+    - *setup
+    - auto-deploy check_kube_domain
+    - auto-deploy download_chart
+    - auto-deploy create_secret
+    - |
+
+      DEPLOYMENT_NAME="govtool-frontend-$CI_ENVIRONMENT_SLUG"
+      helm upgrade $DEPLOYMENT_NAME ./charts/govtool \
+          --install \
+          --timeout 300s \
+          --wait \
+          --atomic \
+          --namespace="$NAMESPACE" \
+          --create-namespace \
+          -f ./charts/values.yaml \
+          --set namespace=$NAMESPACE \
+          --set image.govtool.tag=$CI_APPLICATION_TAG \
+          --set ingress.hosts[0]=$INGRESS_HOST
   rules:
     - if: '$DEPLOY_WEBSITE == "true"'
 
@@ -132,12 +188,34 @@ outcomes_preview_backend:
     url: https://$CI_PROJECT_PATH_SLUG.$AUTO_DEVOPS_DOMAIN
   when: manual
 
+outcomes_preview_govtool:
+  <<: *outcomes_govtool_deployment
+  stage: preview
+  rules:
+    - if: $CI_COMMIT_BRANCH != "beta" || $CI_COMMIT_BRANCH != "main"
+  environment:
+    name: preview
+    url: https://$CI_PROJECT_PATH_SLUG.$AUTO_DEVOPS_DOMAIN
+  when: manual
+
 outcomes_mainnet_backend:
   <<: *outcomes_backend_deployment
-  stage: mainnet
+  stage: mainnet 
   rules:
-    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "beta" || $CI_COMMIT_BRANCH == "main"
   environment:
     name: mainnet
     url: https://$CI_PROJECT_PATH_SLUG.$AUTO_DEVOPS_DOMAIN
   when: manual
+
+outcomes_mainnet_govtool:
+  <<: *outcomes_govtool_deployment
+  stage: mainnet
+  rules:
+    - if: $CI_COMMIT_BRANCH == "beta" || $CI_COMMIT_BRANCH == "main"
+  environment:
+    name: mainnet
+    url: https://$CI_PROJECT_PATH_SLUG.$AUTO_DEVOPS_DOMAIN
+  when: manual
+
+
