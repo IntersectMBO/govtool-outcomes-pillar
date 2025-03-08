@@ -14,7 +14,6 @@ import { GOVERNANCE_ACTION_FILTERS } from "../../consts/filters";
 import { GovernanceActionCardHeader } from "../ActionCard/GovernanceActionCardHeader";
 import { NavLink } from "react-router-dom";
 import { Button } from "../Atoms/Button";
-import { useEffect } from "react";
 
 interface GovernanceActionCardProps {
   action: GovernanceAction;
@@ -22,7 +21,7 @@ interface GovernanceActionCardProps {
 
 function GovernanceActionCard({ action }: GovernanceActionCardProps) {
   const { metadata, metadataValid, isMetadataLoading } = useMetadata(action);
-  
+
   const idCIP129 = encodeCIP129Identifier({
     txID: action?.tx_hash,
     index: action?.index.toString(16).padStart(2, "0"),
