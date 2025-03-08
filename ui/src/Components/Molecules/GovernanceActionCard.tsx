@@ -22,11 +22,7 @@ interface GovernanceActionCardProps {
 
 function GovernanceActionCard({ action }: GovernanceActionCardProps) {
   const { metadata, metadataValid, isMetadataLoading } = useMetadata(action);
-
-  useEffect(()=>{
-    console.log('loading', isMetadataLoading)
-  })
-
+  
   const idCIP129 = encodeCIP129Identifier({
     txID: action?.tx_hash,
     index: action?.index.toString(16).padStart(2, "0"),
