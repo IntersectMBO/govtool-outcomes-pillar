@@ -5,12 +5,14 @@ interface GovernanceActionCardElementProps {
   title: string;
   description: string;
   dataTestId: string;
+  isMetadataLoading: boolean;
 }
 
 export default function GovernanceActionCardElement({
   title,
   description,
   dataTestId,
+  isMetadataLoading,
 }: GovernanceActionCardElementProps) {
   return (
     <Box data-testid={dataTestId}>
@@ -38,9 +40,15 @@ export default function GovernanceActionCardElement({
           WebkitLineClamp: 2,
           maxWidth: "auto",
           fontWeight: 400,
+          transition: "filter 0.5s ease-in-out, opacity 0.5s ease-in-out",
+          filter: isMetadataLoading ? "blur(5px)" : "none",
+          opacity: isMetadataLoading ? 0.6 : 1,
+          color: isMetadataLoading ? "gray" : "inherit",
         }}
       >
-        {description}
+        {isMetadataLoading
+          ? "Loading description for this section..."
+          : description}
       </Typography>
     </Box>
   );

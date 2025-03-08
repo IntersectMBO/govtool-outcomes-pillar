@@ -10,12 +10,14 @@ type GovernanceActionCardHeaderProps = {
   title?: string;
   isDataMissing: MetadataValidationStatus | null;
   dataTestId: string;
+  isMetadataLoading: boolean;
 };
 
 export const GovernanceActionCardHeader = ({
   title,
   isDataMissing,
   dataTestId,
+  isMetadataLoading,
 }: GovernanceActionCardHeaderProps) => {
   return (
     <Box
@@ -37,14 +39,21 @@ export const GovernanceActionCardHeader = ({
           WebkitBoxOrient: "vertical",
           WebkitLineClamp: 2,
           wordBreak: "break-word",
-          ...(isDataMissing && { color: "errorRed" }),
+          transition: "filter 0.5s ease-in-out, opacity 0.5s ease-in-out",
+          filter: isMetadataLoading ? "blur(5px)" : "none",
+          opacity: isMetadataLoading ? 0.6 : 1,
+          color: isMetadataLoading
+            ? "gray"
+            : isDataMissing
+            ? "errorRed"
+            : "inherit",
         }}
       >
-        {(isDataMissing &&
-          getMetadataDataMissingStatusTranslation(
-            isDataMissing as MetadataValidationStatus
-          )) ||
-          title}
+        {isDataMissing
+          ? getMetadataDataMissingStatusTranslation(
+              isDataMissing as MetadataValidationStatus
+            )
+          : title || "Loading title..."}
       </Typography>
       {isDataMissing && typeof isDataMissing === "string" && (
         <Tooltip

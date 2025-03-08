@@ -14,13 +14,18 @@ import { GOVERNANCE_ACTION_FILTERS } from "../../consts/filters";
 import { GovernanceActionCardHeader } from "../ActionCard/GovernanceActionCardHeader";
 import { NavLink } from "react-router-dom";
 import { Button } from "../Atoms/Button";
+import { useEffect } from "react";
 
 interface GovernanceActionCardProps {
   action: GovernanceAction;
 }
 
 function GovernanceActionCard({ action }: GovernanceActionCardProps) {
-  const { metadata, metadataValid } = useMetadata(action);
+  const { metadata, metadataValid, isMetadataLoading } = useMetadata(action);
+
+  useEffect(()=>{
+    console.log('loading', isMetadataLoading)
+  })
 
   const idCIP129 = encodeCIP129Identifier({
     txID: action?.tx_hash,
@@ -71,6 +76,7 @@ function GovernanceActionCard({ action }: GovernanceActionCardProps) {
           title={action.title || metadata?.data?.title}
           isDataMissing={metadata?.metadataStatus || null}
           dataTestId={`${idCIP129}-card-title`}
+          isMetadataLoading={isMetadataLoading}
         />
         <Box sx={{ marginTop: 2.5 }}>
           <GovActionDatesInfo action={action} />
@@ -83,6 +89,7 @@ function GovernanceActionCard({ action }: GovernanceActionCardProps) {
                 action.abstract || (metadata?.data?.abstract as string)
               }
               dataTestId={`${idCIP129}-abstract`}
+              isMetadataLoading={isMetadataLoading}
             />
           </Box>
         )}
@@ -96,6 +103,7 @@ function GovernanceActionCard({ action }: GovernanceActionCardProps) {
             title="Governance Action Type"
             description={typeInWords}
             dataTestId={`${idCIP129}-type`}
+            isMetadataLoading={isMetadataLoading}
           />
 
           <GovernanceActionStatus status={action?.status} actionId={idCIP129} />
