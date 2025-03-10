@@ -74,6 +74,7 @@ export type GovActionMetadata = {
     rationale?: string;
     references?: Reference[];
     title: string;
+    authors: [];
   };
 };
 
@@ -142,22 +143,22 @@ export type EpochParams = {
 export type NetworkMetrics = {
   /** Current epoch number */
   epoch_no: number;
-  
+
   /** Total stake controlled by active DReps (in lovelace) */
   total_stake_controlled_by_active_dreps: string;
-  
+
   /** Voting power for always abstain (in lovelace) */
   always_abstain_voting_power: string;
-  
+
   /** Voting power for always no confidence (in lovelace) */
   always_no_confidence_voting_power: string;
-  
+
   /** Number of active committee members */
   no_of_committee_members: number;
-  
+
   /** Committee quorum numerator */
   quorum_numerator: number;
-  
+
   /** Committee quorum denominator */
   quorum_denominator: number;
 };

@@ -11,8 +11,10 @@ export class MiscellaneousService {
     private cexplorerService: DataSource
   ) {}
 
-  async getNetworkMetrics() {
-    const res = await this.cexplorerService.manager.query(getNetworkMetrics);
+  async getNetworkMetrics(epoch: number | null) {
+    const res = await this.cexplorerService.manager.query(getNetworkMetrics, [
+      epoch,
+    ]);
     return res?.[0] || null;
   }
 

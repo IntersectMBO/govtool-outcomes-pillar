@@ -10,6 +10,7 @@ interface GovernanceActionElementProps {
   type: string;
   content: string;
   isCopyable?: boolean;
+  dataTestId?: string;
 }
 
 export default function GovernanceActionElement({
@@ -17,6 +18,7 @@ export default function GovernanceActionElement({
   type,
   content,
   isCopyable = false,
+  dataTestId,
 }: GovernanceActionElementProps) {
   const { addSuccessAlert } = useSnackbar();
   const { ipfsGateway } = useAppContext();
@@ -27,7 +29,7 @@ export default function GovernanceActionElement({
   };
 
   const contentTypographyStyles = {
-    fontSize: "1rem",
+    fontSize: 16,
     color: "primaryBlue",
     wordBreak: "break-word",
     overflow: "hidden",
@@ -80,6 +82,7 @@ export default function GovernanceActionElement({
 
   return (
     <Box
+      data-testid={dataTestId}
       sx={{ width: "100%", display: "flex", flexDirection: "column", gap: 0.5 }}
     >
       <Typography

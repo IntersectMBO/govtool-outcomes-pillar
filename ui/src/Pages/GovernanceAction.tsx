@@ -1,19 +1,13 @@
-import {
-  Box,
-  ButtonBase,
-  CircularProgress,
-  Grid,
-  Skeleton,
-  Typography,
-} from "@mui/material";
+import { Box, CircularProgress, Grid, Skeleton } from "@mui/material";
 import { Breadcrumbs } from "../Components/Molecules/Breadcrumbs";
 import { useGetGovernanceActionQuery } from "../hooks/useGetGovernanceActionQuery";
 import Header from "../Components/SingleAction/Header";
 import { useMetadata } from "../hooks/useMetadata";
-import { useSnackbar } from "../contexts/Snackbar";
 import ReasoningElement from "../Components/SingleAction/ReasoningElement";
 import References from "../Components/SingleAction/References";
 import ActionIdentity from "../Components/SingleAction/ActionIdentity";
+import { encodeCIP129Identifier } from "../lib/utils";
+import GovernanceVotingUI from "../Components/SingleAction/GovernanceVotingUI";
 
 type GovernanceActionProps = {
   id: string;
@@ -21,19 +15,8 @@ type GovernanceActionProps = {
 function GovernanceAction({ id }: GovernanceActionProps) {
   const { governanceAction, isGovernanceActionLoading } =
     useGetGovernanceActionQuery(id);
-  const { metadata, metadataValid, isMetadataLoading } = useMetadata(
-    governanceAction,
-    {
-      skipConditionCheck: true,
-    }
-  );
-  const { addSuccessAlert } = useSnackbar();
-
-  const onCopy = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation();
-    navigator.clipboard.writeText(window.location.href);
-    addSuccessAlert("Copied to clipboard!");
-  };
+  const { metadata, metadataValid, isMetadataLoading } =
+    useMetadata(governanceAction);
 
   const abstractText = governanceAction?.abstract || metadata?.data?.abstract;
   const motivationText =
@@ -43,8 +26,20 @@ function GovernanceAction({ id }: GovernanceActionProps) {
 
   const hasAnyContent = abstractText || motivationText || rationaleText;
 
+  const idCIP129 = encodeCIP129Identifier({
+    txID: governanceAction?.tx_hash,
+    index: governanceAction?.index.toString(16).padStart(2, "0"),
+    bech32Prefix: "gov_action",
+  });
+
   return (
-    <Box display="flex" flex={1} flexDirection="column" width="100%">
+    <Box
+      data-testid={`single-action-${idCIP129}-page`}
+      display="flex"
+      flex={1}
+      flexDirection="column"
+      width="100%"
+    >
       {isGovernanceActionLoading && (
         <Box
           sx={{
@@ -65,59 +60,19 @@ function GovernanceAction({ id }: GovernanceActionProps) {
             elementOnePath="/outcomes"
             elementTwo={governanceAction?.title || metadata?.data?.title}
             isMetadataLoading={isMetadataLoading}
+            isDataMissing={metadata?.metadataStatus || null}
           />
-          <Box
-            display="flex"
-            flexDirection="row"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            {isGovernanceActionLoading || isMetadataLoading ? (
-              <Skeleton variant="rounded" width="75%" height={32} />
-            ) : (
-              <Typography
-                fontWeight={500}
-                fontSize="1.75rem"
-                lineHeight="2.25rem"
-              >
-                {governanceAction?.title || metadata?.data?.title}
-              </Typography>
-            )}
-            <ButtonBase
-              onClick={onCopy}
-              sx={(theme) => ({
-                alignItems: "center",
-                bgcolor: "#F7F9FB",
-                borderRadius: 50,
-                boxShadow: theme.shadows[1],
-                cursor: "pointer",
-                display: "flex",
-                justifyContent: "center",
-                padding: 1.5,
-                transition: "all 0.3s",
-                "&:hover": {
-                  boxShadow: theme.shadows[3],
-                },
-              })}
-            >
-              <img
-                alt="Share icon."
-                height={24}
-                width={24}
-                src="/icons/Share.svg"
-              />
-            </ButtonBase>
-          </Box>
-          <Grid container spacing={3} sx={{ marginTop: 4 }}>
-            <Grid item xs={12} lg={8} sx={{ marginBottom: { xs: 3, lg: 0 } }}>
+          <Grid container spacing={3} marginTop={0.5}>
+            <Grid item xs={12} lg={7} sx={{ marginBottom: { xs: 3, lg: 0 } }}>
               <Box
+                data-testid={`single-action-${idCIP129}-description`}
                 sx={{
                   height: "100%",
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "space-between",
                   boxShadow: "0px 4px 15px 0px #DDE3F5",
-                  borderRadius: "1.25rem",
+                  borderRadius: "20px",
 
                   padding: 2,
                   backgroundColor: !metadataValid
@@ -131,17 +86,11 @@ function GovernanceAction({ id }: GovernanceActionProps) {
                 {governanceAction && (
                   <Box display="flex" flexDirection="column" gap="1.5rem">
                     <Header
-                      dateSubmitted={governanceAction?.time}
-                      epochSubmitted={governanceAction?.epoch_no}
-                      status={governanceAction?.status}
+                      isGovernanceActionLoading={isGovernanceActionLoading}
+                      isMetadataLoading={isMetadataLoading}
+                      governanceAction={governanceAction}
+                      metadata={metadata}
                     />
-                    {!metadataValid && (
-                      <Box>
-                        <Typography sx={{ fontWeight: 600, color: "errorRed" }}>
-                          Data not processable!
-                        </Typography>
-                      </Box>
-                    )}
                     <ActionIdentity governanceAction={governanceAction} />
                     {!hasAnyContent &&
                       (!governanceAction || isMetadataLoading) && (
@@ -189,20 +138,23 @@ function GovernanceAction({ id }: GovernanceActionProps) {
                 )}
               </Box>
             </Grid>
-            <Grid item xs={12} lg={4}>
+            <Grid item xs={12} lg={5} sx={{ position: "relative" }}>
               <Box
+                data-testid={`single-action-${idCIP129}-outcome-numbers`}
                 sx={{
-                  height: "100%",
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "space-between",
                   boxShadow: "0px 4px 15px 0px #DDE3F5",
-                  borderRadius: "1.25rem",
+                  borderRadius: "20px",
                   backgroundColor: "rgba(255, 255, 255, 0.3)",
                   padding: 2,
+                  position: "sticky",
+                  top: "96px",
+                  zIndex: 100,
                 }}
               >
-                <Typography>Voting Outcomes Tab</Typography>
+                <GovernanceVotingUI action={governanceAction} />
               </Box>
             </Grid>
           </Grid>

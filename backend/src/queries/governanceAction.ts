@@ -16,6 +16,15 @@ LatestEpoch AS (
         no DESC
     LIMIT 1
 ),
+EpochBlocks AS (
+    SELECT DISTINCT ON (epoch_no)
+        epoch_no,
+        time as block_time
+    FROM
+        block
+    ORDER BY
+        epoch_no, time DESC
+),
 DRepVotingPower AS (
     SELECT
         SUM(CASE WHEN drep_hash.view = 'drep_always_no_confidence' THEN amount ELSE 0 END) AS no_confidence,
@@ -108,9 +117,9 @@ PoolVotes AS (
     SELECT
         rpv.gov_action_proposal_id,
         ps.epoch_no,
-        COUNT(DISTINCT CASE WHEN vote = 'Yes' THEN rpv.pool_voter ELSE 0 END) AS total_unique_votes,
-        COUNT(DISTINCT CASE WHEN vote = 'No' THEN rpv.pool_voter ELSE 0 END) AS total_unique_votes,
-        COUNT(DISTINCT CASE WHEN vote = 'Abstain' THEN rpv.pool_voter ELSE 0 END) AS total_unique_votes,
+        COUNT(DISTINCT CASE WHEN vote = 'Yes' THEN rpv.pool_voter ELSE 0 END) AS poolYesCount,
+        COUNT(DISTINCT CASE WHEN vote = 'No' THEN rpv.pool_voter ELSE 0 END) AS poolNoCount,
+        COUNT(DISTINCT CASE WHEN vote = 'Abstain' THEN rpv.pool_voter ELSE 0 END) AS poolAbstainCount,
         SUM(CASE WHEN rpv.vote = 'Yes' THEN ps.voting_power ELSE 0 END) AS poolYesVotes,
         SUM(CASE WHEN rpv.vote = 'No' THEN ps.voting_power ELSE 0 END) AS poolNoVotes,
         SUM(CASE WHEN rpv.vote = 'Abstain' THEN ps.voting_power ELSE 0 END) AS poolAbstainVotes
@@ -281,7 +290,13 @@ SELECT
         'enacted_epoch', gov_action_proposal.enacted_epoch,
         'dropped_epoch', gov_action_proposal.dropped_epoch,
         'expired_epoch', gov_action_proposal.expired_epoch
-    ) AS status
+    ) AS status,
+    JSON_BUILD_OBJECT(
+        'ratified_time', MAX(ratified_block.block_time),
+        'enacted_time', MAX(enacted_block.block_time),
+        'dropped_time', MAX(dropped_block.block_time),
+        'expired_time', MAX(expired_block.block_time)
+    ) AS status_times
 FROM
     gov_action_proposal
     CROSS JOIN LatestEpoch AS latest_epoch
@@ -302,6 +317,10 @@ FROM
         AND ldd_drep.epoch_no = latest_epoch.no
     LEFT JOIN gov_action_proposal AS prev_gov_action ON gov_action_proposal.prev_gov_action_proposal = prev_gov_action.id
     LEFT JOIN tx AS prev_gov_action_tx ON prev_gov_action.tx_id = prev_gov_action_tx.id
+    LEFT JOIN EpochBlocks ratified_block ON ratified_block.epoch_no = gov_action_proposal.ratified_epoch
+    LEFT JOIN EpochBlocks enacted_block ON enacted_block.epoch_no = gov_action_proposal.enacted_epoch
+    LEFT JOIN EpochBlocks dropped_block ON dropped_block.epoch_no = gov_action_proposal.dropped_epoch
+    LEFT JOIN EpochBlocks expired_block ON expired_block.epoch_no = gov_action_proposal.expired_epoch
 WHERE
     concat(encode(creator_tx.hash, 'hex'), '#', gov_action_proposal.index) ILIKE $1
 GROUP BY

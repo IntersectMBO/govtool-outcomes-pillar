@@ -6,14 +6,6 @@ type StatusChipProps = {
   isUppercase?: boolean;
 };
 
-const borderColorMap: Record<StatusChipProps["status"], string> = {
-  Live: successGreen.c200,
-  Ratified: successGreen.c200,
-  Enacted: successGreen.c200,
-  Expired: errorRed.c200,
-  "Not Ratified": primaryBlue.c200,
-};
-
 const bgColorMap: Record<StatusChipProps["status"], string> = {
   Live: successGreen.c100,
   Ratified: successGreen.c100,

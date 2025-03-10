@@ -6,11 +6,13 @@ import { Typography } from "../Atoms/Typography";
 interface GovernanceActionStatusProps {
   status: Status;
   actionId: string;
+  isCard?: boolean;
 }
 
 export default function GovernanceActionStatus({
   status,
   actionId,
+  isCard = true,
 }: GovernanceActionStatusProps) {
   const getStatusChips = () => {
     const { ratified_epoch, enacted_epoch, dropped_epoch, expired_epoch } =
@@ -66,9 +68,9 @@ export default function GovernanceActionStatus({
       >
         <Typography
           sx={{
-            fontSize: 12,
+            fontSize: isCard ? 12 : 14,
             color: "textGray",
-            fontWeight: 500,
+            fontWeight: isCard ? 500 : 600,
           }}
         >
           Status

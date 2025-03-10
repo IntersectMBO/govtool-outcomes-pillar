@@ -3,6 +3,7 @@ import Outcomes from "../Pages/Outcomes";
 import VotesAndFavorites from "../Pages/VotesAndFavorites";
 import { Box } from "@mui/material";
 import GovActionWrapper from "../Pages/GovActionLegacyWrapper";
+import GovernanceAction from "../Pages/GovernanceAction";
 
 function GlobalWrapper() {
   const location = useLocation();
@@ -18,7 +19,7 @@ function GlobalWrapper() {
       location.pathname.includes("outcomes/governance_actions/") &&
       getActionId()
     ) {
-      return <GovActionWrapper id={getActionId()} />;
+      return <GovernanceAction id={getActionId()} />;
     } else if (location.pathname.includes("my/votes_and_favorites")) {
       return <VotesAndFavorites />;
     } else {
