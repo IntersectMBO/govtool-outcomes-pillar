@@ -40,8 +40,7 @@ export const GovernanceActionCardHeader = ({
           WebkitLineClamp: 2,
           wordBreak: "break-word",
           transition: "filter 0.5s ease-in-out, opacity 0.5s ease-in-out",
-          filter: isMetadataLoading ? "blur(5px)" : "none",
-          opacity: isMetadataLoading ? 0.6 : 1,
+          opacity: isMetadataLoading ? 0.7 : 1,
           color: isMetadataLoading
             ? "gray"
             : isDataMissing
@@ -49,11 +48,24 @@ export const GovernanceActionCardHeader = ({
             : "inherit",
         }}
       >
-        {isDataMissing
-          ? getMetadataDataMissingStatusTranslation(
-              isDataMissing as MetadataValidationStatus
-            )
-          : title || "Loading title..."}
+        {isDataMissing ? (
+          getMetadataDataMissingStatusTranslation(
+            isDataMissing as MetadataValidationStatus
+          )
+        ) : title ? (
+          title
+        ) : (
+          <Box
+            component="span"
+            sx={{
+              filter: "blur(3px)", 
+              transition: "filter 0.5s ease-in-out",
+              display: "inline-block", 
+            }}
+          >
+            Loading title...
+          </Box>
+        )}
       </Typography>
       {isDataMissing && typeof isDataMissing === "string" && (
         <Tooltip
