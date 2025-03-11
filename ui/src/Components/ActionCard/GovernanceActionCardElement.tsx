@@ -6,14 +6,12 @@ interface GovernanceActionCardElementProps {
   title: string;
   description: string;
   dataTestId: string;
-  isMetadataLoading?: boolean;
 }
 
 export default function GovernanceActionCardElement({
   title,
   description,
-  dataTestId,
-  isMetadataLoading,
+  dataTestId
 }: GovernanceActionCardElementProps) {
   return (
     <Box data-testid={dataTestId}>
@@ -31,24 +29,20 @@ export default function GovernanceActionCardElement({
       >
         {title}
       </Typography>
-      {isMetadataLoading ? (
-        <AbstractLoader />
-      ) : (
-        <Typography
-          sx={{
-            fontSize: 14,
-            display: "-webkit-box",
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
-            lineHeight: "20px",
-            WebkitLineClamp: 2,
-            maxWidth: "auto",
-            fontWeight: 400,
-          }}
-        >
-          {description}
-        </Typography>
-      )}
+      <Typography
+        sx={{
+          fontSize: 14,
+          display: "-webkit-box",
+          WebkitBoxOrient: "vertical",
+          overflow: "hidden",
+          lineHeight: "20px",
+          WebkitLineClamp: 2,
+          maxWidth: "auto",
+          fontWeight: 400,
+        }}
+      >
+        {description}
+      </Typography>
     </Box>
   );
 }

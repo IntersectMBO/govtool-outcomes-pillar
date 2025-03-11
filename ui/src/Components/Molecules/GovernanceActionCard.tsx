@@ -14,6 +14,7 @@ import { GOVERNANCE_ACTION_FILTERS } from "../../consts/filters";
 import { GovernanceActionCardHeader } from "../ActionCard/GovernanceActionCardHeader";
 import { NavLink } from "react-router-dom";
 import { Button } from "../Atoms/Button";
+import AbstractLoader from "./GovernanceActionAbstractLoader";
 
 interface GovernanceActionCardProps {
   action: GovernanceAction;
@@ -78,14 +79,17 @@ function GovernanceActionCard({ action }: GovernanceActionCardProps) {
         </Box>
         {metadataValid && (
           <Box sx={{ marginTop: 2.5 }}>
-            <GovernanceActionCardElement
-              title="Abstract"
-              description={
-                action.abstract || (metadata?.data?.abstract as string)
-              }
-              dataTestId={`${idCIP129}-abstract`}
-              isMetadataLoading={isMetadataLoading}
-            />
+            {isMetadataLoading ? (
+              <AbstractLoader />
+            ) : (
+              <GovernanceActionCardElement
+                title="Abstract"
+                description={
+                  action.abstract || (metadata?.data?.abstract as string)
+                }
+                dataTestId={`${idCIP129}-abstract`}
+              />
+            )}
           </Box>
         )}
         <Box
@@ -98,7 +102,6 @@ function GovernanceActionCard({ action }: GovernanceActionCardProps) {
             title="Governance Action Type"
             description={typeInWords}
             dataTestId={`${idCIP129}-type`}
-            isMetadataLoading={isMetadataLoading}
           />
 
           <GovernanceActionStatus status={action?.status} actionId={idCIP129} />
