@@ -73,7 +73,7 @@ function GovernanceActionCard({ action }: GovernanceActionCardProps) {
           dataTestId={`${idCIP129}-card-title`}
         />
         <Box sx={{ marginTop: 2.5 }}>
-          <GovActionDatesInfo action={action} />
+          <GovActionDatesInfo action={action} isCard />
         </Box>
         {metadataValid && (
           <Box sx={{ marginTop: 2.5 }}>

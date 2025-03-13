@@ -11,9 +11,13 @@ import { Typography } from "../Atoms/Typography";
 
 interface GovActionDatesInfoProps {
   action: GovernanceAction;
+  isCard?: boolean;
 }
 
-const GovActionDatesInfo = ({ action }: GovActionDatesInfoProps) => {
+const GovActionDatesInfo = ({
+  action,
+  isCard = false,
+}: GovActionDatesInfoProps) => {
   const proposalStatus = getProposalStatus(action.status);
 
   const isExpired = ["Expired", "Not Ratified", "Enacted"].includes(
@@ -84,12 +88,13 @@ const GovActionDatesInfo = ({ action }: GovActionDatesInfoProps) => {
           padding: "6px 0",
           borderTopLeftRadius: "inherit",
           borderTopRightRadius: "inherit",
+          flexWrap: "wrap",
         }}
       >
         <Typography variant="caption" sx={{ fontSize: 12 }}>
           Submitted:{" "}
           <Typography component="span" fontWeight={600} variant="caption">
-            {formatTimeStamp(action.time)}
+            {formatTimeStamp(action.time, isCard ? "short" : "full")}
           </Typography>
         </Typography>
         {action.epoch_no && (
@@ -119,8 +124,11 @@ const GovActionDatesInfo = ({ action }: GovActionDatesInfoProps) => {
           {isExpired ? "Expired: " : "Expires: "}
           <Typography component="span" fontWeight={600} variant="caption">
             {action.status.expired_epoch !== null
-              ? formatTimeStamp(action.status_times.expired_time as string)
-              : formatTimeStamp(action.expiry_date)}
+              ? formatTimeStamp(
+                  action.status_times.expired_time as string,
+                  isCard ? "short" : "full"
+                )
+              : formatTimeStamp(action.expiry_date, isCard ? "short" : "full")}
           </Typography>
         </Typography>
         <Typography variant="caption">

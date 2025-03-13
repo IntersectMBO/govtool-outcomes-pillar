@@ -9,7 +9,7 @@ export class MiscellaneousController {
     return await this.miscellaneousService.getNetworkMetrics(epoch || null);
   }
   @Get("/epoch/params")
-  async getEpochParams() {
-    return await this.miscellaneousService.getEpochParams();
+  async getEpochParams(@Query("epoch") epoch: number) {
+    return await this.miscellaneousService.getEpochParams(epoch || null);
   }
 }

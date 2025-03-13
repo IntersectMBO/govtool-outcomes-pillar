@@ -3,15 +3,15 @@ import { OutcomeIndicator } from "./OutcomeIndicator";
 import { Typography } from "../Atoms/Typography";
 import { VoteSection } from "./VoteSection";
 import {
+  EpochParams,
   GovernanceAction,
   GovernanceActionType,
   NetworkMetrics,
 } from "../../types/api";
-import { useAppContext } from "../../contexts/AppContext";
 import { getGovActionVotingThresholdKey } from "../../lib/utils";
-import { useGetNetworkMetrics } from "../../hooks/useGetNetworkMetrics";
 import { useEffect, useState } from "react";
 import { getNetworkMetrics } from "../../services/requests/getNetworkMetrics";
+import { getEpochParams } from "../../services/requests/getEpochParams";
 
 type GovernanceVotingUIProps = {
   action: GovernanceAction;
@@ -31,10 +31,10 @@ const GovernanceVotingUI = ({ action }: GovernanceVotingUIProps) => {
     type,
     status,
   } = action;
-  const { epochParams } = useAppContext();
   const [networkMetrics, setNetworkMetrics] = useState<NetworkMetrics | null>(
     null
   );
+  const [epochParams, setEpochParams] = useState<EpochParams | null>(null);
 
   const getEpochForMetrics = () => {
     if (status.ratified_epoch) return status.ratified_epoch;
@@ -54,19 +54,37 @@ const GovernanceVotingUI = ({ action }: GovernanceVotingUIProps) => {
             ? await getNetworkMetrics(metricsEpoch)
             : await getNetworkMetrics();
 
+        const params =
+          metricsEpoch !== null
+            ? await getEpochParams(metricsEpoch)
+            : await getEpochParams();
+
         setNetworkMetrics(metrics);
+        setEpochParams(params);
       } catch (error) {
         console.error("Failed to fetch network metrics:", error);
         setNetworkMetrics(null);
       }
     };
 
-    fetchNetworkMetrics();
+    if (action) {
+      fetchNetworkMetrics();
+    }
   }, [action, metricsEpoch]);
 
+  // Metrics collection
+  const totalStakeControlledByAlwaysAbstain =
+    Number(networkMetrics?.always_abstain_voting_power) ?? 0;
+  const totalStakeControlledByAlwaysAbstainForSPOs =
+    Number(networkMetrics?.spos_abstain_voting_power) ?? 0;
+  const totalStakeControlledByNoConfidence =
+    Number(networkMetrics?.always_no_confidence_voting_power) ?? 0;
+  const totalStakeControlledByNoConfidenceForSPOs =
+    Number(networkMetrics?.spos_no_confidence_voting_power) ?? 0;
   const totalStakeControlledByDReps =
-    (Number(networkMetrics?.total_stake_controlled_by_active_dreps) ?? 0) -
-    abstain_votes;
+    Number(networkMetrics?.total_stake_controlled_by_active_dreps) ?? 0;
+  const totalStakeControlledBySPOs =
+    Number(networkMetrics?.total_stake_controlled_by_stake_pools) ?? 0;
   const noOfCommitteeMembers =
     Number(networkMetrics?.no_of_committee_members) ?? 0;
   const ccThreshold = (
@@ -76,39 +94,62 @@ const GovernanceVotingUI = ({ action }: GovernanceVotingUIProps) => {
       : 0
   ).toPrecision(2);
 
-  const dRepYesVotes = Number(yes_votes) ?? 0;
-  const dRepNoVotes = Number(no_votes) ?? 0;
-  const dRepAbstainVotes = Number(abstain_votes) ?? 0;
+  // DRep votes collection
+  const dRepYesVotes = Number(yes_votes);
+  const dRepNoVotes = Number(no_votes);
+  const dRepAbstainVotes =
+    Number(abstain_votes) + totalStakeControlledByAlwaysAbstain;
+  const dRepNotVotedVotes = Number(
+    totalStakeControlledByDReps - (dRepYesVotes + dRepNoVotes)
+  );
 
-  const poolYesVotes = Number(pool_yes_votes) ?? 0;
-  const poolNoVotes = Number(pool_no_votes) ?? 0;
-  const poolAbstainVotes = Number(pool_abstain_votes) ?? 0;
+  // SPO votes collection
+  const poolYesVotes =
+    action.type === "NoConfidence"
+      ? Number(pool_yes_votes) + totalStakeControlledByNoConfidenceForSPOs
+      : Number(pool_yes_votes);
+  const poolNoVotes =
+    action.type !== "NoConfidence"
+      ? Number(pool_no_votes) + totalStakeControlledByNoConfidenceForSPOs
+      : Number(pool_no_votes);
+  const poolAbstainVotes =
+    Number(pool_abstain_votes) + totalStakeControlledByAlwaysAbstainForSPOs;
+  const poolNotVotedVotes = Number(
+    totalStakeControlledBySPOs - (poolYesVotes + poolNoVotes)
+  );
 
+  // CC votes  collection
   const ccYesVotes = Number(cc_yes_votes) ?? 0;
   const ccNoVotes = Number(cc_no_votes) ?? 0;
   const ccAbstainVotes = Number(cc_abstain_votes) ?? 0;
+  const ccNotVotedVotes = Number(
+    noOfCommitteeMembers - (ccYesVotes + ccNoVotes + ccAbstainVotes)
+  );
 
   const dRepYesVotesPercentage = totalStakeControlledByDReps
     ? (dRepYesVotes / totalStakeControlledByDReps) * 100
     : undefined;
-  const dRepNoVotesPercentage = dRepYesVotesPercentage
-    ? 100 - dRepYesVotesPercentage
-    : undefined;
-
-  const poolYesVotesPercentage =
-    poolYesVotes + poolNoVotes
-      ? (poolYesVotes / (poolYesVotes + poolNoVotes)) * 100
+  const dRepNoVotesPercentage =
+    dRepYesVotesPercentage !== undefined
+      ? Number(100 - dRepYesVotesPercentage)
       : undefined;
-  const poolNoVotesPercentage = poolYesVotesPercentage
-    ? 100 - poolYesVotesPercentage
-    : undefined;
 
-  const ccYesVotesPercentage = noOfCommitteeMembers
-    ? (ccYesVotes / noOfCommitteeMembers) * 100
+  const poolYesVotesPercentage = totalStakeControlledBySPOs
+    ? (poolYesVotes / totalStakeControlledBySPOs) * 100
     : undefined;
-  const ccNoVotesPercentage = ccYesVotesPercentage
-    ? 100 - ccYesVotesPercentage
-    : undefined;
+  const poolNoVotesPercentage =
+    poolYesVotesPercentage !== undefined
+      ? Number(100 - poolYesVotesPercentage)
+      : undefined;
+
+  const ccYesVotesPercentage =
+    noOfCommitteeMembers - ccAbstainVotes
+      ? (ccYesVotes / (noOfCommitteeMembers - ccAbstainVotes)) * 100
+      : undefined;
+  const ccNoVotesPercentage =
+    ccYesVotesPercentage !== undefined
+      ? Number(100 - ccYesVotesPercentage)
+      : undefined;
 
   return (
     <Box>
@@ -120,6 +161,7 @@ const GovernanceVotingUI = ({ action }: GovernanceVotingUIProps) => {
           display: "-webkit-box",
           WebkitBoxOrient: "vertical",
           WebkitLineClamp: 2,
+          py: "6px",
           wordBreak: "break-word",
           mb: 3,
         }}
@@ -131,7 +173,10 @@ const GovernanceVotingUI = ({ action }: GovernanceVotingUIProps) => {
         title="DReps"
         yesVotes={dRepYesVotes}
         noVotes={dRepNoVotes}
+        totalControlled={totalStakeControlledByDReps}
         abstainVotes={dRepAbstainVotes}
+        notVotedVotes={dRepNotVotedVotes}
+        noConfidence={totalStakeControlledByNoConfidence}
         threshold={(() => {
           const votingThresholdKey = getGovActionVotingThresholdKey({
             govActionType: type as GovernanceActionType,
@@ -150,7 +195,10 @@ const GovernanceVotingUI = ({ action }: GovernanceVotingUIProps) => {
         title="SPOs"
         yesVotes={poolYesVotes}
         noVotes={poolNoVotes}
+        totalControlled={totalStakeControlledBySPOs}
         abstainVotes={poolAbstainVotes}
+        notVotedVotes={poolNotVotedVotes}
+        noConfidence={totalStakeControlledByNoConfidenceForSPOs}
         threshold={(() => {
           const votingThresholdKey = getGovActionVotingThresholdKey({
             govActionType: type as GovernanceActionType,
@@ -169,7 +217,9 @@ const GovernanceVotingUI = ({ action }: GovernanceVotingUIProps) => {
         title="CC Committee"
         yesVotes={ccYesVotes}
         noVotes={ccNoVotes}
+        totalControlled={noOfCommitteeMembers}
         abstainVotes={ccAbstainVotes}
+        notVotedVotes={ccNotVotedVotes}
         threshold={Number(ccThreshold)}
         yesPercentage={ccYesVotesPercentage}
         noPercentage={ccNoVotesPercentage}

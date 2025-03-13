@@ -92,6 +92,7 @@ function ActionIdentity({ governanceAction }: governanceActionProps) {
         title="(CIP-129) Governance Action ID"
         type="text"
         content={idCIP129}
+        isCopyable
         dataTestId={`single-action-${idCIP129}-CIP-129-id`}
       />
     </Box>

@@ -11,6 +11,7 @@ type ButtonProps = Omit<MUIButtonProps, "size"> & {
 export const Button = ({
   size = "large",
   variant = "contained",
+  dataTestId,
   sx,
   isLoading,
   ...props
@@ -31,6 +32,7 @@ export const Button = ({
 
   return (
     <MUIButton
+      data-testid={dataTestId}
       sx={{
         fontSize: size === "extraLarge" ? 16 : 14,
         height,

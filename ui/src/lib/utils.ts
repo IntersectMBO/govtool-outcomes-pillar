@@ -13,15 +13,37 @@ import {
   PPU_NETWORK_GROUP_PARAMS_KEYS,
   PPU_TECHNICAL_GROUP_PARAMS_KEYS,
 } from "../consts/params";
+
 const LOVELACE = 1000000;
-export function formatTimeStamp(timeStamp: string): string {
+export function formatTimeStamp(
+  timeStamp: string,
+  format: "short" | "full" = "full"
+): string {
   const date = new Date(timeStamp);
 
-  const day = date.getUTCDate();
-  const month = date.toLocaleString("default", { month: "short" });
-  const year = date.getUTCFullYear();
+  if (format === "short") {
+    return date
+      .toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+      })
+      .replace(",", "");
+  }
 
-  return `${day} ${month} ${year}`;
+  return date
+    .toLocaleString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    })
+    .replace(",", "");
 }
 
 /**

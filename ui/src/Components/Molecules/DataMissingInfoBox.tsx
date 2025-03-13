@@ -24,10 +24,7 @@ export const DataMissingInfoBox = ({
   return (
     <Box
       sx={{
-        maxWidth: {
-          xs: "295px",
-          md: "100%",
-        },
+        maxWidth: "100%",
         ...sx,
       }}
     >

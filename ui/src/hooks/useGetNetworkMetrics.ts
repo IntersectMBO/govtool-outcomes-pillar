@@ -1,10 +1,10 @@
 import { useQuery } from "react-query";
 import { getNetworkMetrics } from "../services/requests/getNetworkMetrics";
 
-export const useGetNetworkMetrics = (epoch?: number) => {
+export const useGetNetworkMetrics = () => {
   const { data: networkMetrics, refetch: fetchNetworkMetrics } = useQuery({
     queryKey: ["networkMetrics"],
-    queryFn: () => getNetworkMetrics(epoch),
+    queryFn: () => getNetworkMetrics(),
     enabled: false,
   });
 

@@ -1,10 +1,27 @@
 export const getGovernanceAction = `
-WITH LatestDrepDistr AS (
+WITH ActionEpoch AS (
     SELECT
-        *,
-        ROW_NUMBER() OVER (PARTITION BY hash_id ORDER BY epoch_no DESC) AS rn
+        gov_action_proposal.id,
+        CASE
+            WHEN gov_action_proposal.ratified_epoch IS NOT NULL THEN gov_action_proposal.ratified_epoch
+            WHEN gov_action_proposal.enacted_epoch IS NOT NULL THEN gov_action_proposal.enacted_epoch
+            WHEN gov_action_proposal.expired_epoch IS NOT NULL THEN gov_action_proposal.expired_epoch
+            WHEN gov_action_proposal.dropped_epoch IS NOT NULL THEN gov_action_proposal.dropped_epoch
+            ELSE (SELECT MAX(no) FROM epoch)
+        END AS relevant_epoch_no
     FROM
-        drep_distr
+        gov_action_proposal
+    WHERE
+        concat(encode((SELECT hash FROM tx WHERE tx.id = gov_action_proposal.tx_id), 'hex'), '#', gov_action_proposal.index) ILIKE $1
+),
+LatestDrepDistr AS (
+    SELECT
+        dd.*,
+        ROW_NUMBER() OVER (PARTITION BY dd.hash_id ORDER BY dd.epoch_no DESC) AS rn
+    FROM
+        drep_distr dd
+    JOIN
+        ActionEpoch ae ON dd.epoch_no <= ae.relevant_epoch_no
 ),
 LatestEpoch AS (
     SELECT
@@ -15,6 +32,15 @@ LatestEpoch AS (
     ORDER BY
         no DESC
     LIMIT 1
+),
+RelevantEpoch AS (
+    SELECT 
+        e.start_time AS start_time,
+        ae.relevant_epoch_no AS no
+    FROM 
+        ActionEpoch ae
+    JOIN 
+        epoch e ON e.no = ae.relevant_epoch_no
 ),
 EpochBlocks AS (
     SELECT DISTINCT ON (epoch_no)
@@ -31,7 +57,8 @@ DRepVotingPower AS (
         SUM(CASE WHEN drep_hash.view = 'drep_always_abstain' THEN amount ELSE 0 END) AS abstain
     FROM
         drep_hash
-    LEFT JOIN drep_distr ON drep_hash.id = drep_distr.hash_id AND drep_distr.epoch_no = (SELECT MAX(no) FROM epoch)
+    LEFT JOIN drep_distr ON drep_hash.id = drep_distr.hash_id 
+    JOIN ActionEpoch ae ON drep_distr.epoch_no = ae.relevant_epoch_no
     WHERE drep_hash.view IN ('drep_always_no_confidence', 'drep_always_abstain')
 ),
 CommitteeData AS (
@@ -109,17 +136,16 @@ EnrichedCurrentMembers AS (
 RankedPoolVotes AS (
     SELECT
         *,
-        ROW_NUMBER() OVER (PARTITION BY vp.pool_voter ORDER BY vp.tx_id DESC) AS rn
+        ROW_NUMBER() OVER (PARTITION BY vp.pool_voter, vp.gov_action_proposal_id ORDER BY vp.tx_id DESC) AS rn
     FROM
         voting_procedure vp
+    WHERE 
+        vp.pool_voter IS NOT NULL
 ),
 PoolVotes AS (
     SELECT
         rpv.gov_action_proposal_id,
         ps.epoch_no,
-        COUNT(DISTINCT CASE WHEN vote = 'Yes' THEN rpv.pool_voter ELSE 0 END) AS poolYesCount,
-        COUNT(DISTINCT CASE WHEN vote = 'No' THEN rpv.pool_voter ELSE 0 END) AS poolNoCount,
-        COUNT(DISTINCT CASE WHEN vote = 'Abstain' THEN rpv.pool_voter ELSE 0 END) AS poolAbstainCount,
         SUM(CASE WHEN rpv.vote = 'Yes' THEN ps.voting_power ELSE 0 END) AS poolYesVotes,
         SUM(CASE WHEN rpv.vote = 'No' THEN ps.voting_power ELSE 0 END) AS poolNoVotes,
         SUM(CASE WHEN rpv.vote = 'Abstain' THEN ps.voting_power ELSE 0 END) AS poolAbstainVotes
@@ -128,8 +154,10 @@ PoolVotes AS (
     JOIN 
         pool_stat ps
         ON rpv.pool_voter = ps.pool_hash_id
+    JOIN
+        ActionEpoch ae ON ps.epoch_no = ae.relevant_epoch_no
     WHERE
-        rpv.rn = 1 AND ps.epoch_no = (SELECT MAX(no) FROM epoch)
+        rpv.rn = 1
     GROUP BY
         rpv.gov_action_proposal_id, ps.epoch_no
 ),
@@ -155,7 +183,6 @@ RankedDRepRegistration AS (
 CommitteeVotes AS (
     SELECT
         gov_action_proposal_id,
-
         SUM(CASE WHEN vote = 'Yes' THEN 1 ELSE 0 END) AS ccYesVotes,
         SUM(CASE WHEN vote = 'No' THEN 1 ELSE 0 END) AS ccNoVotes,
         SUM(CASE WHEN vote = 'Abstain' THEN 1 ELSE 0 END) AS ccAbstainVotes
@@ -277,14 +304,15 @@ SELECT
             drep_voting_power.no_confidence
         END) no_votes,
     COALESCE(SUM(ldd_drep.amount) FILTER (WHERE rdv.vote::text = 'Abstain'), 0) abstain_votes,
-	COALESCE(ps.poolYesVotes, 0) pool_yes_votes,
-	COALESCE(ps.poolNoVotes, 0) pool_no_votes,
-	COALESCE(ps.poolAbstainVotes, 0) pool_abstain_votes,
+    COALESCE(ps.poolYesVotes, 0) pool_yes_votes,
+    COALESCE(ps.poolNoVotes, 0) pool_no_votes,
+    COALESCE(ps.poolAbstainVotes, 0) pool_abstain_votes,
     COALESCE(cv.ccYesVotes, 0) cc_yes_votes,
     COALESCE(cv.ccNoVotes, 0) cc_no_votes,
     COALESCE(cv.ccAbstainVotes, 0) cc_abstain_votes,
     prev_gov_action.index as prev_gov_action_index,
     encode(prev_gov_action_tx.hash, 'hex') as prev_gov_action_tx_hash,
+    ae.relevant_epoch_no AS used_epoch_no,
     JSON_BUILD_OBJECT(
         'ratified_epoch', gov_action_proposal.ratified_epoch,
         'enacted_epoch', gov_action_proposal.enacted_epoch,
@@ -299,6 +327,7 @@ SELECT
     ) AS status_times
 FROM
     gov_action_proposal
+    JOIN ActionEpoch ae ON gov_action_proposal.id = ae.id
     CROSS JOIN LatestEpoch AS latest_epoch
     CROSS JOIN DRepVotingPower AS drep_voting_power
     CROSS JOIN meta
@@ -309,12 +338,11 @@ FROM
     LEFT JOIN off_chain_vote_gov_action_data ON off_chain_vote_gov_action_data.off_chain_vote_data_id = off_chain_vote_data.id
     LEFT JOIN param_proposal AS proposal_params ON gov_action_proposal.param_proposal = proposal_params.id
     LEFT JOIN cost_model AS cost_model ON proposal_params.cost_model_id = cost_model.id
-	LEFT JOIN PoolVotes ps ON gov_action_proposal.id = ps.gov_action_proposal_id
+    LEFT JOIN PoolVotes ps ON gov_action_proposal.id = ps.gov_action_proposal_id
     LEFT JOIN CommitteeVotes cv ON gov_action_proposal.id = cv.gov_action_proposal_id
     LEFT JOIN RankedDRepVotes rdv ON rdv.gov_action_proposal_id = gov_action_proposal.id
     LEFT JOIN RankedDRepRegistration rdr ON rdr.drep_hash_id = rdv.drep_voter AND COALESCE(rdr.deposit, 0) >= 0
-	LEFT JOIN LatestDrepDistr ldd_drep ON ldd_drep.hash_id = rdr.drep_hash_id
-        AND ldd_drep.epoch_no = latest_epoch.no
+    LEFT JOIN LatestDrepDistr ldd_drep ON ldd_drep.hash_id = rdr.drep_hash_id AND ldd_drep.rn = 1
     LEFT JOIN gov_action_proposal AS prev_gov_action ON gov_action_proposal.prev_gov_action_proposal = prev_gov_action.id
     LEFT JOIN tx AS prev_gov_action_tx ON prev_gov_action.tx_id = prev_gov_action_tx.id
     LEFT JOIN EpochBlocks ratified_block ON ratified_block.epoch_no = gov_action_proposal.ratified_epoch
@@ -336,15 +364,16 @@ GROUP BY
     cv.ccAbstainVotes,
     proposal_params,
     ps.poolYesVotes,
-	ps.poolNoVotes,
-	ps.poolAbstainVotes,
-	meta.network_name,
-	voting_anchor.url,
-	voting_anchor.data_hash,
+    ps.poolNoVotes,
+    ps.poolAbstainVotes,
+    meta.network_name,
+    voting_anchor.url,
+    voting_anchor.data_hash,
     prev_gov_action.index,
     prev_gov_action_tx.hash,
     off_chain_vote_gov_action_data.title,
     off_chain_vote_gov_action_data.abstract,
     off_chain_vote_gov_action_data.motivation,
-    off_chain_vote_gov_action_data.rationale;
+    off_chain_vote_gov_action_data.rationale,
+    ae.relevant_epoch_no;
 `;

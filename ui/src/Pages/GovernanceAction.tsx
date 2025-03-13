@@ -8,6 +8,7 @@ import References from "../Components/SingleAction/References";
 import ActionIdentity from "../Components/SingleAction/ActionIdentity";
 import { encodeCIP129Identifier } from "../lib/utils";
 import GovernanceVotingUI from "../Components/SingleAction/GovernanceVotingUI";
+import { DataMissingInfoBox } from "../Components/Molecules/DataMissingInfoBox";
 
 type GovernanceActionProps = {
   id: string;
@@ -86,10 +87,14 @@ function GovernanceAction({ id }: GovernanceActionProps) {
                 {governanceAction && (
                   <Box display="flex" flexDirection="column" gap="1.5rem">
                     <Header
+                      title={governanceAction?.title || metadata?.data?.title}
                       isGovernanceActionLoading={isGovernanceActionLoading}
                       isMetadataLoading={isMetadataLoading}
                       governanceAction={governanceAction}
-                      metadata={metadata}
+                      isDataMissing={metadata?.metadataStatus || null}
+                    />
+                    <DataMissingInfoBox
+                      isDataMissing={metadata?.metadataStatus || null}
                     />
                     <ActionIdentity governanceAction={governanceAction} />
                     {!hasAnyContent &&
@@ -103,7 +108,7 @@ function GovernanceAction({ id }: GovernanceActionProps) {
                           />
                         </>
                       )}
-                    {abstractText && (
+                    {abstractText && metadataValid && (
                       <ReasoningElement
                         label="Abstract"
                         text={
@@ -112,7 +117,7 @@ function GovernanceAction({ id }: GovernanceActionProps) {
                         }
                       />
                     )}
-                    {motivationText && (
+                    {motivationText && metadataValid && (
                       <ReasoningElement
                         label="Motivation"
                         text={
@@ -121,7 +126,7 @@ function GovernanceAction({ id }: GovernanceActionProps) {
                         }
                       />
                     )}
-                    {rationaleText && (
+                    {rationaleText && metadataValid && (
                       <ReasoningElement
                         label="Rationale"
                         text={
@@ -130,7 +135,8 @@ function GovernanceAction({ id }: GovernanceActionProps) {
                         }
                       />
                     )}
-                    {metadata?.data?.references &&
+                    {metadataValid &&
+                      metadata?.data?.references &&
                       metadata?.data?.references.length > 0 && (
                         <References links={metadata?.data?.references} />
                       )}

@@ -101,6 +101,15 @@ TotalStakeControlledByActiveDReps AS (
         AND COALESCE(rd.deposit, 0) >= 0
         AND ((DRepActivity.epoch_no - GREATEST(COALESCE(lve.epoch_no, 0), COALESCE(rd.epoch_no, 0))) <= DRepActivity.drep_activity)
 ),
+TotalStakeControlledByStakePools AS (
+    SELECT
+        COALESCE(SUM(ps.voting_power), 0)::bigint AS total
+    FROM
+        pool_stat ps
+    CROSS JOIN CurrentEpoch
+    WHERE
+        ps.epoch_no = CurrentEpoch.no
+),
 AlwaysAbstainVotingPower AS (
     SELECT COALESCE((
         SELECT amount FROM drep_hash
@@ -123,6 +132,40 @@ AlwaysNoConfidenceVotingPower AS (
         LIMIT 1
     ), 0) AS amount
 ),
+SPOsAbstainVotingPower AS (
+    SELECT 
+        COALESCE(SUM(ps.voting_power), 0)::bigint AS total
+    FROM (
+        SELECT DISTINCT ph.id AS pool_hash_id
+        FROM delegation_vote dv
+        JOIN stake_address sa ON dv.addr_id = sa.id
+        JOIN pool_owner po ON po.addr_id = sa.id
+        JOIN pool_update pu ON pu.id = po.pool_update_id
+        JOIN pool_hash ph ON pu.hash_id = ph.id
+        JOIN drep_hash dh ON dv.drep_hash_id = dh.id
+        WHERE dh.view = 'drep_always_abstain'
+    ) unique_pools
+    JOIN pool_stat ps ON ps.pool_hash_id = unique_pools.pool_hash_id
+    CROSS JOIN CurrentEpoch
+    WHERE ps.epoch_no = CurrentEpoch.no
+),
+SPOsNoConfidenceVotingPower AS (
+    SELECT 
+        COALESCE(SUM(ps.voting_power), 0)::bigint AS total
+    FROM (
+        SELECT DISTINCT ph.id AS pool_hash_id
+        FROM delegation_vote dv
+        JOIN stake_address sa ON dv.addr_id = sa.id
+        JOIN pool_owner po ON po.addr_id = sa.id
+        JOIN pool_update pu ON pu.id = po.pool_update_id
+        JOIN pool_hash ph ON pu.hash_id = ph.id
+        JOIN drep_hash dh ON dv.drep_hash_id = dh.id
+        WHERE dh.view = 'drep_always_no_confidence'
+    ) unique_pools
+    JOIN pool_stat ps ON ps.pool_hash_id = unique_pools.pool_hash_id
+    CROSS JOIN CurrentEpoch
+    WHERE ps.epoch_no = CurrentEpoch.no
+),
 LatestGovAction AS (
     SELECT gap.id, gap.enacted_epoch
     FROM gov_action_proposal gap
@@ -141,15 +184,20 @@ CommitteeThreshold AS (
 SELECT
     CurrentEpoch.no AS epoch_no,
     COALESCE(TotalStakeControlledByActiveDReps.total, 0) + COALESCE(AlwaysNoConfidenceVotingPower.amount, 0) AS total_stake_controlled_by_active_dreps,
+    COALESCE(TotalStakeControlledByStakePools.total, 0) AS total_stake_controlled_by_stake_pools,
     AlwaysAbstainVotingPower.amount AS always_abstain_voting_power,
     AlwaysNoConfidenceVotingPower.amount AS always_no_confidence_voting_power,
+    SPOsAbstainVotingPower.total AS spos_abstain_voting_power,
+    SPOsNoConfidenceVotingPower.total AS spos_no_confidence_voting_power,
     NoOfCommitteeMembers.total AS no_of_committee_members,
     CommitteeThreshold.quorum_numerator,
     CommitteeThreshold.quorum_denominator
 FROM CurrentEpoch
 CROSS JOIN TotalStakeControlledByActiveDReps
+CROSS JOIN TotalStakeControlledByStakePools
 CROSS JOIN AlwaysAbstainVotingPower
 CROSS JOIN AlwaysNoConfidenceVotingPower
+CROSS JOIN SPOsAbstainVotingPower
+CROSS JOIN SPOsNoConfidenceVotingPower
 CROSS JOIN NoOfCommitteeMembers
-CROSS JOIN CommitteeThreshold;
-`;
+CROSS JOIN CommitteeThreshold`;

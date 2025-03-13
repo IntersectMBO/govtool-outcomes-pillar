@@ -147,11 +147,20 @@ export type NetworkMetrics = {
   /** Total stake controlled by active DReps (in lovelace) */
   total_stake_controlled_by_active_dreps: string;
 
+  /** Total stake controlled by stake pools (in lovelace) */
+  total_stake_controlled_by_stake_pools: string;
+
   /** Voting power for always abstain (in lovelace) */
   always_abstain_voting_power: string;
 
+  /** SPOs Voting power for always abstain (in lovelace) */
+  spos_abstain_voting_power: string;
+
   /** Voting power for always no confidence (in lovelace) */
   always_no_confidence_voting_power: string;
+
+  /** SPOs Voting power for always no confidence (in lovelace) */
+  spos_no_confidence_voting_power: string;
 
   /** Number of active committee members */
   no_of_committee_members: number;

@@ -28,7 +28,7 @@ function StatusChip({ status, isUppercase }: StatusChipProps) {
         px: 2.25,
         "& .MuiChip-label": {
           fontSize: 12,
-          fontWeight: 400,
+          fontWeight: 500,
           whiteSpace: "nowrap",
           textOverflow: "ellipsis",
           overflow: "hidden",

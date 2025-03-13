@@ -1,22 +1,26 @@
-import { Box, ButtonBase, Skeleton } from "@mui/material";
+import { Box, Skeleton } from "@mui/material";
 import ShareIcon from "../../Assets/Icons/ShareIcon";
-import { GovActionMetadata, GovernanceAction } from "../../types/api";
+import { GovernanceAction, MetadataValidationStatus } from "../../types/api";
 import { useSnackbar } from "../../contexts/Snackbar";
 import { Typography } from "../Atoms/Typography";
 import { encodeCIP129Identifier } from "../../lib/utils";
+import { getMetadataDataMissingStatusTranslation } from "../../lib/getMetadataDataMissingStatusTranslation";
+import { Button } from "../Atoms/Button";
 
 interface HeaderProps {
+  title: string | null;
   isGovernanceActionLoading: boolean;
   isMetadataLoading: boolean;
   governanceAction: GovernanceAction;
-  metadata: GovActionMetadata;
+  isDataMissing: MetadataValidationStatus | null;
 }
 
 export default function Header({
+  title,
   isGovernanceActionLoading,
   isMetadataLoading,
   governanceAction,
-  metadata,
+  isDataMissing,
 }: HeaderProps) {
   const { addSuccessAlert } = useSnackbar();
 
@@ -36,9 +40,7 @@ export default function Header({
     <Box
       data-testid={`single-action-${idCIP129}-header`}
       display="flex"
-      flexDirection="row"
       justifyContent="space-between"
-      alignItems="center"
     >
       {isGovernanceActionLoading || isMetadataLoading ? (
         <Skeleton variant="rounded" width="75%" height={32} />
@@ -47,26 +49,28 @@ export default function Header({
           data-testid={`single-action-${idCIP129}-title`}
           sx={{
             fontSize: 22,
+            py: "6px",
             fontWeight: 600,
             lineHeight: "24px",
-            display: "-webkit-box",
-            WebkitBoxOrient: "vertical",
             WebkitLineClamp: 2,
             wordBreak: "break-word",
+            ...(isDataMissing && { color: "errorRed" }),
           }}
         >
-          {governanceAction?.title || metadata?.data?.title}
+          {(isDataMissing &&
+            getMetadataDataMissingStatusTranslation(
+              isDataMissing as MetadataValidationStatus
+            )) ||
+            title}
         </Typography>
       )}
-      <ButtonBase
+      <Button
+        size="small"
+        variant="text"
+        dataTestId={`single-action-${idCIP129}-share-link`}
         onClick={onCopy}
         sx={(theme) => ({
-          alignItems: "center",
-          padding: 1,
-          borderRadius: 50,
-          cursor: "pointer",
-          display: "flex",
-          justifyContent: "center",
+          padding: 0,
           transition: "all 0.3s",
           "&:hover": {
             boxShadow: theme.shadows[1],
@@ -74,7 +78,7 @@ export default function Header({
         })}
       >
         <ShareIcon />
-      </ButtonBase>
+      </Button>
     </Box>
   );
 }
