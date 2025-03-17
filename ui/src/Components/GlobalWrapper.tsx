@@ -2,7 +2,6 @@ import { useLocation } from "react-router-dom";
 import Outcomes from "../Pages/Outcomes";
 import VotesAndFavorites from "../Pages/VotesAndFavorites";
 import { Box } from "@mui/material";
-import GovActionWrapper from "../Pages/GovActionLegacyWrapper";
 import GovernanceAction from "../Pages/GovernanceAction";
 
 function GlobalWrapper() {

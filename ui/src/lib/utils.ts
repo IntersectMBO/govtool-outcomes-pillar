@@ -6,13 +6,14 @@ import {
   Status,
   StatusTimes,
 } from "../types/api";
-import { VoterType } from "../Components/Legacy/GovActionVoteElement";
+
 import {
   PPU_ECONOMIC_GROUP_PARAMS_KEYS,
   PPU_GOVERNANCE_GROUP_PARAMS_KEYS,
   PPU_NETWORK_GROUP_PARAMS_KEYS,
   PPU_TECHNICAL_GROUP_PARAMS_KEYS,
 } from "../consts/params";
+import { VoterType } from "../models/voters";
 
 const LOVELACE = 1000000;
 export function formatTimeStamp(

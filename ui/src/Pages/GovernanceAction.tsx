@@ -11,7 +11,6 @@ import { Breadcrumbs } from "../Components/Molecules/Breadcrumbs";
 import { useGetGovernanceActionQuery } from "../hooks/useGetGovernanceActionQuery";
 import Header from "../Components/SingleAction/Header";
 import { useMetadata } from "../hooks/useMetadata";
-import ReasoningElement from "../Components/SingleAction/ReasoningElement";
 import References from "../Components/SingleAction/References";
 import ActionIdentity from "../Components/SingleAction/ActionIdentity";
 import { encodeCIP129Identifier, getFullGovActionId } from "../lib/utils";

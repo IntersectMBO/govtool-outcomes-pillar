@@ -28,8 +28,8 @@ function References({ links }: ReferencesProps) {
               <Typography
                 sx={{
                   fontSize: 14,
-                  fontWeight: 400,
-                  color: "textBlack",
+                  fontWeight: 600,
+                  color: "textGray",
                 }}
               >
                 {link?.label}
@@ -55,7 +55,7 @@ function References({ links }: ReferencesProps) {
                   <Typography
                     sx={{
                       fontSize: 13,
-                      fontWeight: 400,
+                      fontWeight: 500,
                       overflow: "hidden",
                       width: "100%",
                       color: "primaryBlue",
