@@ -12,15 +12,15 @@ import GovActionDatesInfo from "./GovActionDatesInfo";
 import GovernanceActionStatus from "./GovernanceActionStatus";
 import { GOVERNANCE_ACTION_FILTERS } from "../../consts/filters";
 import { GovernanceActionCardHeader } from "../ActionCard/GovernanceActionCardHeader";
-import { NavLink } from "react-router-dom";
-import { Button } from "../Atoms/Button";
+import AbstractLoader from "../Loaders/GovernanceActionAbstractLoader";
+import ViewDetailsLink from "../ActionCard/ViewDetailsLink";
 
 interface GovernanceActionCardProps {
   action: GovernanceAction;
 }
 
 function GovernanceActionCard({ action }: GovernanceActionCardProps) {
-  const { metadata, metadataValid } = useMetadata(action);
+  const { metadata, metadataValid, isMetadataLoading } = useMetadata(action);
 
   const idCIP129 = encodeCIP129Identifier({
     txID: action?.tx_hash,
@@ -34,6 +34,8 @@ function GovernanceActionCard({ action }: GovernanceActionCardProps) {
   const typeInWords =
     GOVERNANCE_ACTION_FILTERS.find((filter) => filter.value === action?.type)
       ?.label || action?.type;
+
+  const abstract = action.abstract || metadata?.data?.abstract;
 
   return (
     <Card
@@ -70,6 +72,7 @@ function GovernanceActionCard({ action }: GovernanceActionCardProps) {
         <GovernanceActionCardHeader
           title={action.title || metadata?.data?.title}
           isDataMissing={metadata?.metadataStatus || null}
+          isMetadataLoading={isMetadataLoading}
           dataTestId={`${idCIP129}-card-title`}
         />
         <Box sx={{ marginTop: 2.5 }}>
@@ -77,13 +80,15 @@ function GovernanceActionCard({ action }: GovernanceActionCardProps) {
         </Box>
         {metadataValid && (
           <Box sx={{ marginTop: 2.5 }}>
-            <GovernanceActionCardElement
-              title="Abstract"
-              description={
-                action.abstract || (metadata?.data?.abstract as string)
-              }
-              dataTestId={`${idCIP129}-abstract`}
-            />
+            {!abstract || isMetadataLoading ? (
+              <AbstractLoader />
+            ) : (
+              <GovernanceActionCardElement
+                title="Abstract"
+                description={abstract}
+                dataTestId={`${idCIP129}-abstract`}
+              />
+            )}
           </Box>
         )}
         <Box
@@ -117,29 +122,7 @@ function GovernanceActionCard({ action }: GovernanceActionCardProps) {
         id={`${idCIP129}-outcome-card-actions`}
         data-testid={`${idCIP129}-outcome-card-actions`}
       >
-        <NavLink
-          data-testid={`${idCIP129}-view-details`}
-          to={`/outcomes/governance_actions/${fullGovActionId}`}
-          color="inherit"
-          style={{
-            display: "block",
-            width: "100%",
-            textDecoration: "none",
-          }}
-        >
-          <Button
-            variant="contained"
-            sx={{
-              borderRadius: "50px",
-              color: "neutralWhite",
-              backgroundColor: "primaryBlue",
-              width: "100%",
-            }}
-            aria-label={`${idCIP129}-view-details`}
-          >
-            View Details
-          </Button>
-        </NavLink>
+        <ViewDetailsLink id={fullGovActionId} />
       </CardActions>
     </Card>
   );

@@ -2,8 +2,9 @@ import { Chip } from "@mui/material";
 import { errorRed, primaryBlue, successGreen } from "../../consts/colors";
 
 type StatusChipProps = {
-  status: "Live" | "Ratified" | "Enacted" | "Expired" | "Not Ratified";
+  status: string;
   isUppercase?: boolean;
+  bgColor?: string;
 };
 
 const bgColorMap: Record<StatusChipProps["status"], string> = {
@@ -14,21 +15,21 @@ const bgColorMap: Record<StatusChipProps["status"], string> = {
   "Not Ratified": primaryBlue.c100,
 };
 
-function StatusChip({ status, isUppercase }: StatusChipProps) {
+function StatusChip({ status, isUppercase, bgColor }: StatusChipProps) {
   const label = isUppercase ? status.toLocaleUpperCase() : status;
 
   return (
     <Chip
       label={label}
       sx={{
-        backgroundColor: bgColorMap[status],
+        backgroundColor: bgColor ? bgColor : bgColorMap[status],
         borderRadius: 100,
         height: "auto",
         py: 0.75,
         px: 2.25,
         "& .MuiChip-label": {
           fontSize: 12,
-          fontWeight: 500,
+          fontWeight: 400,
           whiteSpace: "nowrap",
           textOverflow: "ellipsis",
           overflow: "hidden",

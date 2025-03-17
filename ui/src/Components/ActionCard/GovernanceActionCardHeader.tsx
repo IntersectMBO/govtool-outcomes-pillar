@@ -9,14 +9,23 @@ import { Typography } from "../Atoms/Typography";
 type GovernanceActionCardHeaderProps = {
   title?: string;
   isDataMissing: MetadataValidationStatus | null;
+  isMetadataLoading: boolean;
   dataTestId: string;
 };
 
 export const GovernanceActionCardHeader = ({
   title,
   isDataMissing,
+  isMetadataLoading,
   dataTestId,
 }: GovernanceActionCardHeaderProps) => {
+  const showLoader =
+    isMetadataLoading ||
+    (!(
+      isDataMissing && getMetadataDataMissingStatusTranslation(isDataMissing)
+    ) &&
+      !title);
+
   return (
     <Box
       sx={{
@@ -28,24 +37,41 @@ export const GovernanceActionCardHeader = ({
       }}
       data-testid={dataTestId}
     >
-      <Typography
-        sx={{
-          fontSize: 18,
-          fontWeight: 600,
-          lineHeight: "24px",
-          display: "-webkit-box",
-          WebkitBoxOrient: "vertical",
-          WebkitLineClamp: 2,
-          wordBreak: "break-word",
-          ...(isDataMissing && { color: "errorRed" }),
-        }}
-      >
-        {(isDataMissing &&
-          getMetadataDataMissingStatusTranslation(
-            isDataMissing as MetadataValidationStatus
-          )) ||
-          title}
-      </Typography>
+      {showLoader ? (
+        <Typography
+          sx={{
+            fontSize: 18,
+            fontWeight: 600,
+            lineHeight: "24px",
+            filter: "blur(2px) brightness(0.8) grayscale(0.2)",
+            transition: "filter 0.5s ease-in-out",
+            wordBreak: "break-word",
+            opacity: 0.7,
+            color: "gray",
+          }}
+        >
+          Loading governance action title...
+        </Typography>
+      ) : (
+        <Typography
+          sx={{
+            fontSize: 18,
+            fontWeight: 600,
+            lineHeight: "24px",
+            WebkitLineClamp: 2,
+            wordBreak: "break-word",
+            transition: "opacity 0.5s ease-in-out",
+            opacity: 1,
+            color: isDataMissing ? "errorRed" : "inherit",
+          }}
+        >
+          {(isDataMissing &&
+            getMetadataDataMissingStatusTranslation(
+              isDataMissing as MetadataValidationStatus
+            )) ||
+            title}
+        </Typography>
+      )}
       {isDataMissing && typeof isDataMissing === "string" && (
         <Tooltip
           heading={getMetadataDataMissingStatusTranslation(

@@ -1,4 +1,5 @@
-import { Box, Grid, Typography } from "@mui/material";
+import { Box } from "@mui/material";
+import { Typography } from "../Atoms/Typography";
 interface Reference {
   "@type": string;
   label: string;
@@ -26,7 +27,7 @@ function References({ links }: ReferencesProps) {
             <Box key={index}>
               <Typography
                 sx={{
-                  fontSize: 16,
+                  fontSize: 14,
                   fontWeight: 400,
                   color: "textBlack",
                 }}
@@ -53,12 +54,9 @@ function References({ links }: ReferencesProps) {
                   />
                   <Typography
                     sx={{
-                      fontSize: 14,
-                      display: "-webkit-box",
-                      WebkitBoxOrient: "vertical",
+                      fontSize: 13,
+                      fontWeight: 400,
                       overflow: "hidden",
-                      padding: 1,
-                      borderRadius: "0.25rem",
                       width: "100%",
                       color: "primaryBlue",
                     }}

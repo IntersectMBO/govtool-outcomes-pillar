@@ -59,24 +59,23 @@ export default function GovernanceActionStatus({
     return null;
   };
   return (
-    <Box data-testid={`${actionId}-status`}>
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        width="100%"
-        alignItems="center"
+    <Box
+      data-testid={`${actionId}-status`}
+      display="flex"
+      justifyContent="space-between"
+      width="100%"
+      alignItems="center"
+    >
+      <Typography
+        sx={{
+          fontSize: isCard ? 12 : 14,
+          color: "textGray",
+          fontWeight: isCard ? 500 : 600,
+        }}
       >
-        <Typography
-          sx={{
-            fontSize: isCard ? 12 : 14,
-            color: "textGray",
-            fontWeight: isCard ? 500 : 600,
-          }}
-        >
-          Status
-        </Typography>
-        {getStatusChips()}
-      </Box>
+        Status
+      </Typography>
+      {getStatusChips()}
     </Box>
   );
 }

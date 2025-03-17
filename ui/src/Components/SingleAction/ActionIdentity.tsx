@@ -1,4 +1,4 @@
-import { Box, Chip } from "@mui/material";
+import { Box } from "@mui/material";
 import { encodeCIP129Identifier, getFullGovActionId } from "../../lib/utils";
 import GovActionDatesInfo from "../Molecules/GovActionDatesInfo";
 import GovernanceActionStatus from "../Molecules/GovernanceActionStatus";
@@ -6,10 +6,14 @@ import { GOVERNANCE_ACTION_FILTERS } from "../../consts/filters";
 import GovernanceActionElement from "./GovernanceActionElement";
 import { Typography } from "../Atoms/Typography";
 import { primaryBlue } from "../../consts/colors";
-type governanceActionProps = {
-  governanceAction: any;
+import StatusChip from "../Molecules/StatusChip";
+import { GovActionMetadata, GovernanceAction } from "../../types/api";
+
+type ActionIdentityProps = {
+  governanceAction: GovernanceAction;
+  metadata: GovActionMetadata;
 };
-function ActionIdentity({ governanceAction }: governanceActionProps) {
+function ActionIdentity({ governanceAction, metadata }: ActionIdentityProps) {
   const idCIP129 = encodeCIP129Identifier({
     txID: governanceAction?.tx_hash,
     index: governanceAction?.index.toString(16).padStart(2, "0"),
@@ -31,7 +35,7 @@ function ActionIdentity({ governanceAction }: governanceActionProps) {
       sx={{
         display: "flex",
         flexDirection: "column",
-        gap: 2,
+        gap: 3,
       }}
     >
       <Box
@@ -53,29 +57,37 @@ function ActionIdentity({ governanceAction }: governanceActionProps) {
           Governance Action Type
         </Typography>
         <Box sx={{ display: "inline-flex" }}>
-          <Chip
-            label={typeInWords}
-            sx={{
-              backgroundColor: primaryBlue.c100,
-              borderRadius: 100,
-              height: "auto",
-              py: 0.75,
-              px: 2.25,
-              "& .MuiChip-label": {
-                fontSize: 12,
-                fontWeight: 400,
-                whiteSpace: "nowrap",
-                textOverflow: "ellipsis",
-                overflow: "hidden",
-                color: "textBlack",
-                px: 0,
-                py: 0,
-              },
-            }}
-          />
+          <StatusChip status={typeInWords} bgColor={primaryBlue.c100} />
         </Box>
       </Box>
       <GovActionDatesInfo action={governanceAction} />
+      {metadata && metadata?.data?.authors?.length > 0 && (
+        <Box display="flex" flexDirection="column" gap={0.5}>
+          <Typography
+            sx={{
+              color: "textGray",
+              fontWeight: 600,
+              fontSize: 14,
+            }}
+          >
+            Author(s)
+          </Typography>
+          <Box display="flex" gap={2} flexWrap="wrap">
+            {metadata?.data?.authors?.map((author: { name: string }, index) => (
+              <Typography
+                key={index}
+                sx={{
+                  color: "textGray",
+                  fontWeight: 400,
+                  fontSize: 16,
+                }}
+              >
+                {author?.name}
+              </Typography>
+            ))}
+          </Box>
+        </Box>
+      )}
       <GovernanceActionStatus
         status={governanceAction?.status}
         actionId={idCIP129}

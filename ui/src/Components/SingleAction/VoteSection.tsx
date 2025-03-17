@@ -1,6 +1,7 @@
-import { Box, Grid, LinearProgress, styled, Typography } from "@mui/material";
+import { Box, Grid, LinearProgress, styled } from "@mui/material";
 import { correctAdaFormatWithSuffix } from "../../lib/utils";
 import { errorRed, successGreen } from "../../consts/colors";
+import { Typography } from "../Atoms/Typography";
 
 type VoteSectionProps = {
   title: string;
@@ -14,6 +15,7 @@ type VoteSectionProps = {
   yesPercentage?: number;
   noPercentage?: number;
   isCC?: boolean;
+  isDisplayed: boolean;
 };
 
 const ProgressContainer = styled(Box)({
@@ -58,7 +60,7 @@ const ThresholdMarker = styled("div")<{ left: number }>(({ left }) => ({
   top: "0",
   height: "100%",
   width: "3px",
-  backgroundColor: successGreen.c500,
+  backgroundColor: successGreen.c600,
   zIndex: 3,
 }));
 
@@ -74,6 +76,7 @@ export const VoteSection = ({
   yesPercentage = 0,
   noPercentage = 0,
   isCC = false,
+  isDisplayed,
 }: VoteSectionProps) => {
   const formatValue = (value: number) =>
     isCC ? value : `₳${correctAdaFormatWithSuffix(value)}`;
@@ -81,7 +84,13 @@ export const VoteSection = ({
   return (
     <Box mb={3}>
       <Box display="flex" alignItems="center" gap={1} mb={1}>
-        <Typography variant="subtitle1" fontWeight="bold" color="textGray">
+        <Typography
+          color="textGray"
+          sx={{
+            fontWeight: 600,
+            fontSize: 18,
+          }}
+        >
           {title}
         </Typography>
         <Typography variant="body2" color="textGray">
@@ -92,78 +101,86 @@ export const VoteSection = ({
           )
         </Typography>
       </Box>
+      {!isDisplayed && (
+        <Typography variant="body2" color="textGray">
+          {`Voting for this action is not available for ${title}`}
+        </Typography>
+      )}
+      {isDisplayed && (
+        <Grid container spacing={1}>
+          <Grid item xs={12}>
+            <Box display="flex" justifyContent="space-between" mb={0.5}>
+              <Typography variant="body2" sx={{ color: successGreen.c500 }}>
+                {isCC ? "Constitutional" : "Yes"} (
+                <Box component="span" sx={{ fontWeight: "bold" }}>
+                  {formatValue(yesVotes)}
+                </Box>
+                )
+              </Typography>
 
-      <Grid container spacing={1}>
-        <Grid item xs={12}>
-          <Box display="flex" justifyContent="space-between" mb={0.5}>
-            <Typography variant="body2" sx={{ color: successGreen.c500 }}>
-              {isCC ? "Constitutional" : "Yes"} (
-              <Box component="span" sx={{ fontWeight: "bold" }}>
-                {formatValue(yesVotes)}
-              </Box>
-              )
-            </Typography>
+              {threshold !== null && (
+                <Typography variant="body2" color="textGray">
+                  {threshold}
+                </Typography>
+              )}
 
-            {threshold !== null && (
+              <Typography variant="body2" sx={{ color: errorRed.c500 }}>
+                {isCC ? "Unconstitutional" : "No"} (
+                <Box component="span" sx={{ fontWeight: "bold" }}>
+                  {formatValue(noVotes)}
+                </Box>
+                )
+              </Typography>
+            </Box>
+
+            <ProgressContainer>
+              <StyledLinearProgress
+                variant="determinate"
+                value={yesPercentage}
+              />
+              <PercentageOverlay>
+                <PercentageText>{yesPercentage?.toFixed(2)}%</PercentageText>
+                <PercentageText>{noPercentage?.toFixed(2)}%</PercentageText>
+              </PercentageOverlay>
+              {threshold !== null && <ThresholdMarker left={threshold * 100} />}
+            </ProgressContainer>
+          </Grid>
+          <Grid item xs={12}>
+            <Box
+              mb={0.5}
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+            >
               <Typography variant="body2" color="textGray">
-                {threshold}
+                Abstain (
+                <Box component="span" sx={{ fontWeight: "bold" }}>
+                  {formatValue(abstainVotes)}
+                </Box>
+                )
+              </Typography>
+
+              <Typography variant="body2" color="textGray">
+                Not Voted (
+                <Box component="span" sx={{ fontWeight: "bold" }}>
+                  {formatValue(notVotedVotes)}
+                </Box>
+                )
+              </Typography>
+            </Box>
+
+            {!isCC && noConfidence !== undefined && (
+              <Typography variant="body2" color="textGray">
+                No confidence (
+                <Box component="span" sx={{ fontWeight: "bold" }}>
+                  {formatValue(noConfidence)}
+                </Box>
+                )
               </Typography>
             )}
-
-            <Typography variant="body2" sx={{ color: errorRed.c500 }}>
-              {isCC ? "Unconstitutional" : "No"} (
-              <Box component="span" sx={{ fontWeight: "bold" }}>
-                {formatValue(noVotes)}
-              </Box>
-              )
-            </Typography>
-          </Box>
-
-          <ProgressContainer>
-            <StyledLinearProgress variant="determinate" value={yesPercentage} />
-            <PercentageOverlay>
-              <PercentageText>{yesPercentage?.toFixed(2)}%</PercentageText>
-              <PercentageText>{noPercentage?.toFixed(2)}%</PercentageText>
-            </PercentageOverlay>
-            {threshold !== null && <ThresholdMarker left={threshold * 100} />}
-          </ProgressContainer>
+          </Grid>
         </Grid>
-
-        <Grid item xs={12}>
-          <Box
-            mb={0.5}
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Typography variant="body2" color="textGray">
-              Abstain (
-              <Box component="span" sx={{ fontWeight: "bold" }}>
-                {formatValue(abstainVotes)}
-              </Box>
-              )
-            </Typography>
-
-            <Typography variant="body2" color="textGray">
-              Not Voted (
-              <Box component="span" sx={{ fontWeight: "bold" }}>
-                {formatValue(notVotedVotes)}
-              </Box>
-              )
-            </Typography>
-          </Box>
-
-          {!isCC && noConfidence !== undefined && (
-            <Typography variant="body2" color="textGray">
-              No confidence (
-              <Box component="span" sx={{ fontWeight: "bold" }}>
-                {formatValue(noConfidence)}
-              </Box>
-              )
-            </Typography>
-          )}
-        </Grid>
-      </Grid>
+      )}
     </Box>
   );
 };

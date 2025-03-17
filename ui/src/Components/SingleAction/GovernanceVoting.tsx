@@ -2,21 +2,16 @@ import { Box, Divider } from "@mui/material";
 import { OutcomeIndicator } from "./OutcomeIndicator";
 import { Typography } from "../Atoms/Typography";
 import { VoteSection } from "./VoteSection";
-import {
-  EpochParams,
-  GovernanceAction,
-  GovernanceActionType,
-  NetworkMetrics,
-} from "../../types/api";
+import { GovernanceAction, GovernanceActionType } from "../../types/api";
 import { getGovActionVotingThresholdKey } from "../../lib/utils";
-import { useEffect, useState } from "react";
-import { getNetworkMetrics } from "../../services/requests/getNetworkMetrics";
-import { getEpochParams } from "../../services/requests/getEpochParams";
+import { useCallback } from "react";
+import { useNetworkMetrics } from "../../hooks/useNetworkMetrics";
+import { SECURITY_RELEVANT_PARAMS_MAP } from "../../consts/params";
 
-type GovernanceVotingUIProps = {
+type GovernanceVotingProps = {
   action: GovernanceAction;
 };
-const GovernanceVotingUI = ({ action }: GovernanceVotingUIProps) => {
+const GovernanceVoting = ({ action }: GovernanceVotingProps) => {
   const {
     yes_votes,
     no_votes,
@@ -31,46 +26,22 @@ const GovernanceVotingUI = ({ action }: GovernanceVotingUIProps) => {
     type,
     status,
   } = action;
-  const [networkMetrics, setNetworkMetrics] = useState<NetworkMetrics | null>(
-    null
+  const {
+    networkMetrics,
+    epochParams,
+    areDRepVoteTotalsDisplayed,
+    areSPOVoteTotalsDisplayed,
+    areCCVoteTotalsDisplayed,
+  } = useNetworkMetrics(action);
+
+  const isSecurityGroup = useCallback(
+    () =>
+      Object.values(SECURITY_RELEVANT_PARAMS_MAP).some(
+        (paramKey) =>
+          proposal_params?.[paramKey as keyof typeof proposal_params] !== null
+      ),
+    [proposal_params]
   );
-  const [epochParams, setEpochParams] = useState<EpochParams | null>(null);
-
-  const getEpochForMetrics = () => {
-    if (status.ratified_epoch) return status.ratified_epoch;
-    if (status.enacted_epoch) return status.enacted_epoch;
-    if (status.expired_epoch) return status.expired_epoch;
-    if (status.dropped_epoch) return status.dropped_epoch;
-    return null;
-  };
-
-  const metricsEpoch = getEpochForMetrics();
-
-  useEffect(() => {
-    const fetchNetworkMetrics = async () => {
-      try {
-        const metrics =
-          metricsEpoch !== null
-            ? await getNetworkMetrics(metricsEpoch)
-            : await getNetworkMetrics();
-
-        const params =
-          metricsEpoch !== null
-            ? await getEpochParams(metricsEpoch)
-            : await getEpochParams();
-
-        setNetworkMetrics(metrics);
-        setEpochParams(params);
-      } catch (error) {
-        console.error("Failed to fetch network metrics:", error);
-        setNetworkMetrics(null);
-      }
-    };
-
-    if (action) {
-      fetchNetworkMetrics();
-    }
-  }, [action, metricsEpoch]);
 
   // Metrics collection
   const totalStakeControlledByAlwaysAbstain =
@@ -84,7 +55,8 @@ const GovernanceVotingUI = ({ action }: GovernanceVotingUIProps) => {
   const totalStakeControlledByDReps =
     Number(networkMetrics?.total_stake_controlled_by_active_dreps) ?? 0;
   const totalStakeControlledBySPOs =
-    Number(networkMetrics?.total_stake_controlled_by_stake_pools) ?? 0;
+    Number(networkMetrics?.total_stake_controlled_by_stake_pools) -
+    totalStakeControlledByAlwaysAbstainForSPOs;
   const noOfCommitteeMembers =
     Number(networkMetrics?.no_of_committee_members) ?? 0;
   const ccThreshold = (
@@ -126,6 +98,7 @@ const GovernanceVotingUI = ({ action }: GovernanceVotingUIProps) => {
     noOfCommitteeMembers - (ccYesVotes + ccNoVotes + ccAbstainVotes)
   );
 
+  // DReps vote percentages
   const dRepYesVotesPercentage = totalStakeControlledByDReps
     ? (dRepYesVotes / totalStakeControlledByDReps) * 100
     : undefined;
@@ -134,6 +107,7 @@ const GovernanceVotingUI = ({ action }: GovernanceVotingUIProps) => {
       ? Number(100 - dRepYesVotesPercentage)
       : undefined;
 
+  // SPOs vote percentages
   const poolYesVotesPercentage = totalStakeControlledBySPOs
     ? (poolYesVotes / totalStakeControlledBySPOs) * 100
     : undefined;
@@ -142,6 +116,7 @@ const GovernanceVotingUI = ({ action }: GovernanceVotingUIProps) => {
       ? Number(100 - poolYesVotesPercentage)
       : undefined;
 
+  // CC vote percentages
   const ccYesVotesPercentage =
     noOfCommitteeMembers - ccAbstainVotes
       ? (ccYesVotes / (noOfCommitteeMembers - ccAbstainVotes)) * 100
@@ -150,6 +125,46 @@ const GovernanceVotingUI = ({ action }: GovernanceVotingUIProps) => {
     ccYesVotesPercentage !== undefined
       ? Number(100 - ccYesVotesPercentage)
       : undefined;
+
+  // Calculate if each entity reached their threshold
+  const isDRepPassed =
+    dRepYesVotesPercentage !== undefined &&
+    (() => {
+      const votingThresholdKey = getGovActionVotingThresholdKey({
+        govActionType: type as GovernanceActionType,
+        protocolParams: proposal_params,
+        voterType: "dReps",
+      });
+      const thresholdValue =
+        votingThresholdKey && epochParams?.[votingThresholdKey];
+      if (thresholdValue) {
+        return dRepYesVotesPercentage >= thresholdValue * 100;
+      }
+      return dRepYesVotesPercentage > 50;
+    })();
+
+  const isSPOPassed =
+    poolYesVotesPercentage !== undefined &&
+    (() => {
+      const votingThresholdKey = getGovActionVotingThresholdKey({
+        govActionType: type as GovernanceActionType,
+        protocolParams: proposal_params,
+        voterType: "sPos",
+      });
+      const thresholdValue =
+        votingThresholdKey && epochParams?.[votingThresholdKey];
+
+      if (thresholdValue) {
+        return poolYesVotesPercentage >= thresholdValue * 100;
+      }
+      return poolYesVotesPercentage > 50;
+    })();
+
+  const isCCPassed =
+    ccYesVotesPercentage !== undefined &&
+    (() => {
+      return ccYesVotesPercentage >= Number(ccThreshold) * 100;
+    })();
 
   return (
     <Box>
@@ -187,6 +202,10 @@ const GovernanceVotingUI = ({ action }: GovernanceVotingUIProps) => {
         })()}
         yesPercentage={dRepYesVotesPercentage}
         noPercentage={dRepNoVotesPercentage}
+        isDisplayed={areDRepVoteTotalsDisplayed(
+          type as GovernanceActionType,
+          isSecurityGroup()
+        )}
       />
 
       <Divider sx={{ my: 2 }} />
@@ -209,6 +228,10 @@ const GovernanceVotingUI = ({ action }: GovernanceVotingUIProps) => {
         })()}
         yesPercentage={poolYesVotesPercentage}
         noPercentage={poolNoVotesPercentage}
+        isDisplayed={areSPOVoteTotalsDisplayed(
+          type as GovernanceActionType,
+          isSecurityGroup()
+        )}
       />
 
       <Divider sx={{ my: 2 }} />
@@ -224,26 +247,41 @@ const GovernanceVotingUI = ({ action }: GovernanceVotingUIProps) => {
         yesPercentage={ccYesVotesPercentage}
         noPercentage={ccNoVotesPercentage}
         isCC
+        isDisplayed={areCCVoteTotalsDisplayed(type as GovernanceActionType)}
       />
 
       <Divider sx={{ my: 2 }} />
 
       <Box>
-        <Typography
-          sx={{
-            mb: 1,
-          }}
-        >
-          Outcome
-        </Typography>
+        <Typography sx={{ mb: 1 }}>Outcome</Typography>
         <Box display="flex" justifyContent="flex-start" gap={1}>
-          <OutcomeIndicator title="DReps" passed={false} />
-          <OutcomeIndicator title="SPOs" passed={true} />
-          <OutcomeIndicator title="CC Committee" passed={true} />
+          <OutcomeIndicator
+            title="DReps"
+            passed={isDRepPassed}
+            isDisplayed={areDRepVoteTotalsDisplayed(
+              type as GovernanceActionType,
+              isSecurityGroup()
+            )}
+          />
+
+          <OutcomeIndicator
+            title="SPOs"
+            passed={isSPOPassed}
+            isDisplayed={areSPOVoteTotalsDisplayed(
+              type as GovernanceActionType,
+              isSecurityGroup()
+            )}
+          />
+
+          <OutcomeIndicator
+            title="CC Committee"
+            passed={isCCPassed}
+            isDisplayed={areCCVoteTotalsDisplayed(type as GovernanceActionType)}
+          />
         </Box>
       </Box>
     </Box>
   );
 };
 
-export default GovernanceVotingUI;
+export default GovernanceVoting;

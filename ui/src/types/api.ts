@@ -16,7 +16,7 @@ export interface GovernanceAction {
   epoch_no: number;
   url: string;
   data_hash: string;
-  proposal_params: {} | null;
+  proposal_params: EpochParams | null;
   title: string | null;
   abstract: string | null;
   status: Status;

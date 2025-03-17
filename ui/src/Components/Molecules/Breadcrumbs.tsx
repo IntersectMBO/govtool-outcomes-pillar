@@ -1,6 +1,5 @@
 import { NavLink, To } from "react-router-dom";
 import { Box, Divider, Skeleton } from "@mui/material";
-import { useScreenDimension } from "../../hooks/useDimensions";
 import { Typography } from "../Atoms/Typography";
 import { MetadataValidationStatus } from "../../types/api";
 import { getMetadataDataMissingStatusTranslation } from "../../lib/getMetadataDataMissingStatusTranslation";
@@ -20,7 +19,6 @@ export const Breadcrumbs = ({
   isMetadataLoading,
   isDataMissing,
 }: BreadcrumbsProps) => {
-  const { isMobile } = useScreenDimension();
   const showLoader =
     isMetadataLoading ||
     (!(
@@ -34,17 +32,17 @@ export const Breadcrumbs = ({
       sx={{
         display: "flex",
         alignItems: "center",
-        margin: `2px 0 ${isMobile ? "44px" : "24px"}`,
+        margin: "2px 0 20px",
       }}
     >
       <img
         src="/icons/ArrowLeftThin.svg"
         alt="arrow"
-        style={{ marginRight: "12px" }}
+        style={{ marginRight: "6px" }}
       />
       <NavLink to={elementOnePath} style={{ textDecorationColor: "#0033AD" }}>
         <Typography
-          color="primary"
+          color="primaryBlue"
           variant="caption"
           sx={{
             whiteSpace: "nowrap",

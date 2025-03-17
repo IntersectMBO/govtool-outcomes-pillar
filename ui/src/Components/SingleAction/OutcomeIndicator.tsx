@@ -3,22 +3,29 @@ import { Typography } from "../Atoms/Typography";
 import CloseIcon from "../../Assets/Icons/CloseIcon";
 import CheckMarkIcon from "../../Assets/Icons/CheckMarkIcon";
 import { errorRed, successGreen } from "../../consts/colors";
-
+type OutcomeIndicatorProps = {
+  title: string;
+  passed: boolean;
+  isDisplayed: boolean;
+};
 export const OutcomeIndicator = ({
   title,
   passed,
-}: {
-  title: string;
-  passed: boolean;
-}) => {
+  isDisplayed,
+}: OutcomeIndicatorProps) => {
   return (
     <Box display="flex" flexDirection="column" alignItems="center">
       <Avatar
         sx={{
-          bgcolor: passed ? successGreen.c500 : errorRed.c500,
+          bgcolor: !isDisplayed
+            ? "gray"
+            : passed
+            ? successGreen.c600
+            : errorRed.c500,
           width: 35,
           height: 35,
           mb: 1,
+          opacity: !isDisplayed ? 0.6 : 1,
         }}
       >
         {passed ? (
@@ -27,7 +34,10 @@ export const OutcomeIndicator = ({
           <CloseIcon width={11} height={11} />
         )}
       </Avatar>
-      <Typography variant="caption" color="textGray">
+      <Typography
+        variant="caption"
+        color={!isDisplayed ? "text.disabled" : "textGray"}
+      >
         {title}
       </Typography>
     </Box>

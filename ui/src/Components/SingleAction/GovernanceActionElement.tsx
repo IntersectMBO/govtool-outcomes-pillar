@@ -1,9 +1,10 @@
-import { Box, IconButton, Tooltip, Typography } from "@mui/material";
+import { Box, IconButton, Tooltip } from "@mui/material";
 import CopyIcon from "../../Assets/Icons/CopyIcon";
 import { useSnackbar } from "../../contexts/Snackbar";
 import { IconExternalLink } from "@intersect.mbo/intersectmbo.org-icons-set";
 import { openInNewTab } from "../../lib/openInNewTab";
 import { useAppContext } from "../../contexts/AppContext";
+import { Typography } from "../Atoms/Typography";
 
 interface GovernanceActionElementProps {
   title: string;
@@ -30,6 +31,7 @@ export default function GovernanceActionElement({
 
   const contentTypographyStyles = {
     fontSize: 16,
+    fontWeight: 400,
     color: "primaryBlue",
     wordBreak: "break-word",
     overflow: "hidden",
