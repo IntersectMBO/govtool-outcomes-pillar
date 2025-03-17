@@ -17,12 +17,12 @@ export interface GovernanceAction {
   url: string;
   data_hash: string;
   proposal_params: EpochParams | null;
-  title: string | null;
-  abstract: string | null;
+  title?: string;
+  abstract?: string;
   status: Status;
   status_times: StatusTimes;
-  motivation: string | null;
-  rationale: string | null;
+  motivation?: string;
+  rationale?: string;
   yes_votes: number;
   no_votes: number;
   abstain_votes: number;
@@ -51,8 +51,20 @@ export type StatusTimes = {
 };
 
 export type GovActionDescription = {
-  major: number;
-  minor: number;
+  [key: string]: JSONValue;
+};
+
+export type JSONValue =
+  | string
+  | number
+  | boolean
+  | null
+  | { [property: string]: JSONValue }
+  | JSONValue[];
+
+export type NewConstitutionAnchor = {
+  dataHash: string;
+  url: string;
 };
 
 export type Reference = {

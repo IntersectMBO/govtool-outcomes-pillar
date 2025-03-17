@@ -1,4 +1,12 @@
-import { Box, CircularProgress, Grid, Skeleton } from "@mui/material";
+import {
+  Box,
+  CircularProgress,
+  Grid,
+  Skeleton,
+  styled,
+  Tab,
+  Tabs,
+} from "@mui/material";
 import { Breadcrumbs } from "../Components/Molecules/Breadcrumbs";
 import { useGetGovernanceActionQuery } from "../hooks/useGetGovernanceActionQuery";
 import Header from "../Components/SingleAction/Header";
@@ -6,20 +14,70 @@ import { useMetadata } from "../hooks/useMetadata";
 import ReasoningElement from "../Components/SingleAction/ReasoningElement";
 import References from "../Components/SingleAction/References";
 import ActionIdentity from "../Components/SingleAction/ActionIdentity";
-import { encodeCIP129Identifier } from "../lib/utils";
+import { encodeCIP129Identifier, getFullGovActionId } from "../lib/utils";
 import GovernanceVotingUI from "../Components/SingleAction/GovernanceVoting";
 import { DataMissingInfoBox } from "../Components/Molecules/DataMissingInfoBox";
 import GovernanceActionElement from "../Components/SingleAction/GovernanceActionElement";
+import { useMemo, useState } from "react";
+import { ReasoningTabContent } from "../Components/SingleAction/ReasoningTabContent";
+import { GovernanceActionDetailsDiffView } from "../Components/SingleAction/GovernanceActionDetailsDiffView";
+import { mapArrayToObjectByKeys } from "../lib/mapArrayToObjectByKeys";
+import { filterUpdatableProtocolParams } from "../lib/filterUpdatableProtocolParams";
+import { useNetworkMetrics } from "../hooks/useNetworkMetrics";
+import { filterOutNullParams } from "../lib/filterOutNullParams";
+import { GovernanceActionType } from "../types/api";
+import { HardforkDetailsTabContent } from "../Components/SingleAction/HardforkDetailsTabContent";
+import { GovernanceActionNewCommitteeDetailsTabContent } from "../Components/SingleAction/GovernanceActionNewCommitteeDetailsTabContent";
+import { GovernanceActionNewConstitutionDetailsTabContent } from "../Components/SingleAction/GovernanceActionNewConstitutionDetailsTabContent";
+import { useScreenDimension } from "../hooks/useDimensions";
+import { GovernanceActionCardTreasuryWithdrawalElement } from "../Components/SingleAction/GovernanceActionCardTreasuryWithdrawalElement";
 
 type GovernanceActionProps = {
   id: string;
 };
 
+type TabPanelProps = {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+};
+
+const CustomTabPanel = ({ children, value, index }: TabPanelProps) =>
+  value === index && <Box sx={{ overflow: "auto" }}>{children}</Box>;
+
+type StyledTabProps = {
+  label: string;
+  isMobile: boolean;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const StyledTab = styled(({ isMobile, ...props }: StyledTabProps) => (
+  <Tab disableRipple {...props} />
+))(({ isMobile }) => ({
+  textTransform: "none",
+  fontWeight: 600,
+  fontSize: 16,
+  width: !isMobile ? "auto" : "50%",
+
+  color: "rgba(36, 34, 50, 0.5)",
+  "&.Mui-selected": {
+    color: "rgba(38, 37, 45, 1)",
+  },
+}));
+
 function GovernanceAction({ id }: GovernanceActionProps) {
+  const { isMobile } = useScreenDimension();
   const { governanceAction, isGovernanceActionLoading } =
     useGetGovernanceActionQuery(id);
-  const { metadata, metadataValid, isMetadataLoading } =
-    useMetadata(governanceAction);
+  const { metadata, metadataValid, isMetadataLoading } = useMetadata(
+    governanceAction,
+    {
+      skipConditionCheck: true,
+    }
+  );
+
+  const { epochParams } = useNetworkMetrics(governanceAction);
+  const [selectedTab, setSelectedTab] = useState<number>(0);
 
   const content = {
     title: governanceAction?.title || metadata?.data?.title,
@@ -38,6 +96,149 @@ function GovernanceAction({ id }: GovernanceActionProps) {
     index: governanceAction?.index.toString(16).padStart(2, "0"),
     bech32Prefix: "gov_action",
   });
+
+  const prevGovActionId =
+    governanceAction?.prev_gov_action_index &&
+    governanceAction?.prev_gov_action_tx_hash
+      ? getFullGovActionId(
+          governanceAction?.prev_gov_action_tx_hash,
+          governanceAction?.prev_gov_action_index
+        )
+      : null;
+
+  const mappedArraysToObjectsProtocolParams = useMemo(
+    () =>
+      mapArrayToObjectByKeys(governanceAction?.proposal_params, [
+        "PlutusV1",
+        "PlutusV2",
+        "PlutusV3",
+      ]),
+    [governanceAction?.proposal_params]
+  );
+
+  const updatableProtocolParams = useMemo(
+    () =>
+      filterUpdatableProtocolParams(
+        epochParams,
+        mappedArraysToObjectsProtocolParams,
+        ["id", "registered_tx_id", "key"]
+      ),
+    [epochParams, mappedArraysToObjectsProtocolParams]
+  );
+
+  const nonNullProtocolParams = useMemo(
+    () =>
+      filterOutNullParams(mappedArraysToObjectsProtocolParams, [
+        "id",
+        "registered_tx_id",
+        "key",
+      ]),
+    [mappedArraysToObjectsProtocolParams]
+  );
+
+  const showReasoningTab = !isDataMissing && hasAnyContent;
+
+  const showParametersTab =
+    (governanceAction?.type === GovernanceActionType.ParameterChange ||
+      governanceAction?.type === GovernanceActionType.NewConstitution) &&
+    !!governanceAction?.proposal_params &&
+    !!epochParams;
+
+  const showHardforkDetailsTab =
+    governanceAction?.type === GovernanceActionType.HardForkInitiation &&
+    !!governanceAction?.description;
+
+  const showNewCommitteeTab =
+    governanceAction?.type === GovernanceActionType.NewCommittee &&
+    !!governanceAction?.description;
+
+  const showNewConstitutionTab =
+    governanceAction?.type === GovernanceActionType.NewConstitution &&
+    !!governanceAction?.description &&
+    !!governanceAction?.description?.anchor;
+
+  const tabDefinitions = useMemo(() => {
+    return [
+      {
+        label: "Reasoning",
+        dataTestId: "reasoning-tab",
+        content: (
+          <ReasoningTabContent
+            abstract={content.abstract}
+            motivation={content.motivation}
+            rationale={content.rationale}
+          />
+        ),
+        visible: showReasoningTab,
+      },
+      {
+        label: "Parameters",
+        dataTestId: "parameters-tab",
+        content: (
+          <GovernanceActionDetailsDiffView
+            oldJson={updatableProtocolParams}
+            newJson={nonNullProtocolParams}
+          />
+        ),
+        visible: showParametersTab,
+      },
+      {
+        label: "Details",
+        dataTestId: "hardfork-details-tab",
+        content: (
+          <HardforkDetailsTabContent
+            description={governanceAction?.description}
+            prevGovActionId={prevGovActionId}
+          />
+        ),
+        visible: showHardforkDetailsTab,
+      },
+      {
+        label: "Parameters",
+        dataTestId: "new-committee-tab",
+        content: (
+          <GovernanceActionNewCommitteeDetailsTabContent
+            description={governanceAction?.description}
+          />
+        ),
+        visible: showNewCommitteeTab,
+      },
+      {
+        label: "Details",
+        dataTestId: "new-constitution-tab",
+        content: (
+          <GovernanceActionNewConstitutionDetailsTabContent
+            description={governanceAction?.description}
+          />
+        ),
+        visible: showNewConstitutionTab,
+      },
+    ];
+  }, [
+    content.abstract,
+    content.motivation,
+    content.rationale,
+    updatableProtocolParams,
+    nonNullProtocolParams,
+    governanceAction?.description,
+    prevGovActionId,
+    showReasoningTab,
+    showParametersTab,
+    showHardforkDetailsTab,
+    showNewCommitteeTab,
+    showNewConstitutionTab,
+  ]);
+
+  const visibleTabs = useMemo(() => {
+    return tabDefinitions.filter((tab) => tab.visible);
+  }, [tabDefinitions]);
+
+  const handleChange: (
+    event: React.SyntheticEvent,
+    newValue: number
+  ) => void = (_event, newValue) => {
+    setSelectedTab(newValue);
+  };
 
   if (isGovernanceActionLoading) {
     return (
@@ -77,6 +278,20 @@ function GovernanceAction({ id }: GovernanceActionProps) {
     ...(!metadataValid && {
       border: "1px solid #F6D5D5",
     }),
+  };
+
+  const renderAllTabContent = () => {
+    return tabDefinitions.map((tab, index) => (
+      <CustomTabPanel
+        key={tab.dataTestId}
+        value={selectedTab}
+        index={visibleTabs.findIndex(
+          (visibleTab) => visibleTab.dataTestId === tab.dataTestId
+        )}
+      >
+        {tab.visible && tab.content}
+      </CustomTabPanel>
+    ));
   };
 
   return (
@@ -124,42 +339,69 @@ function GovernanceAction({ id }: GovernanceActionProps) {
                   </>
                 )}
 
-                {metadataValid && (
+                {visibleTabs.length > 0 && (
                   <>
-                    {content.abstract && (
-                      <ReasoningElement
-                        label="Abstract"
-                        text={content.abstract as string}
-                      />
-                    )}
+                    {visibleTabs.length === 1 ? (
+                      visibleTabs[0].content
+                    ) : (
+                      <>
+                        <Tabs
+                          sx={{
+                            display: "flex",
+                            fontSize: 16,
+                            fontWeight: 500,
+                          }}
+                          value={selectedTab}
+                          indicatorColor="secondary"
+                          onChange={handleChange}
+                          aria-label="Governance action content description"
+                        >
+                          {visibleTabs.map((tab) => (
+                            <StyledTab
+                              key={tab.dataTestId}
+                              data-testid={tab.dataTestId}
+                              label={tab.label}
+                              isMobile={isMobile}
+                            />
+                          ))}
+                        </Tabs>
 
-                    {content.motivation && (
-                      <ReasoningElement
-                        label="Motivation"
-                        text={content.motivation as string}
-                      />
-                    )}
-
-                    {content.rationale && (
-                      <ReasoningElement
-                        label="Rationale"
-                        text={content.rationale as string}
-                      />
+                        {renderAllTabContent()}
+                      </>
                     )}
                   </>
                 )}
-                <GovernanceActionElement
-                  title="Metadata anchor link"
-                  type="link"
-                  content={governanceAction?.url}
-                  isCopyable
-                />
-                <GovernanceActionElement
-                  title="Metadata anchor hash"
-                  type="text"
-                  content={governanceAction?.data_hash}
-                  isCopyable
-                />
+
+                {governanceAction?.description &&
+                  governanceAction?.type ===
+                    GovernanceActionType.TreasuryWithdrawals &&
+                  Array.isArray(governanceAction?.description) &&
+                  governanceAction?.description?.map((withdrawal) => (
+                    <GovernanceActionCardTreasuryWithdrawalElement
+                      key={withdrawal.receivingAddress}
+                      receivingAddress={withdrawal.receivingAddress}
+                      amount={withdrawal.amount}
+                    />
+                  ))}
+
+                {governanceAction?.type !==
+                  GovernanceActionType.NewConstitution && (
+                  <>
+                    <GovernanceActionElement
+                      title="Metadata anchor link"
+                      type="link"
+                      content={governanceAction?.url}
+                      isCopyable
+                    />
+                    <GovernanceActionElement
+                      title="Metadata anchor hash"
+                      type="text"
+                      content={governanceAction?.data_hash}
+                      isCopyable
+                    />
+                  </>
+                )}
+
                 {metadataValid && content.references.length > 0 && (
                   <References links={content.references} />
                 )}

@@ -288,3 +288,17 @@ export function setItemToLocalStorage(key: string, data: any) {
 export function removeItemFromLocalStorage(key: string) {
   window.localStorage.removeItem(key);
 }
+
+export const correctVoteAdaFormat = (
+  lovelace: number | undefined,
+  locale: string | undefined = undefined
+) => {
+  if (lovelace) {
+    const ada = lovelace / LOVELACE;
+
+    return ada.toLocaleString(locale, {
+      maximumFractionDigits: 3,
+    });
+  }
+  return "0";
+};

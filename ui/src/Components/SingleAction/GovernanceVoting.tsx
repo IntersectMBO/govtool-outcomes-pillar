@@ -24,7 +24,6 @@ const GovernanceVoting = ({ action }: GovernanceVotingProps) => {
     cc_abstain_votes,
     proposal_params,
     type,
-    status,
   } = action;
   const {
     networkMetrics,

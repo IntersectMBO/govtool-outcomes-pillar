@@ -1,5 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
-import { EpochParams, GovernanceAction, NetworkMetrics, GovernanceActionType } from "../types/api";
+import {
+  EpochParams,
+  GovernanceAction,
+  NetworkMetrics,
+  GovernanceActionType,
+} from "../types/api";
 import { getNetworkMetrics } from "../services/requests/getNetworkMetrics";
 import { getEpochParams } from "../services/requests/getEpochParams";
 
@@ -11,23 +16,25 @@ import { getEpochParams } from "../services/requests/getEpochParams";
 const BOOTSTRAPPING_PHASE_MAJOR = 9;
 
 export const useNetworkMetrics = (action: GovernanceAction) => {
-  const [networkMetrics, setNetworkMetrics] = useState<NetworkMetrics | null>(null);
+  const [networkMetrics, setNetworkMetrics] = useState<NetworkMetrics | null>(
+    null
+  );
   const [epochParams, setEpochParams] = useState<EpochParams | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
 
   const getEpochForMetrics = () => {
-    if (action.status.ratified_epoch) return action.status.ratified_epoch;
-    if (action.status.enacted_epoch) return action.status.enacted_epoch;
-    if (action.status.expired_epoch) return action.status.expired_epoch;
-    if (action.status.dropped_epoch) return action.status.dropped_epoch;
+    if (action?.status?.ratified_epoch) return action?.status?.ratified_epoch;
+    if (action?.status?.enacted_epoch) return action?.status?.enacted_epoch;
+    if (action?.status?.expired_epoch) return action?.status?.expired_epoch;
+    if (action?.status?.dropped_epoch) return action?.status?.dropped_epoch;
     return null;
   };
 
   const metricsEpoch = getEpochForMetrics();
-  
-  // Cardano governance phase flags
-  const isInBootstrapPhase = epochParams?.protocol_major === BOOTSTRAPPING_PHASE_MAJOR;
+
+  const isInBootstrapPhase =
+    epochParams?.protocol_major === BOOTSTRAPPING_PHASE_MAJOR;
   const isFullGovernance = Number(epochParams?.protocol_major) >= 10;
 
   useEffect(() => {
@@ -72,7 +79,7 @@ export const useNetworkMetrics = (action: GovernanceAction) => {
   const areDRepVoteTotalsDisplayed = useCallback(
     (
       governanceActionType: GovernanceActionType,
-      isSecurityGroup: boolean = false,
+      isSecurityGroup: boolean = false
     ) => {
       if (isInBootstrapPhase) {
         return !(
@@ -84,7 +91,7 @@ export const useNetworkMetrics = (action: GovernanceAction) => {
 
       return true;
     },
-    [isInBootstrapPhase],
+    [isInBootstrapPhase]
   );
 
   /**
@@ -108,7 +115,7 @@ export const useNetworkMetrics = (action: GovernanceAction) => {
       }
       return true;
     },
-    [isInBootstrapPhase, isFullGovernance],
+    [isInBootstrapPhase, isFullGovernance]
   );
 
   /**
@@ -126,7 +133,7 @@ export const useNetworkMetrics = (action: GovernanceAction) => {
       }
       return true;
     },
-    [isFullGovernance],
+    [isFullGovernance]
   );
 
   return {
@@ -136,14 +143,14 @@ export const useNetworkMetrics = (action: GovernanceAction) => {
     loading,
     error,
     metricsEpoch,
-    
+
     // Governance phase flags
     isInBootstrapPhase,
     isFullGovernance,
-    
+
     // Vote display logic
     areDRepVoteTotalsDisplayed,
     areSPOVoteTotalsDisplayed,
-    areCCVoteTotalsDisplayed
+    areCCVoteTotalsDisplayed,
   };
 };

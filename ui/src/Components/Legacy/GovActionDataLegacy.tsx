@@ -47,7 +47,7 @@ const GovActionDataLegacy = ({
       }}
     >
       <GovActionTitleLegacy
-        title={title}
+        title={title as string}
         isDataMissing={metadataStatus || null}
         extra={{ externalMetadataLink: shareableLink as string }}
       />
@@ -121,7 +121,6 @@ const GovActionDataLegacy = ({
         title="Metadata anchor link"
         type="link"
         content={url}
-        isCopyable
       />
       <GovernanceActionElement
         title="Metadata anchor hash"
