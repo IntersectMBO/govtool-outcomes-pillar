@@ -2,6 +2,7 @@ import { Box, Grid, LinearProgress, styled } from "@mui/material";
 import { correctAdaFormatWithSuffix } from "../../lib/utils";
 import { errorRed, successGreen } from "../../consts/colors";
 import { Typography } from "../Atoms/Typography";
+import { VoteSectionLoader } from "../Loaders/VoteSectionLoader";
 
 type VoteSectionProps = {
   title: string;
@@ -16,6 +17,8 @@ type VoteSectionProps = {
   noPercentage?: number;
   isCC?: boolean;
   isDisplayed: boolean;
+  isLoading?: boolean;
+  dataTestId?: string;
 };
 
 const ProgressContainer = styled(Box)({
@@ -77,14 +80,20 @@ export const VoteSection = ({
   noPercentage = 0,
   isCC = false,
   isDisplayed,
+  isLoading = true,
+  dataTestId,
 }: VoteSectionProps) => {
   const formatValue = (value: number) =>
     isCC ? value : `₳${correctAdaFormatWithSuffix(value)}`;
+  if (isLoading) {
+    return <VoteSectionLoader title={title} isCC={isCC} />;
+  }
 
   return (
-    <Box mb={3}>
+    <Box data-testid={dataTestId} mb={3}>
       <Box display="flex" alignItems="center" gap={1} mb={1}>
         <Typography
+          data-testid="outcome-voter-label"
           color="textGray"
           sx={{
             fontWeight: 600,
@@ -93,7 +102,11 @@ export const VoteSection = ({
         >
           {title}
         </Typography>
-        <Typography variant="body2" color="textGray">
+        <Typography
+          data-testid="total-controlled-amount"
+          variant="body2"
+          color="textGray"
+        >
           (
           <Box component="span" sx={{ fontWeight: "bold" }}>
             {formatValue(totalControlled)}
@@ -102,15 +115,28 @@ export const VoteSection = ({
         </Typography>
       </Box>
       {!isDisplayed && (
-        <Typography variant="body2" color="textGray">
+        <Typography
+          data-testid="voting-not-available-label"
+          variant="body2"
+          color="textGray"
+        >
           {`Voting for this action is not available for ${title}`}
         </Typography>
       )}
       {isDisplayed && (
         <Grid container spacing={1}>
           <Grid item xs={12}>
-            <Box display="flex" justifyContent="space-between" mb={0.5}>
-              <Typography variant="body2" sx={{ color: successGreen.c500 }}>
+            <Box
+              data-testid="votes-numbers-section"
+              display="flex"
+              justifyContent="space-between"
+              mb={0.5}
+            >
+              <Typography
+                data-testid="outcomes-yes-votes"
+                variant="body2"
+                sx={{ color: successGreen.c600 }}
+              >
                 {isCC ? "Constitutional" : "Yes"} (
                 <Box component="span" sx={{ fontWeight: "bold" }}>
                   {formatValue(yesVotes)}
@@ -119,12 +145,20 @@ export const VoteSection = ({
               </Typography>
 
               {threshold !== null && (
-                <Typography variant="body2" color="textGray">
+                <Typography
+                  data-testid="outcome-threshold"
+                  variant="body2"
+                  color="textGray"
+                >
                   {threshold}
                 </Typography>
               )}
 
-              <Typography variant="body2" sx={{ color: errorRed.c500 }}>
+              <Typography
+                data-testid="outcome-no-votes"
+                variant="body2"
+                sx={{ color: errorRed.c500 }}
+              >
                 {isCC ? "Unconstitutional" : "No"} (
                 <Box component="span" sx={{ fontWeight: "bold" }}>
                   {formatValue(noVotes)}
@@ -135,12 +169,17 @@ export const VoteSection = ({
 
             <ProgressContainer>
               <StyledLinearProgress
+                data-testid="percentages-progress-bar"
                 variant="determinate"
                 value={yesPercentage}
               />
               <PercentageOverlay>
-                <PercentageText>{yesPercentage?.toFixed(2)}%</PercentageText>
-                <PercentageText>{noPercentage?.toFixed(2)}%</PercentageText>
+                <PercentageText data-testid="yes-percentage-text">
+                  {yesPercentage?.toFixed(2)}%
+                </PercentageText>
+                <PercentageText data-testid="no-percentage-text">
+                  {noPercentage?.toFixed(2)}%
+                </PercentageText>
               </PercentageOverlay>
               {threshold !== null && <ThresholdMarker left={threshold * 100} />}
             </ProgressContainer>
@@ -152,7 +191,11 @@ export const VoteSection = ({
               justifyContent="space-between"
               alignItems="center"
             >
-              <Typography variant="body2" color="textGray">
+              <Typography
+                data-testid="outcome-abstain-votes"
+                variant="body2"
+                color="textGray"
+              >
                 Abstain (
                 <Box component="span" sx={{ fontWeight: "bold" }}>
                   {formatValue(abstainVotes)}
@@ -160,7 +203,11 @@ export const VoteSection = ({
                 )
               </Typography>
 
-              <Typography variant="body2" color="textGray">
+              <Typography
+                data-testid="outcome-not-voted-votes"
+                variant="body2"
+                color="textGray"
+              >
                 Not Voted (
                 <Box component="span" sx={{ fontWeight: "bold" }}>
                   {formatValue(notVotedVotes)}
@@ -170,7 +217,11 @@ export const VoteSection = ({
             </Box>
 
             {!isCC && noConfidence !== undefined && (
-              <Typography variant="body2" color="textGray">
+              <Typography
+                data-testid="outcome-no-confidence-votes"
+                variant="body2"
+                color="textGray"
+              >
                 No confidence (
                 <Box component="span" sx={{ fontWeight: "bold" }}>
                   {formatValue(noConfidence)}

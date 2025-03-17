@@ -3,21 +3,35 @@ import { Typography } from "../Atoms/Typography";
 import CloseIcon from "../../Assets/Icons/CloseIcon";
 import CheckMarkIcon from "../../Assets/Icons/CheckMarkIcon";
 import { errorRed, successGreen } from "../../consts/colors";
+
 type OutcomeIndicatorProps = {
   title: string;
   passed: boolean;
   isDisplayed: boolean;
+  isLoading?: boolean;
+  dataTestId?: string;
 };
+
 export const OutcomeIndicator = ({
   title,
   passed,
   isDisplayed,
+  isLoading = true,
+  dataTestId,
 }: OutcomeIndicatorProps) => {
   return (
-    <Box display="flex" flexDirection="column" alignItems="center">
+    <Box
+      data-testid={dataTestId}
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+    >
       <Avatar
+        data-testid="outcome-icon"
         sx={{
-          bgcolor: !isDisplayed
+          bgcolor: isLoading
+            ? "gray"
+            : !isDisplayed
             ? "gray"
             : passed
             ? successGreen.c600
@@ -26,6 +40,7 @@ export const OutcomeIndicator = ({
           height: 35,
           mb: 1,
           opacity: !isDisplayed ? 0.6 : 1,
+          transition: "background-color 0.3s ease-in-out",
         }}
       >
         {passed ? (
@@ -35,6 +50,7 @@ export const OutcomeIndicator = ({
         )}
       </Avatar>
       <Typography
+        data-testid="voter-type-label"
         variant="caption"
         color={!isDisplayed ? "text.disabled" : "textGray"}
       >

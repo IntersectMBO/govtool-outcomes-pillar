@@ -8,10 +8,14 @@ function CopyButton({ text }: { text: string }) {
     navigator.clipboard.writeText(text);
     addSuccessAlert("Copied to clipboard!");
   };
-  
+
   return (
     <Tooltip title="Copy to clipboard">
-      <IconButton onClick={handleCopyClick} size="small">
+      <IconButton
+        data-testid="copy-button"
+        onClick={handleCopyClick}
+        size="small"
+      >
         <CopyIcon width={16} height={16} />
       </IconButton>
     </Tooltip>

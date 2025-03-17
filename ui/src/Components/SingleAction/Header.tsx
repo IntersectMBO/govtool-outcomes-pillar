@@ -1,9 +1,9 @@
 import { Box, Skeleton } from "@mui/material";
 import ShareIcon from "../../Assets/Icons/ShareIcon";
-import { GovernanceAction, MetadataValidationStatus } from "../../types/api";
+import { MetadataValidationStatus } from "../../types/api";
 import { useSnackbar } from "../../contexts/Snackbar";
 import { Typography } from "../Atoms/Typography";
-import { encodeCIP129Identifier } from "../../lib/utils";
+
 import { getMetadataDataMissingStatusTranslation } from "../../lib/getMetadataDataMissingStatusTranslation";
 import { Button } from "../Atoms/Button";
 
@@ -11,7 +11,6 @@ interface HeaderProps {
   title: string | null;
   isGovernanceActionLoading: boolean;
   isMetadataLoading: boolean;
-  governanceAction: GovernanceAction;
   isDataMissing: MetadataValidationStatus | null;
 }
 
@@ -19,16 +18,9 @@ export default function Header({
   title,
   isGovernanceActionLoading,
   isMetadataLoading,
-  governanceAction,
   isDataMissing,
 }: HeaderProps) {
   const { addSuccessAlert } = useSnackbar();
-
-  const idCIP129 = encodeCIP129Identifier({
-    txID: governanceAction?.tx_hash,
-    index: governanceAction?.index.toString(16).padStart(2, "0"),
-    bech32Prefix: "gov_action",
-  });
 
   const onCopy = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
@@ -38,7 +30,7 @@ export default function Header({
 
   return (
     <Box
-      data-testid={`single-action-${idCIP129}-header`}
+      data-testid={`single-action-header`}
       display="flex"
       justifyContent="space-between"
     >
@@ -46,7 +38,7 @@ export default function Header({
         <Skeleton variant="rounded" width="75%" height={32} />
       ) : (
         <Typography
-          data-testid={`single-action-${idCIP129}-title`}
+          data-testid={`single-action-title`}
           sx={{
             fontSize: 22,
             py: "6px",
@@ -67,7 +59,7 @@ export default function Header({
       <Button
         size="small"
         variant="text"
-        dataTestId={`single-action-${idCIP129}-share-link`}
+        dataTestId={`single-action-share-link`}
         onClick={onCopy}
         sx={(theme) => ({
           padding: 0,

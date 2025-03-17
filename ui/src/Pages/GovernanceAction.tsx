@@ -25,11 +25,11 @@ import { filterUpdatableProtocolParams } from "../lib/filterUpdatableProtocolPar
 import { useNetworkMetrics } from "../hooks/useNetworkMetrics";
 import { filterOutNullParams } from "../lib/filterOutNullParams";
 import { GovernanceActionType } from "../types/api";
-import { HardforkDetailsTabContent } from "../Components/SingleAction/HardforkDetailsTabContent";
 import { GovernanceActionNewCommitteeDetailsTabContent } from "../Components/SingleAction/GovernanceActionNewCommitteeDetailsTabContent";
 import { GovernanceActionNewConstitutionDetailsTabContent } from "../Components/SingleAction/GovernanceActionNewConstitutionDetailsTabContent";
 import { useScreenDimension } from "../hooks/useDimensions";
 import { GovernanceActionCardTreasuryWithdrawalElement } from "../Components/SingleAction/GovernanceActionCardTreasuryWithdrawalElement";
+import { HardForkDetailsTabContent } from "../Components/SingleAction/HardForkDetailsTabContent";
 
 type GovernanceActionProps = {
   id: string;
@@ -49,7 +49,6 @@ type StyledTabProps = {
   isMobile: boolean;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const StyledTab = styled(({ isMobile, ...props }: StyledTabProps) => (
   <Tab disableRipple {...props} />
 ))(({ isMobile }) => ({
@@ -68,12 +67,8 @@ function GovernanceAction({ id }: GovernanceActionProps) {
   const { isMobile } = useScreenDimension();
   const { governanceAction, isGovernanceActionLoading } =
     useGetGovernanceActionQuery(id);
-  const { metadata, metadataValid, isMetadataLoading } = useMetadata(
-    governanceAction,
-    {
-      skipConditionCheck: true,
-    }
-  );
+  const { metadata, metadataValid, isMetadataLoading } =
+    useMetadata(governanceAction);
 
   const { epochParams } = useNetworkMetrics(governanceAction);
   const [selectedTab, setSelectedTab] = useState<number>(0);
@@ -185,7 +180,7 @@ function GovernanceAction({ id }: GovernanceActionProps) {
         label: "Details",
         dataTestId: "hardfork-details-tab",
         content: (
-          <HardforkDetailsTabContent
+          <HardForkDetailsTabContent
             description={governanceAction?.description}
             prevGovActionId={prevGovActionId}
           />
@@ -321,7 +316,6 @@ function GovernanceAction({ id }: GovernanceActionProps) {
                   title={content.title}
                   isGovernanceActionLoading={isGovernanceActionLoading}
                   isMetadataLoading={isMetadataLoading}
-                  governanceAction={governanceAction}
                   isDataMissing={isDataMissing}
                 />
 
@@ -364,7 +358,6 @@ function GovernanceAction({ id }: GovernanceActionProps) {
                             />
                           ))}
                         </Tabs>
-
                         {renderAllTabContent()}
                       </>
                     )}
@@ -391,12 +384,14 @@ function GovernanceAction({ id }: GovernanceActionProps) {
                       type="link"
                       content={governanceAction?.url}
                       isCopyable
+                      dataTestId="metadata-anchor-link"
                     />
                     <GovernanceActionElement
                       title="Metadata anchor hash"
                       type="text"
                       content={governanceAction?.data_hash}
                       isCopyable
+                      dataTestId="metadata-anchor-hash"
                     />
                   </>
                 )}
@@ -411,7 +406,7 @@ function GovernanceAction({ id }: GovernanceActionProps) {
 
         <Grid item xs={12} lg={5} sx={{ position: "relative" }}>
           <Box
-            data-testid={`single-action-${idCIP129}-outcome-numbers`}
+            data-testid={`single-action-outcome-numbers`}
             sx={{
               display: "flex",
               flexDirection: "column",

@@ -20,7 +20,7 @@ export const useNetworkMetrics = (action: GovernanceAction) => {
     null
   );
   const [epochParams, setEpochParams] = useState<EpochParams | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
 
   const getEpochForMetrics = () => {
@@ -41,7 +41,7 @@ export const useNetworkMetrics = (action: GovernanceAction) => {
     const fetchNetworkMetrics = async () => {
       if (!action) return;
 
-      setLoading(true);
+      setIsLoading(true);
       setError(null);
       setNetworkMetrics(null);
       setEpochParams(null);
@@ -63,7 +63,7 @@ export const useNetworkMetrics = (action: GovernanceAction) => {
         console.error("Failed to fetch network metrics:", error);
         setError(error instanceof Error ? error : new Error(String(error)));
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
@@ -140,7 +140,7 @@ export const useNetworkMetrics = (action: GovernanceAction) => {
     // Network and epoch data
     networkMetrics,
     epochParams,
-    loading,
+    isLoading,
     error,
     metricsEpoch,
 

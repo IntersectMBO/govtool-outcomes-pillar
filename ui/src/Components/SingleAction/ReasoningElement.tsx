@@ -3,10 +3,14 @@ import Markdown from "react-markdown";
 type ReasoningElementProps = {
   label: string;
   text: string;
+  dataTestId?: string;
 };
-function ReasoningElement({ label, text }: ReasoningElementProps) {
+function ReasoningElement({ label, text, dataTestId }: ReasoningElementProps) {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+    <Box
+      data-testid={dataTestId}
+      sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}
+    >
       <Typography
         sx={{
           fontSize: 14,

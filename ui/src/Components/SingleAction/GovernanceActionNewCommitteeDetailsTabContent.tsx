@@ -36,15 +36,23 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
     }));
 
   return (
-    <Box>
+    <Box display="flex" flexDirection="column" gap={3}>
       {membersToBeAdded.length > 0 && (
-        <Box mb="32px">
+        <Box
+          data-testid="members-to-be-added-to-the-committee"
+          sx={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            gap: 0.5,
+          }}
+        >
           <Typography
             sx={{
               fontSize: 14,
               fontWeight: 600,
               lineHeight: "20px",
-              color: "neutralGray",
+              color: "textGray",
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
@@ -53,12 +61,17 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
             Members to be added to the Committee
           </Typography>
           {membersToBeAdded.map(({ cip129Identifier }) => (
-            <Box display="flex" flexDirection="row">
+            <Box
+              display="flex"
+              flexDirection="row"
+              justifyContent="space-between"
+            >
               <Typography
+                data-testid={`member-to-be-added-to-the-committee-id-${cip129Identifier}`}
                 sx={{
                   fontSize: 16,
                   fontWeight: 400,
-                  maxWidth: "auto",
+                  width: "100%",
                   lineHeight: "24px",
                   color: "primaryBlue",
                 }}
@@ -73,13 +86,21 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
         </Box>
       )}
       {(description?.membersToBeRemoved as string[]).length > 0 && (
-        <Box mb="32px">
+        <Box
+          data-testid="members-to-be-removed-from-the-committee"
+          sx={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            gap: 0.5,
+          }}
+        >
           <Typography
             sx={{
               fontSize: 14,
               fontWeight: 600,
               lineHeight: "20px",
-              color: "neutralGray",
+              color: "textGray",
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
@@ -88,8 +109,13 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
             Members to be removed from the Committee
           </Typography>
           {(description?.membersToBeRemoved as string[]).map((hash) => (
-            <Box display="flex" flexDirection="row">
+            <Box
+              display="flex"
+              flexDirection="row"
+              justifyContent="space-between"
+            >
               <Typography
+                data-testid="members-to-be-removed-from-the-committee-id"
                 sx={{
                   fontSize: 16,
                   fontWeight: 400,
@@ -117,13 +143,21 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
       )}
 
       {membersToBeUpdated.length > 0 && (
-        <Box mb="32px">
+        <Box
+          data-testid="change-to-terms-of-existing-members"
+          sx={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            gap: 0.5,
+          }}
+        >
           <Typography
             sx={{
               fontSize: 14,
               fontWeight: 600,
               lineHeight: "20px",
-              color: "neutralGray",
+              color: "textGray",
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
@@ -151,9 +185,10 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
                   </Box>
                 </Box>
                 <Typography
+                  data-testid="member-expiration-update"
                   sx={{
                     fontSize: 14,
-                    fontWeight: 400,
+                    fontWeight: 500,
                     lineHeight: "24px",
                     color: "neutralGray",
                   }}
@@ -166,13 +201,21 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
         </Box>
       )}
       {description?.threshold && (
-        <Box>
+        <Box
+          data-testid="new-threshold-container"
+          sx={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            gap: 0.5,
+          }}
+        >
           <Typography
             sx={{
               fontSize: 14,
               fontWeight: 600,
               lineHeight: "20px",
-              color: "neutralGray",
+              color: "textGray",
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
@@ -181,11 +224,13 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
             New threshold value
           </Typography>
           <Typography
+            data-testid="new-threshold-value"
             sx={{
               fontSize: 16,
-              fontWeight: 400,
+              fontWeight: 500,
               maxWidth: "auto",
               lineHeight: "24px",
+              color: "neutralGray",
             }}
           >
             {(description?.threshold as number).toString()}

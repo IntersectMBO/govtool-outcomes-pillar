@@ -9,9 +9,21 @@ export const ReasoningTabContent = ({
 }: Pick<GovernanceAction, "abstract" | "motivation" | "rationale">) => {
   return (
     <Box display="flex" flexDirection="column" gap={3}>
-      <ReasoningElement label="Abstract" text={abstract as string} />
-      <ReasoningElement label="Motivation" text={motivation as string} />
-      <ReasoningElement label="Rationale" text={rationale as string} />
+      <ReasoningElement
+        label="Abstract"
+        text={abstract as string}
+        dataTestId="governance-action-abstract"
+      />
+      <ReasoningElement
+        label="Motivation"
+        text={motivation as string}
+        dataTestId="governance-action-motivation"
+      />
+      <ReasoningElement
+        label="Rationale"
+        text={rationale as string}
+        dataTestId="governance-action-rationale"
+      />
     </Box>
   );
 };

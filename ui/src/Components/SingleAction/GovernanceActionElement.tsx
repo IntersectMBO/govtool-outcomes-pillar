@@ -1,4 +1,4 @@
-import { Box, IconButton, Tooltip } from "@mui/material";
+import { Box, IconButton, Link, Tooltip } from "@mui/material";
 import CopyIcon from "../../Assets/Icons/CopyIcon";
 import { useSnackbar } from "../../contexts/Snackbar";
 import { IconExternalLink } from "@intersect.mbo/intersectmbo.org-icons-set";
@@ -23,6 +23,7 @@ export default function GovernanceActionElement({
 }: GovernanceActionElementProps) {
   const { addSuccessAlert } = useSnackbar();
   const { ipfsGateway } = useAppContext();
+  if (!content) return;
 
   const handleCopyClick = () => {
     navigator.clipboard.writeText(content);
@@ -46,8 +47,6 @@ export default function GovernanceActionElement({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: 1,
-    minWidth: 0,
   };
 
   const renderContent = () => {
@@ -68,14 +67,16 @@ export default function GovernanceActionElement({
 
     if (type === "link") {
       return (
-        <Box sx={contentContainerStyles}>
-          <a href={content} style={{ textDecoration: "none" }}>
-            <Typography sx={contentTypographyStyles}>{content}</Typography>
-          </a>
-          <IconButton onClick={() => openInNewTab(content, ipfsGateway)}>
+        <Link
+          onClick={() => openInNewTab(content, ipfsGateway)}
+          sx={{ ...contentContainerStyles, cursor: "pointer" }}
+          style={{ textDecoration: "none" }}
+        >
+          <Typography sx={contentTypographyStyles}>{content}</Typography>
+          <IconButton>
             <IconExternalLink fill="#0033AD" />
           </IconButton>
-        </Box>
+        </Link>
       );
     }
 

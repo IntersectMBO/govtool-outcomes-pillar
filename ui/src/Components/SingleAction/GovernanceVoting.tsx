@@ -28,6 +28,7 @@ const GovernanceVoting = ({ action }: GovernanceVotingProps) => {
   const {
     networkMetrics,
     epochParams,
+    isLoading,
     areDRepVoteTotalsDisplayed,
     areSPOVoteTotalsDisplayed,
     areCCVoteTotalsDisplayed,
@@ -205,6 +206,8 @@ const GovernanceVoting = ({ action }: GovernanceVotingProps) => {
           type as GovernanceActionType,
           isSecurityGroup()
         )}
+        isLoading={isLoading}
+        dataTestId="DReps-voting-results-data"
       />
 
       <Divider sx={{ my: 2 }} />
@@ -231,6 +234,8 @@ const GovernanceVoting = ({ action }: GovernanceVotingProps) => {
           type as GovernanceActionType,
           isSecurityGroup()
         )}
+        isLoading={isLoading}
+        dataTestId="SPOs-voting-results-data"
       />
 
       <Divider sx={{ my: 2 }} />
@@ -247,6 +252,8 @@ const GovernanceVoting = ({ action }: GovernanceVotingProps) => {
         noPercentage={ccNoVotesPercentage}
         isCC
         isDisplayed={areCCVoteTotalsDisplayed(type as GovernanceActionType)}
+        isLoading={isLoading}
+        dataTestId="CC-voting-results-data"
       />
 
       <Divider sx={{ my: 2 }} />
@@ -261,6 +268,8 @@ const GovernanceVoting = ({ action }: GovernanceVotingProps) => {
               type as GovernanceActionType,
               isSecurityGroup()
             )}
+            isLoading={isLoading}
+            dataTestId="DReps-voting-results-outcome"
           />
 
           <OutcomeIndicator
@@ -270,12 +279,16 @@ const GovernanceVoting = ({ action }: GovernanceVotingProps) => {
               type as GovernanceActionType,
               isSecurityGroup()
             )}
+            isLoading={isLoading}
+            dataTestId="SPOs-voting-results-outcome"
           />
 
           <OutcomeIndicator
             title="CC Committee"
             passed={isCCPassed}
             isDisplayed={areCCVoteTotalsDisplayed(type as GovernanceActionType)}
+            isLoading={isLoading}
+            dataTestId="CC-voting-results-outcome"
           />
         </Box>
       </Box>

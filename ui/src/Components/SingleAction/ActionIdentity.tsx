@@ -39,7 +39,7 @@ function ActionIdentity({ governanceAction, metadata }: ActionIdentityProps) {
       }}
     >
       <Box
-        data-testid={`single-action-${idCIP129}-type`}
+        data-testid={`single-action-type`}
         sx={{
           width: "100%",
           display: "flex",
@@ -62,7 +62,12 @@ function ActionIdentity({ governanceAction, metadata }: ActionIdentityProps) {
       </Box>
       <GovActionDatesInfo action={governanceAction} />
       {metadata && metadata?.data?.authors?.length > 0 && (
-        <Box display="flex" flexDirection="column" gap={0.5}>
+        <Box
+          data-testid="single-action-authors"
+          display="flex"
+          flexDirection="column"
+          gap={0.5}
+        >
           <Typography
             sx={{
               color: "textGray",
@@ -98,14 +103,14 @@ function ActionIdentity({ governanceAction, metadata }: ActionIdentityProps) {
         type="text"
         content={fullGovActionId}
         isCopyable
-        dataTestId={`single-action-${fullGovActionId}-CIP-105-id`}
+        dataTestId={`single-action-CIP-105-id`}
       />
       <GovernanceActionElement
         title="(CIP-129) Governance Action ID"
         type="text"
         content={idCIP129}
         isCopyable
-        dataTestId={`single-action-${idCIP129}-CIP-129-id`}
+        dataTestId={`single-action-CIP-129-id`}
       />
     </Box>
   );

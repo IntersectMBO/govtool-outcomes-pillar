@@ -1,5 +1,7 @@
-import { Box } from "@mui/material";
+import { Box, Link } from "@mui/material";
 import { Typography } from "../Atoms/Typography";
+import { openInNewTab } from "../../lib/openInNewTab";
+import { useAppContext } from "../../contexts/AppContext";
 interface Reference {
   "@type": string;
   label: string;
@@ -9,6 +11,7 @@ type ReferencesProps = {
   links: Reference[];
 };
 function References({ links }: ReferencesProps) {
+  const { ipfsGateway } = useAppContext();
   return (
     <Box>
       <Typography
@@ -34,11 +37,12 @@ function References({ links }: ReferencesProps) {
               >
                 {link?.label}
               </Typography>
-              <a
-                href={link.uri}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                onClick={() => openInNewTab(link?.uri, ipfsGateway)}
                 style={{ textDecoration: "none" }}
+                sx={{
+                  cursor: "pointer",
+                }}
               >
                 <Box
                   display="flex"
@@ -64,7 +68,7 @@ function References({ links }: ReferencesProps) {
                     {link?.uri}
                   </Typography>
                 </Box>
-              </a>
+              </Link>
             </Box>
           ))}
       </Box>

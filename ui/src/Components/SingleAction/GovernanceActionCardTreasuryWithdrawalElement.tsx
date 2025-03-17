@@ -13,48 +13,52 @@ export const GovernanceActionCardTreasuryWithdrawalElement = ({
   receivingAddress,
   amount,
 }: Props) => {
-  const { isMobile } = useScreenDimension();
-  
   return (
     <Box
       sx={{
         display: "flex",
-        mb: "4px",
         flexDirection: "column",
+        gap: 3,
       }}
     >
-      <Box sx={{ display: "flex", flexDirection: isMobile ? "column" : "row" }}>
+      <Box
+        sx={{
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          gap: 0.5,
+        }}
+      >
         <Typography
           data-testid="receiving-address-label"
           sx={{
-            width: "160px",
             fontSize: 14,
             fontWeight: 600,
             lineHeight: "20px",
-            color: "neutralGray",
+            color: "textGray",
           }}
         >
           Receiving Address:
         </Typography>
         <Box
           sx={{
+            width: "100%",
             display: "flex",
             alignItems: "center",
             overflow: "hidden",
             flexDirection: "row",
+            justifyContent: "space-between",
           }}
         >
           <Typography
             data-testid="receiving-address"
             sx={{
-              ml: isMobile ? 0 : 8,
               color: "primaryBlue",
               fontSize: 16,
               fontWeight: 400,
               lineHeight: "20px",
-              whiteSpace: "nowrap",
+              wordBreak: "break-word",
               overflow: "hidden",
-              textOverflow: "ellipsis",
             }}
           >
             {receivingAddress}
@@ -66,18 +70,18 @@ export const GovernanceActionCardTreasuryWithdrawalElement = ({
       </Box>
       <Box
         sx={{
+          width: "100%",
           display: "flex",
-          flexDirection: isMobile ? "column" : "row",
-          mt: "6px",
+          flexDirection: "column",
+          gap: 0.5,
         }}
       >
         <Typography
           sx={{
-            width: "160px",
             fontSize: 14,
             fontWeight: 600,
             lineHeight: "20px",
-            color: "neutralGray",
+            color: "textGray",
           }}
           data-testid="amount-label"
         >
@@ -86,13 +90,12 @@ export const GovernanceActionCardTreasuryWithdrawalElement = ({
         <Typography
           data-testid="amount"
           sx={{
-            ml: isMobile ? 0 : 8,
             fontSize: 16,
             fontWeight: 400,
             lineHeight: "20px",
           }}
         >
-          ₳ {correctVoteAdaFormat(amount) ?? 0}
+          ₳{correctVoteAdaFormat(amount) ?? 0}
         </Typography>
       </Box>
     </Box>
