@@ -74,8 +74,6 @@ function GovernanceAction({ id }: GovernanceActionProps) {
     useMetadata(governanceAction);
   const { proposal } = useGetProposalQuery(governanceAction?.tx_hash);
 
-  if (proposal) console.log(proposal);
-
   const { epochParams } = useNetworkMetrics(governanceAction);
   const [selectedTab, setSelectedTab] = useState<number>(0);
 
