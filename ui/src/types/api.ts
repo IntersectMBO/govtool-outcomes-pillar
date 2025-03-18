@@ -16,13 +16,13 @@ export interface GovernanceAction {
   epoch_no: number;
   url: string;
   data_hash: string;
-  proposal_params: EpochParams | null;
-  title?: string;
-  abstract?: string;
+  proposal_params: {} | null;
+  title: string | null;
+  abstract: string | null;
   status: Status;
   status_times: StatusTimes;
-  motivation?: string;
-  rationale?: string;
+  motivation: string | null;
+  rationale: string | null;
   yes_votes: number;
   no_votes: number;
   abstain_votes: number;
@@ -51,20 +51,8 @@ export type StatusTimes = {
 };
 
 export type GovActionDescription = {
-  [key: string]: JSONValue;
-};
-
-export type JSONValue =
-  | string
-  | number
-  | boolean
-  | null
-  | { [property: string]: JSONValue }
-  | JSONValue[];
-
-export type NewConstitutionAnchor = {
-  dataHash: string;
-  url: string;
+  major: number;
+  minor: number;
 };
 
 export type Reference = {
@@ -86,7 +74,6 @@ export type GovActionMetadata = {
     rationale?: string;
     references?: Reference[];
     title: string;
-    authors: [];
   };
 };
 
@@ -155,31 +142,22 @@ export type EpochParams = {
 export type NetworkMetrics = {
   /** Current epoch number */
   epoch_no: number;
-
+  
   /** Total stake controlled by active DReps (in lovelace) */
   total_stake_controlled_by_active_dreps: string;
-
-  /** Total stake controlled by stake pools (in lovelace) */
-  total_stake_controlled_by_stake_pools: string;
-
+  
   /** Voting power for always abstain (in lovelace) */
   always_abstain_voting_power: string;
-
-  /** SPOs Voting power for always abstain (in lovelace) */
-  spos_abstain_voting_power: string;
-
+  
   /** Voting power for always no confidence (in lovelace) */
   always_no_confidence_voting_power: string;
-
-  /** SPOs Voting power for always no confidence (in lovelace) */
-  spos_no_confidence_voting_power: string;
-
+  
   /** Number of active committee members */
   no_of_committee_members: number;
-
+  
   /** Committee quorum numerator */
   quorum_numerator: number;
-
+  
   /** Committee quorum denominator */
   quorum_denominator: number;
 };

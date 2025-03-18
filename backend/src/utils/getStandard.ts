@@ -1,4 +1,3 @@
-import { MetadataValidationStatus } from "src/enums/ValidationErrors";
 import { MetadataStandard } from "src/types/validateMetadata";
 /**
  * Retrieves the metadata standard from the given data.
@@ -14,5 +13,5 @@ export const getStandard = (
   if (JSON.stringify(data).includes(MetadataStandard.CIP108)) {
     return MetadataStandard.CIP108;
   }
-  throw MetadataValidationStatus.INCORRECT_FORMAT;
+  return undefined;
 };

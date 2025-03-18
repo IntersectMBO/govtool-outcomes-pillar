@@ -107,8 +107,7 @@ export class GovernanceActionsService {
 
       if (standard) {
         await validateMetadataStandard(parsedData.body, standard);
-        const parsedMetadata = parseMetadata(parsedData.body);
-        metadata = { ...parsedMetadata, authors: parsedData.authors || [] };
+        metadata = parseMetadata(parsedData.body);
       }
       const hashedMetadata = blake.blake2bHex(rawData, undefined, 32);
 

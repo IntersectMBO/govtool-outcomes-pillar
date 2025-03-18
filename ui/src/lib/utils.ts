@@ -6,45 +6,22 @@ import {
   Status,
   StatusTimes,
 } from "../types/api";
-
+import { VoterType } from "../Components/Legacy/GovActionVoteElement";
 import {
   PPU_ECONOMIC_GROUP_PARAMS_KEYS,
   PPU_GOVERNANCE_GROUP_PARAMS_KEYS,
   PPU_NETWORK_GROUP_PARAMS_KEYS,
   PPU_TECHNICAL_GROUP_PARAMS_KEYS,
 } from "../consts/params";
-import { VoterType } from "../models/voters";
-
 const LOVELACE = 1000000;
-export function formatTimeStamp(
-  timeStamp: string,
-  format: "short" | "full" = "full"
-): string {
+export function formatTimeStamp(timeStamp: string): string {
   const date = new Date(timeStamp);
 
-  if (format === "short") {
-    return date
-      .toLocaleDateString("en-US", {
-        weekday: "short",
-        month: "short",
-        day: "2-digit",
-        year: "numeric",
-      })
-      .replace(",", "");
-  }
+  const day = date.getUTCDate();
+  const month = date.toLocaleString("default", { month: "short" });
+  const year = date.getUTCFullYear();
 
-  return date
-    .toLocaleString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: true,
-    })
-    .replace(",", "");
+  return `${day} ${month} ${year}`;
 }
 
 /**
@@ -289,17 +266,3 @@ export function setItemToLocalStorage(key: string, data: any) {
 export function removeItemFromLocalStorage(key: string) {
   window.localStorage.removeItem(key);
 }
-
-export const correctVoteAdaFormat = (
-  lovelace: number | undefined,
-  locale: string | undefined = undefined
-) => {
-  if (lovelace) {
-    const ada = lovelace / LOVELACE;
-
-    return ada.toLocaleString(locale, {
-      maximumFractionDigits: 3,
-    });
-  }
-  return "0";
-};

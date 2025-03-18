@@ -1,17 +1,15 @@
-import { Box, IconButton, Link, Tooltip } from "@mui/material";
+import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import CopyIcon from "../../Assets/Icons/CopyIcon";
 import { useSnackbar } from "../../contexts/Snackbar";
 import { IconExternalLink } from "@intersect.mbo/intersectmbo.org-icons-set";
 import { openInNewTab } from "../../lib/openInNewTab";
 import { useAppContext } from "../../contexts/AppContext";
-import { Typography } from "../Atoms/Typography";
 
 interface GovernanceActionElementProps {
   title: string;
   type: string;
   content: string;
   isCopyable?: boolean;
-  dataTestId?: string;
 }
 
 export default function GovernanceActionElement({
@@ -19,11 +17,9 @@ export default function GovernanceActionElement({
   type,
   content,
   isCopyable = false,
-  dataTestId,
 }: GovernanceActionElementProps) {
   const { addSuccessAlert } = useSnackbar();
   const { ipfsGateway } = useAppContext();
-  if (!content) return;
 
   const handleCopyClick = () => {
     navigator.clipboard.writeText(content);
@@ -31,8 +27,7 @@ export default function GovernanceActionElement({
   };
 
   const contentTypographyStyles = {
-    fontSize: 16,
-    fontWeight: 400,
+    fontSize: "1rem",
     color: "primaryBlue",
     wordBreak: "break-word",
     overflow: "hidden",
@@ -47,6 +42,8 @@ export default function GovernanceActionElement({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    gap: 1,
+    minWidth: 0,
   };
 
   const renderContent = () => {
@@ -67,16 +64,14 @@ export default function GovernanceActionElement({
 
     if (type === "link") {
       return (
-        <Link
-          onClick={() => openInNewTab(content, ipfsGateway)}
-          sx={{ ...contentContainerStyles, cursor: "pointer" }}
-          style={{ textDecoration: "none" }}
-        >
-          <Typography sx={contentTypographyStyles}>{content}</Typography>
-          <IconButton>
+        <Box sx={contentContainerStyles}>
+          <a href={content} style={{ textDecoration: "none" }}>
+            <Typography sx={contentTypographyStyles}>{content}</Typography>
+          </a>
+          <IconButton onClick={() => openInNewTab(content, ipfsGateway)}>
             <IconExternalLink fill="#0033AD" />
           </IconButton>
-        </Link>
+        </Box>
       );
     }
 
@@ -85,7 +80,6 @@ export default function GovernanceActionElement({
 
   return (
     <Box
-      data-testid={dataTestId}
       sx={{ width: "100%", display: "flex", flexDirection: "column", gap: 0.5 }}
     >
       <Typography

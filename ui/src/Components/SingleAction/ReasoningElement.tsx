@@ -3,19 +3,19 @@ import Markdown from "react-markdown";
 type ReasoningElementProps = {
   label: string;
   text: string;
-  dataTestId?: string;
 };
-function ReasoningElement({ label, text, dataTestId }: ReasoningElementProps) {
+function ReasoningElement({ label, text }: ReasoningElementProps) {
   return (
-    <Box
-      data-testid={dataTestId}
-      sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}
-    >
+    <Box>
       <Typography
         sx={{
-          fontSize: 14,
-          fontWeight: 600,
-          color: "textGray",
+          fontSize: "0.875rem",
+          fontWeight: 500,
+          lineHeight: "1rem",
+          color: "neutralGray",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
         }}
       >
         {label}
@@ -27,6 +27,7 @@ function ReasoningElement({ label, text, dataTestId }: ReasoningElementProps) {
           overflow: "hidden",
           flexDirection: "column",
           fontFamily: "Poppins, Arial",
+          marginTop: 1,
         }}
       >
         <Markdown
@@ -37,11 +38,10 @@ function ReasoningElement({ label, text, dataTestId }: ReasoningElementProps) {
               return (
                 <Typography
                   sx={{
-                    fontSize: 16,
+                    fontSize: "1rem",
                     fontWeight: 400,
-                    lineHeight: "24px",
+                    lineHeight: "1.5rem",
                     maxWidth: "auto",
-                    color: "textBlack",
                   }}
                 >
                   {children}

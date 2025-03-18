@@ -11,17 +11,13 @@ export class MiscellaneousService {
     private cexplorerService: DataSource
   ) {}
 
-  async getNetworkMetrics(epoch: number | null) {
-    const res = await this.cexplorerService.manager.query(getNetworkMetrics, [
-      epoch,
-    ]);
+  async getNetworkMetrics() {
+    const res = await this.cexplorerService.manager.query(getNetworkMetrics);
     return res?.[0] || null;
   }
 
-  async getEpochParams(epoch: number | null) {
-    const res = await this.cexplorerService.manager.query(getEpochParams, [
-      epoch,
-    ]);
+  async getEpochParams() {
+    const res = await this.cexplorerService.manager.query(getEpochParams);
     return res?.[0]?.epoch_param || null;
   }
 }
