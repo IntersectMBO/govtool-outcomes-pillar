@@ -1,7 +1,6 @@
 import { Box } from "@mui/material";
-import CopyIcon from "../../Assets/Icons/CopyIcon";
-import { useSnackbar } from "../../contexts/Snackbar";
 import { Typography } from "../Atoms/Typography";
+import CopyButton from "../Atoms/CopyButton";
 interface GovernanceActionCardIdElementProps {
   title: string;
   id: string;
@@ -13,13 +12,6 @@ export default function GovernanceActionCardIdElement({
   id,
   dataTestId,
 }: GovernanceActionCardIdElementProps) {
-  const { addSuccessAlert } = useSnackbar();
-
-  const handleCopyClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.stopPropagation();
-    navigator.clipboard.writeText(id);
-    addSuccessAlert("Copied to clipboard!");
-  };
   return (
     <Box data-testid={dataTestId}>
       <Typography
@@ -54,26 +46,7 @@ export default function GovernanceActionCardIdElement({
         >
           {id}
         </Typography>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          <Box
-            sx={{
-              justifyContent: "center",
-              alignItems: "center",
-              cursor: "pointer",
-              display: "flex",
-            }}
-            onClick={handleCopyClick}
-            aria-label="Copy to clipboard"
-            data-testid="copy-button"
-          >
-            <CopyIcon width={24} height={24} />
-          </Box>
-        </Box>
+        <CopyButton text={id} />
       </Box>
     </Box>
   );

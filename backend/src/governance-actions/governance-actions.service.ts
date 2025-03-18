@@ -4,7 +4,7 @@ import { getGovernanceAction } from "src/queries/governanceAction";
 import { getGovernanceActions } from "src/queries/governanceActions";
 import { DataSource } from "typeorm";
 import { HttpService } from "@nestjs/axios";
-import { firstValueFrom } from "rxjs";
+import { firstValueFrom, throwError } from "rxjs";
 import { catchError, finalize } from "rxjs/operators";
 import { ConfigService } from "@nestjs/config";
 import { MetadataValidationStatus } from "src/enums/ValidationErrors";
@@ -43,6 +43,53 @@ export class GovernanceActionsService {
       offset,
       limit,
     ]);
+  }
+
+  findOne(id: string) {
+    return this.cexplorerService.manager.query(getGovernanceAction, [id]);
+  }
+
+  async findProposal(hash: string): Promise<any> {
+    const apiUrl = this.configService
+      .get<string>("PDF_API_URL")
+      ?.replace(/\/+$/, "");
+    const baseUrl = `${apiUrl}/proposals`;
+
+    try {
+      const response = await firstValueFrom(
+        this.httpService
+          .get(`${baseUrl}`, {
+            params: {
+              "filters[$and][0][prop_submitted]": "true",
+              "filters[$and][1][prop_submission_tx_hash]": hash,
+              "pagination[page]": "1",
+              "pagination[pageSize]": "25",
+              "sort[createdAt]": "desc",
+            },
+            headers: {
+              "User-Agent": "GovTool/Proposal-Fetch-Tool",
+              "Content-Type": "application/json",
+            },
+            responseType: "json",
+          })
+          .pipe(
+            finalize(() =>
+              Logger.log(`Fetching proposal with hash ${hash} completed`)
+            ),
+            catchError((error) => {
+              Logger.error(
+                `Error fetching proposal with hash ${hash}`,
+                JSON.stringify(error)
+              );
+              return throwError(() => error);
+            })
+          )
+      );
+      return response.data;
+    } catch (error) {
+      Logger.error(`Failed to fetch proposal with hash ${hash}`, error);
+      throw error;
+    }
   }
 
   private processUrl(url: string): string {
@@ -154,9 +201,5 @@ export class GovernanceActionsService {
       metadataValid: !Boolean(metadataStatus),
       data: metadata,
     };
-  }
-
-  findOne(id: string) {
-    return this.cexplorerService.manager.query(getGovernanceAction, [id]);
   }
 }

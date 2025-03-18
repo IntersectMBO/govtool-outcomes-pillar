@@ -11,7 +11,6 @@ type VoteSectionProps = {
   totalControlled?: number;
   abstainVotes?: number;
   notVotedVotes?: number;
-  noConfidence?: number;
   threshold?: number | null;
   yesPercentage?: number;
   noPercentage?: number;
@@ -20,6 +19,11 @@ type VoteSectionProps = {
   isLoading?: boolean;
   dataTestId?: string;
 };
+
+const ProgressWrapper = styled(Box)({
+  position: "relative",
+  width: "100%",
+});
 
 const ProgressContainer = styled(Box)({
   position: "relative",
@@ -67,6 +71,16 @@ const ThresholdMarker = styled("div")<{ left: number }>(({ left }) => ({
   zIndex: 3,
 }));
 
+const ThresholdText = styled(Typography)<{ left: number }>(({ left }) => ({
+  position: "absolute",
+  left: `${left}%`,
+  top: "-24px",
+  transform: "translateX(-50%)",
+  fontSize: 12,
+  color: "textGray",
+  zIndex: 3,
+}));
+
 export const VoteSection = ({
   title,
   yesVotes = 0,
@@ -74,7 +88,6 @@ export const VoteSection = ({
   totalControlled = 0,
   abstainVotes = 0,
   notVotedVotes = 0,
-  noConfidence = 0,
   threshold = null,
   yesPercentage = 0,
   noPercentage = 0,
@@ -144,16 +157,6 @@ export const VoteSection = ({
                 )
               </Typography>
 
-              {threshold !== null && (
-                <Typography
-                  data-testid="outcome-threshold"
-                  variant="body2"
-                  color="textGray"
-                >
-                  {threshold}
-                </Typography>
-              )}
-
               <Typography
                 data-testid="outcome-no-votes"
                 variant="body2"
@@ -166,24 +169,39 @@ export const VoteSection = ({
                 )
               </Typography>
             </Box>
-
-            <ProgressContainer>
-              <StyledLinearProgress
-                data-testid="percentages-progress-bar"
-                variant="determinate"
-                value={yesPercentage}
-              />
-              <PercentageOverlay>
-                <PercentageText data-testid="yes-percentage-text">
-                  {yesPercentage?.toFixed(2)}%
-                </PercentageText>
-                <PercentageText data-testid="no-percentage-text">
-                  {noPercentage?.toFixed(2)}%
-                </PercentageText>
-              </PercentageOverlay>
-              {threshold !== null && <ThresholdMarker left={threshold * 100} />}
-            </ProgressContainer>
+            <ProgressWrapper>
+              <ProgressContainer>
+                <StyledLinearProgress
+                  data-testid="percentages-progress-bar"
+                  variant="determinate"
+                  value={yesPercentage}
+                />
+                <PercentageOverlay>
+                  <PercentageText data-testid="yes-percentage-text">
+                    {yesPercentage?.toFixed(2)}%
+                  </PercentageText>
+                  <PercentageText data-testid="no-percentage-text">
+                    {noPercentage?.toFixed(2)}%
+                  </PercentageText>
+                </PercentageOverlay>
+                {threshold !== null && (
+                  <>
+                    <ThresholdMarker left={threshold * 100} />
+                  </>
+                )}
+              </ProgressContainer>
+              {threshold !== null && (
+                <ThresholdText
+                  left={threshold * 100}
+                  data-testid="outcome-threshold"
+                  variant="body2"
+                >
+                  {(threshold * 100).toFixed(0)}%
+                </ThresholdText>
+              )}
+            </ProgressWrapper>
           </Grid>
+
           <Grid item xs={12}>
             <Box
               mb={0.5}
@@ -215,20 +233,6 @@ export const VoteSection = ({
                 )
               </Typography>
             </Box>
-
-            {!isCC && noConfidence !== undefined && (
-              <Typography
-                data-testid="outcome-no-confidence-votes"
-                variant="body2"
-                color="textGray"
-              >
-                No confidence (
-                <Box component="span" sx={{ fontWeight: "bold" }}>
-                  {formatValue(noConfidence)}
-                </Box>
-                )
-              </Typography>
-            )}
           </Grid>
         </Grid>
       )}

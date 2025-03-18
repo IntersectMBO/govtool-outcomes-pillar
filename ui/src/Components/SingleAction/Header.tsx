@@ -1,11 +1,9 @@
-import { Box, Skeleton } from "@mui/material";
-import ShareIcon from "../../Assets/Icons/ShareIcon";
+import { Box, IconButton, Skeleton, Tooltip } from "@mui/material";
 import { MetadataValidationStatus } from "../../types/api";
 import { useSnackbar } from "../../contexts/Snackbar";
 import { Typography } from "../Atoms/Typography";
-
 import { getMetadataDataMissingStatusTranslation } from "../../lib/getMetadataDataMissingStatusTranslation";
-import { Button } from "../Atoms/Button";
+import { IconShare } from "@intersect.mbo/intersectmbo.org-icons-set";
 
 interface HeaderProps {
   title: string | null;
@@ -30,7 +28,7 @@ export default function Header({
 
   return (
     <Box
-      data-testid={`single-action-header`}
+      data-testid="single-action-header"
       display="flex"
       justifyContent="space-between"
     >
@@ -44,7 +42,7 @@ export default function Header({
             py: "6px",
             fontWeight: 600,
             lineHeight: "24px",
-            WebkitLineClamp: 2,
+            lineClamp: 2,
             wordBreak: "break-word",
             ...(isDataMissing && { color: "errorRed" }),
           }}
@@ -56,21 +54,19 @@ export default function Header({
             title}
         </Typography>
       )}
-      <Button
-        size="small"
-        variant="text"
-        dataTestId={`single-action-share-link`}
-        onClick={onCopy}
-        sx={(theme) => ({
-          padding: 0,
-          transition: "all 0.3s",
-          "&:hover": {
-            boxShadow: theme.shadows[1],
-          },
-        })}
-      >
-        <ShareIcon />
-      </Button>
+      <Tooltip title="Share Governance Action">
+        <IconButton
+          id="share-button-card"
+          sx={{
+            width: 40,
+            height: 40,
+          }}
+          onClick={onCopy}
+          data-testid="single-action-share-link"
+        >
+          <IconShare width="24" height="24" fill="textBlack" />
+        </IconButton>
+      </Tooltip>
     </Box>
   );
 }

@@ -1,10 +1,9 @@
-import { Box, IconButton, Link, Tooltip } from "@mui/material";
-import CopyIcon from "../../Assets/Icons/CopyIcon";
-import { useSnackbar } from "../../contexts/Snackbar";
+import { Box, IconButton, Link } from "@mui/material";
 import { IconExternalLink } from "@intersect.mbo/intersectmbo.org-icons-set";
 import { openInNewTab } from "../../lib/openInNewTab";
 import { useAppContext } from "../../contexts/AppContext";
 import { Typography } from "../Atoms/Typography";
+import CopyButton from "../Atoms/CopyButton";
 
 interface GovernanceActionElementProps {
   title: string;
@@ -21,14 +20,8 @@ export default function GovernanceActionElement({
   isCopyable = false,
   dataTestId,
 }: GovernanceActionElementProps) {
-  const { addSuccessAlert } = useSnackbar();
   const { ipfsGateway } = useAppContext();
   if (!content) return;
-
-  const handleCopyClick = () => {
-    navigator.clipboard.writeText(content);
-    addSuccessAlert("Copied to clipboard!");
-  };
 
   const contentTypographyStyles = {
     fontSize: 16,
@@ -54,13 +47,7 @@ export default function GovernanceActionElement({
       return (
         <Box sx={contentContainerStyles}>
           <Typography sx={contentTypographyStyles}>{content}</Typography>
-          {isCopyable && (
-            <Tooltip title="Copy to clipboard">
-              <IconButton onClick={handleCopyClick} size="small">
-                <CopyIcon width={16} height={16} />
-              </IconButton>
-            </Tooltip>
-          )}
+          {isCopyable && <CopyButton text={content} />}
         </Box>
       );
     }

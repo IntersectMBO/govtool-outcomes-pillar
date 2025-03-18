@@ -191,7 +191,6 @@ const GovernanceVoting = ({ action }: GovernanceVotingProps) => {
         totalControlled={totalStakeControlledByDReps}
         abstainVotes={dRepAbstainVotes}
         notVotedVotes={dRepNotVotedVotes}
-        noConfidence={totalStakeControlledByNoConfidence}
         threshold={(() => {
           const votingThresholdKey = getGovActionVotingThresholdKey({
             govActionType: type as GovernanceActionType,
@@ -219,7 +218,6 @@ const GovernanceVoting = ({ action }: GovernanceVotingProps) => {
         totalControlled={totalStakeControlledBySPOs}
         abstainVotes={poolAbstainVotes}
         notVotedVotes={poolNotVotedVotes}
-        noConfidence={totalStakeControlledByNoConfidenceForSPOs}
         threshold={(() => {
           const votingThresholdKey = getGovActionVotingThresholdKey({
             govActionType: type as GovernanceActionType,

@@ -34,6 +34,11 @@ export class GovernanceActionsController {
     return this.governanceActionsService.getMetadata(url, hash);
   }
 
+  @Get("/proposal/:hash")
+  findProposal(@Param("hash") hash: string) {
+    return this.governanceActionsService.findProposal(hash);
+  }
+
   @Get(":id")
   findOne(@Param("id") id: string, @Query("index") index: number) {
     const govActionId = `${id}#${index}`;

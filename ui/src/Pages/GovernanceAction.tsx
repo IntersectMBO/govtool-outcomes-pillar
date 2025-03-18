@@ -6,6 +6,7 @@ import {
   styled,
   Tab,
   Tabs,
+  Typography,
 } from "@mui/material";
 import { Breadcrumbs } from "../Components/Molecules/Breadcrumbs";
 import { useGetGovernanceActionQuery } from "../hooks/useGetGovernanceActionQuery";
@@ -30,6 +31,8 @@ import { GovernanceActionNewConstitutionDetailsTabContent } from "../Components/
 import { useScreenDimension } from "../hooks/useDimensions";
 import { GovernanceActionCardTreasuryWithdrawalElement } from "../Components/SingleAction/GovernanceActionCardTreasuryWithdrawalElement";
 import { HardForkDetailsTabContent } from "../Components/SingleAction/HardForkDetailsTabContent";
+import { useGetProposalQuery } from "../hooks/useGetProposalQuery";
+import ProposalCard from "../Components/SingleAction/ProposalCard";
 
 type GovernanceActionProps = {
   id: string;
@@ -69,6 +72,9 @@ function GovernanceAction({ id }: GovernanceActionProps) {
     useGetGovernanceActionQuery(id);
   const { metadata, metadataValid, isMetadataLoading } =
     useMetadata(governanceAction);
+  const { proposal } = useGetProposalQuery(governanceAction?.tx_hash);
+
+  if (proposal) console.log(proposal);
 
   const { epochParams } = useNetworkMetrics(governanceAction);
   const [selectedTab, setSelectedTab] = useState<number>(0);
@@ -258,24 +264,8 @@ function GovernanceAction({ id }: GovernanceActionProps) {
     );
   }
 
-  const contentContainerStyle = {
-    height: "100%",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "space-between",
-    boxShadow: "0px 4px 15px 0px #DDE3F5",
-    borderRadius: "20px",
-    padding: 2,
-    backgroundColor: !metadataValid
-      ? "rgba(251, 235, 235, 0.50)"
-      : "rgba(255, 255, 255, 0.3)",
-    ...(!metadataValid && {
-      border: "1px solid #F6D5D5",
-    }),
-  };
-
   const renderAllTabContent = () => {
-    return tabDefinitions.map((tab, index) => (
+    return tabDefinitions.map((tab) => (
       <CustomTabPanel
         key={tab.dataTestId}
         value={selectedTab}
@@ -304,11 +294,22 @@ function GovernanceAction({ id }: GovernanceActionProps) {
         isDataMissing={isDataMissing}
       />
 
-      <Grid container spacing={3} marginTop={0.5}>
+      <Grid container spacing={2} marginTop={0.5}>
         <Grid item xs={12} lg={7} sx={{ marginBottom: { xs: 3, lg: 0 } }}>
           <Box
             data-testid={`single-action-${idCIP129}-description`}
-            sx={contentContainerStyle}
+            sx={{
+              height: "auto",
+              boxShadow: "0px 4px 15px 0px #DDE3F5",
+              borderRadius: "20px",
+              padding: 2,
+              backgroundColor: !metadataValid
+                ? "rgba(251, 235, 235, 0.50)"
+                : "rgba(255, 255, 255, 0.3)",
+              ...(!metadataValid && {
+                border: "1px solid #F6D5D5",
+              }),
+            }}
           >
             {governanceAction && (
               <Box display="flex" flexDirection="column" gap={3}>
@@ -395,7 +396,6 @@ function GovernanceAction({ id }: GovernanceActionProps) {
                     />
                   </>
                 )}
-
                 {metadataValid && content.references.length > 0 && (
                   <References links={content.references} />
                 )}
@@ -417,13 +417,34 @@ function GovernanceAction({ id }: GovernanceActionProps) {
               padding: 2,
               position: "sticky",
               top: "96px",
-              zIndex: 100,
             }}
           >
             <GovernanceVotingUI action={governanceAction} />
           </Box>
         </Grid>
       </Grid>
+      {proposal?.data?.length > 0 && (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 3,
+            mt: 4.5,
+            maxWidth: "425px",
+          }}
+        >
+          <Typography
+            data-testid={`single-action-title`}
+            sx={{
+              fontSize: 22,
+              fontWeight: 600,
+            }}
+          >
+            Related Proposal
+          </Typography>
+          <ProposalCard proposal={proposal?.data?.[0]} />
+        </Box>
+      )}
     </Box>
   );
 }

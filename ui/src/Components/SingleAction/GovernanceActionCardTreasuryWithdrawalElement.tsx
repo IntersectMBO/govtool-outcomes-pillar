@@ -1,5 +1,4 @@
 import { Box } from "@mui/material";
-import { useScreenDimension } from "../../hooks/useDimensions";
 import { Typography } from "../Atoms/Typography";
 import CopyButton from "../Atoms/CopyButton";
 import { correctVoteAdaFormat } from "../../lib/utils";

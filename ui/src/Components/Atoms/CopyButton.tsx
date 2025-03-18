@@ -16,7 +16,7 @@ function CopyButton({ text }: { text: string }) {
         onClick={handleCopyClick}
         size="small"
       >
-        <CopyIcon width={16} height={16} />
+        <CopyIcon />
       </IconButton>
     </Tooltip>
   );

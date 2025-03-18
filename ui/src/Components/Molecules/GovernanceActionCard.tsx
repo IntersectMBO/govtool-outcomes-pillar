@@ -86,6 +86,7 @@ function GovernanceActionCard({ action }: GovernanceActionCardProps) {
               <GovernanceActionCardElement
                 title="Abstract"
                 description={abstract}
+                type="markdown"
                 dataTestId={`${idCIP129}-abstract`}
               />
             )}
@@ -100,6 +101,7 @@ function GovernanceActionCard({ action }: GovernanceActionCardProps) {
           <GovernanceActionCardElement
             title="Governance Action Type"
             description={typeInWords}
+            type="text"
             dataTestId={`${idCIP129}-type`}
           />
 

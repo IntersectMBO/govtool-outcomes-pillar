@@ -87,7 +87,7 @@ function ActionIdentity({ governanceAction, metadata }: ActionIdentityProps) {
                   fontSize: 16,
                 }}
               >
-                {author?.name}
+                @{author?.name}
               </Typography>
             ))}
           </Box>

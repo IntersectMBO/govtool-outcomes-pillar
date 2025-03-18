@@ -58,7 +58,7 @@ export const GovernanceActionCardHeader = ({
             fontSize: 18,
             fontWeight: 600,
             lineHeight: "24px",
-            WebkitLineClamp: 2,
+            lineClamp: 2,
             wordBreak: "break-word",
             transition: "opacity 0.5s ease-in-out",
             opacity: 1,
