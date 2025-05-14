@@ -41,7 +41,7 @@ function ReasoningElement({ label, text, dataTestId }: ReasoningElementProps) {
         }}
       >
         <Markdown
-          className="markdown-content"
+          className="markdown-content-wrapper"
           components={{
             p(props) {
               const { children } = props;
@@ -76,7 +76,7 @@ function ReasoningElement({ label, text, dataTestId }: ReasoningElementProps) {
                   }}
                   className="markdown-table-wrapper"
                 >
-                  <table className="markdown-table">{children}</table>
+                  <table>{children}</table>
                 </Box>
               );
             },
