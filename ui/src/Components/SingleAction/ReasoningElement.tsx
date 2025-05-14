@@ -15,34 +15,34 @@ type ReasoningElementProps = {
 function ReasoningElement({ label, text, dataTestId }: ReasoningElementProps) {
   const { isMobile, screenWidth } = useScreenDimension();
 
-  const markdownTableStyles = {
-    wrapper: {
-      display: "block",
-      overflow: "scroll",
-      maxWidth: isMobile ? `${screenWidth - 64}px` : "100%",
-      marginY: 2,
-      WebkitOverflowScrolling: "touch",
-      touchAction: "pan-x pan-y",
-    },
-    table: {
-      minWidth: "100%",
-      borderSpacing: 0,
-      borderCollapse: "collapse",
-      "& thead": {
-        backgroundColor: "#d6e2ff80",
-      },
-      "& th, & td": {
-        padding: "6px 13px",
-        border: "1px solid #d6e2ff",
-      },
-      "& td > :last-child": {
-        marginBottom: 0,
-      },
-      "& tr:nth-child(2n)": {
-        backgroundColor: "#d6e2ff80",
-      },
-    },
-  };
+  // const markdownTableStyles = {
+  //   wrapper: {
+  //     display: "block",
+  //     overflow: "scroll",
+  //     maxWidth: isMobile ? `${screenWidth - 64}px` : "100%",
+  //     marginY: 2,
+  //     WebkitOverflowScrolling: "touch",
+  //     touchAction: "pan-x pan-y",
+  //   },
+  //   table: {
+  //     minWidth: "100%",
+  //     borderSpacing: 0,
+  //     borderCollapse: "collapse",
+  //     "& thead": {
+  //       backgroundColor: "#d6e2ff80",
+  //     },
+  //     "& th, & td": {
+  //       padding: "6px 13px",
+  //       border: "1px solid #d6e2ff",
+  //     },
+  //     "& td > :last-child": {
+  //       marginBottom: 0,
+  //     },
+  //     "& tr:nth-child(2n)": {
+  //       backgroundColor: "#d6e2ff80",
+  //     },
+  //   },
+  // };
 
   return (
     <Box
@@ -96,11 +96,11 @@ function ReasoningElement({ label, text, dataTestId }: ReasoningElementProps) {
               const { children } = props;
               return (
                 <Box
-                  sx={markdownTableStyles.wrapper}
+                  // sx={markdownTableStyles.wrapper}
                 >
                   <Box
                     component="table"
-                    sx={markdownTableStyles.table}
+                    // sx={markdownTableStyles.table}
                   >
                     {children}
                   </Box>
