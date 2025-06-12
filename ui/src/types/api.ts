@@ -183,6 +183,7 @@ export type NetworkMetrics = {
   /** Committee quorum denominator */
   quorum_denominator: number;
 };
+
 export enum GovernanceActionType {
   ParameterChange = "ParameterChange",
   HardForkInitiation = "HardForkInitiation",
@@ -192,3 +193,13 @@ export enum GovernanceActionType {
   NewConstitution = "NewConstitution",
   InfoAction = "InfoAction",
 }
+
+export type GovernanceActionVoteData = {
+  id: string;
+  voter_role: string;
+  voter_identity: string;
+  vote: string;
+  voting_power: string;
+  vote_epoch: number;
+  vote_time: string;
+};

@@ -44,4 +44,19 @@ export class GovernanceActionsController {
     const govActionId = `${id}#${index}`;
     return this.governanceActionsService.findOne(govActionId);
   }
+
+  @Get(":id/votes")
+  findVotes(
+    @Param("id") id: string,
+    @Query("index") index: number,
+    @Query("votesType") votesType: string,
+    @Query("roleType") roleType: string
+  ) {
+    const govActionId = `${id}#${index}`;
+    return this.governanceActionsService.findVotes(
+      govActionId,
+      votesType,
+      roleType
+    );
+  }
 }

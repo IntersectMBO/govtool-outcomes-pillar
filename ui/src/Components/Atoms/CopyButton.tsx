@@ -4,7 +4,19 @@ import { useSnackbar } from "../../contexts/Snackbar";
 import { Tooltip } from "./Tooltip";
 import { useTranslation } from "../../contexts/I18nContext";
 
-function CopyButton({ text }: { text: string }) {
+type CopyButtonProps = {
+  text: string;
+  width?: number;
+  height?: number;
+  color?: string;
+};
+
+function CopyButton({
+  text,
+  width = 20,
+  height = 20,
+  color = "#0033AD",
+}: CopyButtonProps) {
   const { addSuccessAlert } = useSnackbar();
   const { t } = useTranslation();
 
@@ -20,7 +32,7 @@ function CopyButton({ text }: { text: string }) {
         onClick={handleCopyClick}
         size="small"
       >
-        <CopyIcon />
+        <CopyIcon width={width} height={height} color={color} />
       </IconButton>
     </Tooltip>
   );

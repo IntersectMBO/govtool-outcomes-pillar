@@ -78,6 +78,7 @@
     },
     "votes": {
       "title": "Votes Submitted for this Governance Action:",
+      "shortTitle": "Votes",
       "dReps": "DReps",
       "sPos": "SPOs",
       "cCommitteeFull": "Constitutional Committee",
@@ -97,7 +98,10 @@
       "totalAbstain": "Total Abstain",
       "autoAbstain": "Auto-Abstain",
       "explicit": "Explicit",
-      "ratificationThreshold": "Ratification Threshold Stake"
+      "ratificationThreshold": "Ratification Threshold Stake",
+      "roles": "Roles",
+      "notFoundTitle": "No governance actions votes found",
+      "notFoundDescription": "No votes have been cast on this governance action yet. Check back later to see how stakeholders vote on this proposal."
     },
     "ratifiedStatus": {
       "title": "Outcome",

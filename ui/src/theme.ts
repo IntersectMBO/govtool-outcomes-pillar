@@ -148,6 +148,7 @@ export const theme = createTheme({
     specialCyanBorder: "#77BFD1",
     textBlack: "#242232",
     textGray: "#525252",
+    textLightGray: "#667385",
     borderGrey: "#BFC8D961",
     badgeColors: {
       primary: "#0034AE",

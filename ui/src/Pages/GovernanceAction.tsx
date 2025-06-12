@@ -34,6 +34,12 @@ import ProposalCard from "../Components/SingleAction/ProposalCard";
 import { Typography } from "../Components/Atoms/Typography";
 import ProposalCardLoader from "../Components/Loaders/ProposalCardLoader";
 import { useTranslation } from "../contexts/I18nContext";
+import {
+  GOVERNANCE_ACTION_ROLES_FILTERS,
+  GOVERNANCE_ACTION_VOTES_FILTERS,
+} from "../consts/filters";
+import GovernanceActionVotesList from "../Components/Molecules/GovernanceActionVotesList";
+import RadioComponent from "../Components/Molecules/RadioComponent";
 
 type GovernanceActionProps = {
   id: string;
@@ -430,7 +436,7 @@ function GovernanceAction({ id }: GovernanceActionProps) {
 
         <Box
           className="action-votes"
-          data-testid={`single-action-outcome-numbers`}
+          data-testid={`single-action-${idCIP129}-outcome-numbers`}
           sx={{
             display: "flex",
             flexDirection: "column",
@@ -445,6 +451,58 @@ function GovernanceAction({ id }: GovernanceActionProps) {
         >
           <GovernanceVotingUI action={governanceAction} />
         </Box>
+      </Box>
+
+      <Box
+        data-testid={`single-action-${idCIP129}-votes-container`}
+        display="flex"
+        flexDirection="column"
+        gap={2}
+        marginTop={3.75}
+      >
+        <Box
+          data-testid={`single-action-${idCIP129}-votes-header`}
+          display="flex"
+          flexDirection="row"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Typography
+            data-testid={`single-action-${idCIP129}-votes-title`}
+            sx={{
+              fontSize: 22,
+              fontWeight: 600,
+            }}
+          >
+            {t("outcome.votes.shortTitle")}
+          </Typography>
+
+          <Box
+            data-testid={`single-action-${idCIP129}-votes-filters`}
+            display="flex"
+            flexDirection="row"
+            justifyContent="flex-end"
+            gap={isMobile ? 1 : 1.5}
+          >
+            <RadioComponent
+              queryParam="votes"
+              options={GOVERNANCE_ACTION_VOTES_FILTERS}
+              defaultValue="AllVotes"
+              titleTranslationKey="outcome.votes.shortTitle"
+              fullTitleTranslationKey="outcome.votes.shortTitle"
+              testIdPrefix="votes"
+            />
+            <RadioComponent
+              queryParam="role"
+              options={GOVERNANCE_ACTION_ROLES_FILTERS}
+              defaultValue="AllVoters"
+              titleTranslationKey="outcome.votes.roles"
+              fullTitleTranslationKey="outcome.votes.roles"
+              testIdPrefix="role"
+            />
+          </Box>
+        </Box>
+        <GovernanceActionVotesList actionId={id} />
       </Box>
     </Box>
   );

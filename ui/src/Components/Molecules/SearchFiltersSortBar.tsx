@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { IconSearch, IconX } from "@intersect.mbo/intersectmbo.org-icons-set";
 import { theme } from "../../theme";
 import FiltersComponent from "./FiltersComponent";
-import SortComponent from "./SortComponent";
+import RadioComponent from "./RadioComponent";
 import { useScreenDimension } from "../../hooks/useDimensions";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "../../contexts/I18nContext";
@@ -199,7 +199,14 @@ export default function SearchFiltersSortBar() {
           gap={isMobile ? 1 : 1.5}
         >
           <FiltersComponent />
-          <SortComponent />
+          <RadioComponent
+            queryParam="sort"
+            options={GOVERNANCE_ACTION_SORT_OPTIONS}
+            defaultValue="newestFirst"
+            titleTranslationKey="outcomesList.sort.title"
+            fullTitleTranslationKey="outcomesList.sort.fullTitle"
+            testIdPrefix="sort"
+          />
         </Box>
       </Box>
 

@@ -15,6 +15,7 @@ import { validateMetadataStandard } from "src/utils/validateMetadataStandard";
 import { parseMetadata } from "src/utils/parseMetadata";
 import { LoggerMessage } from "src/enums/LoggerMessage";
 import { ValidateMetadataResult } from "src/types/validateMetadata";
+import { governanceActionVotesQuery } from "src/queries/governanceActionVotes";
 
 @Injectable()
 export class GovernanceActionsService {
@@ -47,6 +48,12 @@ export class GovernanceActionsService {
 
   findOne(id: string) {
     return this.cexplorerService.manager.query(getGovernanceAction, [id]);
+  }
+
+  findVotes(id: string, votesType: string, roleType: string) {
+    return this.cexplorerService.manager.query(governanceActionVotesQuery, [
+      id,
+    ]);
   }
 
   async findProposal(hash: string): Promise<any> {

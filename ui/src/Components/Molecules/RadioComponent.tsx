@@ -9,12 +9,10 @@ import {
   RadioGroup,
   FormControlLabel,
   FormControl,
-  IconButton,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import React from "react";
 import { useSearchParams } from "react-router-dom";
-import { GOVERNANCE_ACTION_SORT_OPTIONS } from "../../consts/sort-options";
 import { useTranslation } from "../../contexts/I18nContext";
 import { theme } from "../../theme";
 import {
@@ -22,10 +20,33 @@ import {
   IconCheveronUp,
 } from "@intersect.mbo/intersectmbo.org-icons-set";
 
-export default function SortComponent() {
+interface FilterOption {
+  value: string;
+  label: string;
+  displayLabel?: string;
+  dataTestId: string;
+}
+
+interface RadioComponentProps {
+  queryParam: string;
+  options: FilterOption[];
+  defaultValue?: string;
+  titleTranslationKey: string;
+  fullTitleTranslationKey: string;
+  testIdPrefix?: string;
+}
+
+export default function RadioComponent({
+  queryParam,
+  options,
+  defaultValue,
+  titleTranslationKey,
+  fullTitleTranslationKey,
+  testIdPrefix = "filter",
+}: RadioComponentProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [sortParams, setSortParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { t } = useTranslation();
 
   const {
@@ -35,37 +56,35 @@ export default function SortComponent() {
   } = theme;
 
   useEffect(() => {
-    const currentSort = sortParams.get("sort");
-    if (!currentSort) {
-      const newParams = new URLSearchParams(sortParams);
-      newParams.set("sort", "newestFirst");
-      setSortParams(newParams);
+    const currentValue = searchParams.get(queryParam);
+    if (!currentValue && defaultValue) {
+      const newParams = new URLSearchParams(searchParams);
+      newParams.set(queryParam, defaultValue);
+      setSearchParams(newParams);
     }
-  }, []);
+  }, [queryParam, defaultValue, searchParams, setSearchParams]);
 
   const handleShowOptions = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const setSorts = (option: string) => {
-    const newParams = new URLSearchParams(sortParams);
-    if (option) {
-      newParams.set("sort", option);
+  const setFilterValue = (value: string) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (value) {
+      newParams.set(queryParam, value);
     } else {
-      newParams.delete("sort");
+      newParams.delete(queryParam);
     }
-    setSortParams(newParams);
+    setSearchParams(newParams);
   };
 
-  const sortValue = () => {
-    return sortParams.get("sort")?.toString() || "";
+  const getCurrentValue = () => {
+    return searchParams.get(queryParam)?.toString() || "";
   };
 
   const getDisplayLabel = (value: string) => {
-    const option = GOVERNANCE_ACTION_SORT_OPTIONS.find(
-      (opt) => opt.value === value
-    );
-    return option?.displayLabel || value;
+    const option = options.find((opt) => opt.value === value);
+    return option?.displayLabel || option?.label || value;
   };
 
   const handleClose = () => {
@@ -73,13 +92,14 @@ export default function SortComponent() {
   };
 
   const open = Boolean(anchorEl);
+  const currentValue = getCurrentValue();
 
   return (
     <Box>
       <Button
-        id="sort-button"
-        data-testid="sort-button"
-        aria-controls={open ? "sort-menu" : undefined}
+        id={`${testIdPrefix}-button`}
+        data-testid={`${testIdPrefix}-button`}
+        aria-controls={open ? `${testIdPrefix}-menu` : undefined}
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
         sx={{
@@ -107,8 +127,8 @@ export default function SortComponent() {
               whiteSpace: "nowrap",
             }}
           >
-            {t("outcomesList.sort.title")}
-            {sortValue() ? `: ${getDisplayLabel(sortValue())}` : ""}
+            {t(titleTranslationKey)}
+            {currentValue ? `: ${getDisplayLabel(currentValue)}` : ""}
           </Typography>
           <Box
             sx={{
@@ -136,8 +156,8 @@ export default function SortComponent() {
         </Box>
       </Button>
       <Menu
-        id="sort-menu"
-        data-testid="sort-menu"
+        id={`${testIdPrefix}-menu`}
+        data-testid={`${testIdPrefix}-menu`}
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
@@ -154,18 +174,18 @@ export default function SortComponent() {
             <Typography
               sx={{ fontSize: 14, fontWeight: 500, color: "#9792B5" }}
             >
-              {t("outcomesList.sort.fullTitle")}
+              {t(fullTitleTranslationKey)}
             </Typography>
           </Box>
           <Divider sx={{ marginTop: 1, backgroundColor: "neutralGray" }} />
           <RadioGroup
-            id="sort-radio-buttons-group"
-            data-testid="sort-radio-buttons-group"
-            aria-labelledby="sort-radio-buttons-group"
-            name="sort-radio-buttons-group"
-            value={sortValue()}
+            id={`${testIdPrefix}-radio-buttons-group`}
+            data-testid={`${testIdPrefix}-radio-buttons-group`}
+            aria-labelledby={`${testIdPrefix}-radio-buttons-group`}
+            name={`${testIdPrefix}-radio-buttons-group`}
+            value={currentValue}
           >
-            {GOVERNANCE_ACTION_SORT_OPTIONS.map((option, index) => (
+            {options.map((option, index) => (
               <Box
                 id={`${option.dataTestId}-radio-wrapper`}
                 data-testid={`${option.dataTestId}-radio-wrapper`}
@@ -176,19 +196,19 @@ export default function SortComponent() {
                   "&:hover": { bgcolor: "#E6EBF7" },
                 }}
                 bgcolor={
-                  sortValue() === option.value ? "#FFF0E7" : "transparent"
+                  currentValue === option.value ? "#FFF0E7" : "transparent"
                 }
-                onClick={() => setSorts(option.value)}
+                onClick={() => setFilterValue(option.value)}
               >
                 <FormControlLabel
                   value={option.value}
                   control={
                     <Radio
                       id={`${option.dataTestId}-radio`}
-                      data-testid={`${option.value.toLocaleLowerCase()}-radio`}
+                      data-testid={`${option.value.toLowerCase()}-radio`}
                       onChange={(e) => {
                         e.stopPropagation();
-                        setSorts(option.value);
+                        setFilterValue(option.value);
                       }}
                       onClick={(e) => e.stopPropagation()}
                     />

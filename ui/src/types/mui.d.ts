@@ -30,6 +30,7 @@ declare module "@mui/material/styles" {
     lightBlue: string;
     textBlack: string;
     textGray: string;
+    textLightGray: string;
     lightOrange: string;
     fadedPurple: string;
     badgeColors: {
@@ -71,6 +72,7 @@ declare module "@mui/material/styles" {
     lightBlue?: string;
     textBlack?: string;
     textGray?: string;
+    textLightGray?: string;
     lightOrange?: string;
     fadedPurple?: string;
     borderGrey?: string;

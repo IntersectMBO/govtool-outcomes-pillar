@@ -16,6 +16,7 @@ import {
 import { VoterType } from "../models/voters";
 
 const LOVELACE = 1000000;
+
 export function formatTimeStamp(
   timeStamp: string,
   format: "short" | "full" = "full"
@@ -261,7 +262,9 @@ export const formatValue = (
   isCC: boolean,
   addAdaPrefix: boolean = true
 ) =>
-  isCC ? value : `${addAdaPrefix ? "₳" : ""} ${correctAdaFormatWithSuffix(value)}`;
+  isCC
+    ? value
+    : `${addAdaPrefix ? "₳" : ""} ${correctAdaFormatWithSuffix(value)}`;
 
 export const correctAdaFormatWithSuffix = (
   lovelace: number | undefined,
@@ -284,11 +287,9 @@ export const correctAdaFormatWithSuffix = (
   }
 };
 
-export const getRawAdaValue = (
-  lovelace: number | undefined
-) => {
+export const getRawAdaValue = (lovelace: number | undefined) => {
   if (!lovelace) return 0;
-  return Math.ceil(lovelace / LOVELACE)
+  return Math.ceil(lovelace / LOVELACE);
 };
 
 export function getItemFromLocalStorage(key: string) {
@@ -317,3 +318,13 @@ export const correctVoteAdaFormat = (
   }
   return "0";
 };
+
+export function truncateString(string: string): string {
+  if (string.length <= 30) {
+    return string;
+  }
+
+  const first10 = string.slice(0, 10);
+  const last20 = string.slice(-20);
+  return first10 + "..." + last20;
+}
