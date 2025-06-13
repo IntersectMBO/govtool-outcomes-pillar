@@ -50,9 +50,24 @@ export class GovernanceActionsService {
     return this.cexplorerService.manager.query(getGovernanceAction, [id]);
   }
 
-  findVotes(id: string, votesType: string, roleType: string) {
+  findVotes(
+    id: string,
+    votesType: string,
+    roleType: string,
+    sortBy: string,
+    sortOrder: string,
+    page: number,
+    limit: number
+  ) {
+    const offset = (page - 1) * limit;
     return this.cexplorerService.manager.query(governanceActionVotesQuery, [
       id,
+      votesType,
+      roleType,
+      sortBy,
+      sortOrder,
+      limit,
+      offset,
     ]);
   }
 

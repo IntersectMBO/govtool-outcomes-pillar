@@ -1,4 +1,4 @@
-import { useQuery } from "react-query";
+import { useInfiniteQuery } from "react-query";
 import { queryKeys } from "../consts/queryKeys";
 import { decodeCIP129Identifier, getFullGovActionId } from "../lib/utils";
 import { getGovActionVotes } from "../services/requests/getGovActionVotes";
@@ -7,7 +7,10 @@ import { GovernanceActionVoteData } from "../types/api";
 export const useGetGovActionVotesQuery = (
   id: string,
   votesType: string,
-  roleType: string
+  roleType: string,
+  sortBy: string,
+  sortOrder: string,
+  limit: number = 20
 ) => {
   const actionId = (() => {
     if (id.startsWith("gov_action")) {
@@ -22,9 +25,38 @@ export const useGetGovActionVotesQuery = (
     return id;
   })();
 
-  const { data, isLoading, error } = useQuery<GovernanceActionVoteData[]>({
-    queryKey: [queryKeys.getGovActionVotes, actionId, votesType, roleType],
-    queryFn: async () => await getGovActionVotes(actionId, votesType, roleType),
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: [
+      queryKeys.getGovActionVotes,
+      actionId,
+      votesType,
+      roleType,
+      sortBy,
+      sortOrder,
+      limit,
+    ],
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await getGovActionVotes(
+        actionId,
+        votesType,
+        roleType,
+        sortBy,
+        sortOrder,
+        pageParam,
+        limit
+      );
+      return response;
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      return lastPage.length === limit ? allPages.length + 1 : undefined;
+    },
     enabled: !!actionId,
     refetchOnWindowFocus: false,
   });
@@ -33,5 +65,8 @@ export const useGetGovActionVotesQuery = (
     votes: data,
     isVotesLoading: isLoading,
     votesError: error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
   };
 };

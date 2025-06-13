@@ -70,9 +70,23 @@ VotesWithPower AS (
         AND lv.voter_role = 'SPO'
     
     WHERE lv.rn = 1  -- Only latest vote per voter
+),
+FilteredVotes AS (
+    -- Apply filters
+    SELECT *
+    FROM VotesWithPower
+    WHERE 1=1
+        -- Vote filter
+        AND ($2 = 'AllVotes' OR vote::text = $2)
+        -- Role filter  
+        AND ($3 = 'AllVoters' OR 
+             ($3 = 'DReps' AND voter_role = 'DRep') OR
+             ($3 = 'SPOs' AND voter_role = 'SPO') OR  
+             ($3 = 'CCMembers' AND voter_role = 'ConstitutionalCommittee')
+            )
 )
 
--- Final result
+-- Final result with sorting and pagination
 SELECT
     id, 
     voter_role,
@@ -81,12 +95,34 @@ SELECT
     voting_power,
     vote_epoch,
     vote_time
-FROM VotesWithPower
+FROM FilteredVotes
 ORDER BY 
-    vote_time DESC,
-    CASE voter_role 
-        WHEN 'ConstitutionalCommittee' THEN 1
-        WHEN 'DRep' THEN 2
-        WHEN 'SPO' THEN 3
+    CASE 
+        WHEN $4 = 'vote' AND $5 = 'asc' THEN vote::text 
+    END ASC NULLS LAST,
+    CASE 
+        WHEN $4 = 'vote' AND $5 = 'desc' THEN vote::text 
+    END DESC NULLS LAST,
+    CASE 
+        WHEN $4 = 'voting_power' AND $5 = 'asc' THEN voting_power 
+    END ASC NULLS LAST,
+    CASE 
+        WHEN $4 = 'voting_power' AND $5 = 'desc' THEN voting_power 
+    END DESC NULLS LAST,
+    CASE 
+        WHEN $4 = 'vote_time' AND $5 = 'asc' THEN vote_time 
+    END ASC NULLS LAST,
+    CASE 
+        WHEN $4 = 'vote_time' AND $5 = 'desc' THEN vote_time 
+    END DESC NULLS LAST,
+    -- Default fallback ordering when no specific sort is applied
+    CASE WHEN $4 NOT IN ('vote', 'voting_power', 'vote_time') THEN vote_time END DESC,
+    CASE WHEN $4 NOT IN ('vote', 'voting_power', 'vote_time') THEN
+        CASE voter_role 
+            WHEN 'ConstitutionalCommittee' THEN 1
+            WHEN 'DRep' THEN 2
+            WHEN 'SPO' THEN 3
+        END
     END,
-    voter_identity`;
+    CASE WHEN $4 NOT IN ('vote', 'voting_power', 'vote_time') THEN voter_identity END
+LIMIT $6 OFFSET $7`;

@@ -4,15 +4,18 @@ import { useTranslation } from "../../contexts/I18nContext";
 type ActionsEmptyStateProps = {
   title: string;
   description: string;
+  dataTestId?: string;
 };
 
 export const ActionsEmptyState = ({
   title,
   description,
+  dataTestId = "empty-state-placeholder",
 }: ActionsEmptyStateProps) => {
   const { t } = useTranslation();
   return (
     <Card
+    data-testid={dataTestId}
       variant="outlined"
       elevation={0}
       sx={{

@@ -49,14 +49,22 @@ export class GovernanceActionsController {
   findVotes(
     @Param("id") id: string,
     @Query("index") index: number,
-    @Query("votesType") votesType: string,
-    @Query("roleType") roleType: string
+    @Query("votesType") votesType: string = "AllVotes",
+    @Query("roleType") roleType: string = "AllVoters",
+    @Query("sortBy") sortBy: string = "vote_time",
+    @Query("sortOrder") sortOrder: string = "desc",
+    @Query("page") page: number = 1,
+    @Query("limit") limit: number = 20
   ) {
     const govActionId = `${id}#${index}`;
     return this.governanceActionsService.findVotes(
       govActionId,
       votesType,
-      roleType
+      roleType,
+      sortBy,
+      sortOrder,
+      page,
+      limit
     );
   }
 }
