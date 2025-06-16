@@ -28,6 +28,7 @@ import { formatDistanceToNow } from "date-fns";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "../../contexts/I18nContext";
 import { VoteLoader } from "../Loaders/VoteLoader";
+import { GovernanceActionVoteData } from "../../types/api";
 
 const StyledTableContainer = styled(TableContainer)(() => ({
   backgroundColor: "white",
@@ -134,7 +135,7 @@ export default function GovernanceActionVotesList({
     ITEMS_PER_PAGE
   );
 
-  const displayedVotes = votes?.pages?.flat() || [];
+  const displayedVotes: GovernanceActionVoteData[] = votes?.pages?.flat() || [];
 
   const handleSort = (field: SortField) => {
     const newParams = new URLSearchParams(searchParams);
@@ -214,7 +215,7 @@ export default function GovernanceActionVotesList({
                       fontWeight={400}
                       color="textBlack"
                     >
-                      Lido Nation
+                      {vote.drep_given_name ? vote.drep_given_name : "Unknown"}
                     </Typography>
                     <Box display="flex" alignItems="center" gap={1.25}>
                       <Typography variant="caption" color="textLightGray">

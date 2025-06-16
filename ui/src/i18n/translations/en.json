@@ -19,7 +19,9 @@
   },
   "common": {
     "expand": "Expand",
-    "collapse": "Collapse"
+    "collapse": "Collapse",
+    "viewMore": "View More",
+    "viewLess": "View Less"
   },
   "outcome": {
     "label": "Outcome",

@@ -2,7 +2,6 @@ import { useInfiniteQuery } from "react-query";
 import { queryKeys } from "../consts/queryKeys";
 import { decodeCIP129Identifier, getFullGovActionId } from "../lib/utils";
 import { getGovActionVotes } from "../services/requests/getGovActionVotes";
-import { GovernanceActionVoteData } from "../types/api";
 
 export const useGetGovActionVotesQuery = (
   id: string,

@@ -5,7 +5,10 @@ import {
   styled,
   Tab,
   Tabs,
+  Button,
+  Collapse,
 } from "@mui/material";
+import { useState, useRef, useEffect } from "react";
 import { Breadcrumbs } from "../Components/Molecules/Breadcrumbs";
 import { useGetGovernanceActionQuery } from "../hooks/useGetGovernanceActionQuery";
 import Header from "../Components/SingleAction/Header";
@@ -16,7 +19,7 @@ import { encodeCIP129Identifier, getFullGovActionId } from "../lib/utils";
 import GovernanceVotingUI from "../Components/SingleAction/GovernanceVoting";
 import { DataMissingInfoBox } from "../Components/Molecules/DataMissingInfoBox";
 import GovernanceActionElement from "../Components/SingleAction/GovernanceActionElement";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { ReasoningTabContent } from "../Components/SingleAction/ReasoningTabContent";
 import { GovernanceActionDetailsDiffView } from "../Components/SingleAction/GovernanceActionDetailsDiffView";
 import { mapArrayToObjectByKeys } from "../lib/mapArrayToObjectByKeys";
@@ -86,6 +89,15 @@ function GovernanceAction({ id }: GovernanceActionProps) {
 
   const { epochParams } = useNetworkMetrics(governanceAction);
   const [selectedTab, setSelectedTab] = useState<number>(0);
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
+  const [showExpandButton, setShowExpandButton] = useState<boolean>(false);
+  const [votesHeight, setVotesHeight] = useState<number>(0);
+  const [collapsedHeight, setCollapsedHeight] = useState<number>(0);
+
+  const actionDetailsRef = useRef<HTMLDivElement>(null);
+  const actionVotesRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const headerContentRef = useRef<HTMLDivElement>(null);
 
   const content = {
     title: governanceAction?.title || metadata?.data?.title,
@@ -248,6 +260,56 @@ function GovernanceAction({ id }: GovernanceActionProps) {
     setSelectedTab(newValue);
   };
 
+  const handleToggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  useEffect(() => {
+    const checkHeights = () => {
+      if (
+        actionVotesRef.current &&
+        contentRef.current &&
+        headerContentRef.current
+      ) {
+        const votesHeight = actionVotesRef.current.offsetHeight;
+        const contentHeight = contentRef.current.scrollHeight;
+        const headerHeight = headerContentRef.current.scrollHeight;
+
+        setVotesHeight(votesHeight);
+        const calculatedCollapsedHeight = Math.max(
+          0,
+          votesHeight - headerHeight - 125
+        );
+        setCollapsedHeight(calculatedCollapsedHeight);
+
+        if (contentHeight > votesHeight - headerHeight) {
+          setShowExpandButton(true);
+        } else {
+          setShowExpandButton(false);
+          setIsExpanded(false);
+        }
+      }
+    };
+
+    const timer = setTimeout(checkHeights, 100);
+
+    const resizeObserver = new ResizeObserver(checkHeights);
+    if (actionVotesRef.current) {
+      resizeObserver.observe(actionVotesRef.current);
+    }
+    if (contentRef.current) {
+      resizeObserver.observe(contentRef.current);
+    }
+    if (headerContentRef.current) {
+      resizeObserver.observe(headerContentRef.current);
+    }
+
+    return () => {
+      clearTimeout(timer);
+      resizeObserver.disconnect();
+    };
+  }, [governanceAction, metadata, visibleTabs]);
+
   if (isGovernanceActionLoading) {
     return (
       <Box display="flex" flex={1} flexDirection="column" width="100%">
@@ -281,6 +343,115 @@ function GovernanceAction({ id }: GovernanceActionProps) {
     ));
   };
 
+  const renderCollapsibleContent = () => {
+    return (
+      <>
+        {!hasAnyContent && (!governanceAction || isMetadataLoading) && (
+          <>
+            <Skeleton variant="rounded" width="20%" height={15} />
+            <Skeleton variant="rounded" width="100%" height={400} />
+          </>
+        )}
+        {visibleTabs.length > 0 && (
+          <>
+            {visibleTabs.length === 1 ? (
+              visibleTabs[0].content
+            ) : (
+              <>
+                <Tabs
+                  sx={{
+                    display: "flex",
+                    fontSize: 16,
+                    fontWeight: 500,
+                  }}
+                  value={selectedTab}
+                  indicatorColor="secondary"
+                  onChange={handleChange}
+                  aria-label="Governance action content description"
+                >
+                  {visibleTabs.map((tab) => (
+                    <StyledTab
+                      key={tab.dataTestId}
+                      data-testid={tab.dataTestId}
+                      label={tab.label}
+                      isMobile={isMobile}
+                    />
+                  ))}
+                </Tabs>
+                {renderAllTabContent()}
+              </>
+            )}
+          </>
+        )}
+        {governanceAction?.description &&
+          governanceAction?.type === GovernanceActionType.TreasuryWithdrawals &&
+          Array.isArray(governanceAction?.description) &&
+          governanceAction?.description?.map((withdrawal) => (
+            <GovernanceActionCardTreasuryWithdrawalElement
+              key={withdrawal.receivingAddress}
+              receivingAddress={withdrawal.receivingAddress}
+              amount={withdrawal.amount}
+            />
+          ))}
+        {governanceAction?.type !== GovernanceActionType.NewConstitution && (
+          <>
+            <GovernanceActionElement
+              title={t("outcome.metadataLink")}
+              type="link"
+              content={governanceAction?.url}
+              isCopyable
+              dataTestId="metadata-anchor-link"
+            />
+            <GovernanceActionElement
+              title={t("outcome.metadataHash")}
+              type="text"
+              content={governanceAction?.data_hash}
+              isCopyable
+              dataTestId="metadata-anchor-hash"
+            />
+          </>
+        )}
+        {metadataValid && content.references.length > 0 && (
+          <References links={content.references} />
+        )}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 0.5,
+          }}
+        >
+          <Typography
+            data-testid={`related-proposal-label`}
+            sx={{
+              color: "textGray",
+              fontWeight: 600,
+              fontSize: 14,
+            }}
+          >
+            {t("proposalDiscussion.title")}
+          </Typography>
+          {isProposalLoading ? (
+            <ProposalCardLoader />
+          ) : proposal?.data?.length > 0 ? (
+            <ProposalCard proposal={proposal?.data?.[0]} />
+          ) : (
+            <Typography
+              sx={{
+                fontSize: 16,
+                fontWeight: 400,
+                color: "neutralGray",
+                p: 0,
+              }}
+            >
+              {t("proposalDiscussion.notFound")}
+            </Typography>
+          )}
+        </Box>
+      </>
+    );
+  };
+
   return (
     <Box
       className="outcome-container"
@@ -299,142 +470,94 @@ function GovernanceAction({ id }: GovernanceActionProps) {
       />
       <Box className="action-details-container" marginTop={0.5}>
         <Box
+          ref={actionDetailsRef}
           className="action-details"
           data-testid={`single-action-${idCIP129}-description`}
           sx={{
-            height: "auto",
             boxShadow: "0px 4px 15px 0px #DDE3F5",
             borderRadius: "16px",
             paddingX: 2,
             paddingY: 2.75,
             backgroundColor: "white",
+            position: "relative",
+            display: "flex",
+            flexDirection: "column",
             ...(!metadataValid && {
               border: "1px solid #F6D5D5",
             }),
           }}
         >
           {governanceAction && (
-            <Box display="flex" flexDirection="column" gap={3}>
-              <Header
-                title={content.title}
-                isGovernanceActionLoading={isGovernanceActionLoading}
-                isMetadataLoading={isMetadataLoading}
-                isDataMissing={isDataMissing}
-              />
-              <DataMissingInfoBox isDataMissing={isDataMissing} />
-              <ActionIdentity
-                governanceAction={governanceAction}
-                metadata={metadata}
-              />
-              {!hasAnyContent && (!governanceAction || isMetadataLoading) && (
-                <>
-                  <Skeleton variant="rounded" width="20%" height={15} />
-                  <Skeleton variant="rounded" width="100%" height={400} />
-                </>
-              )}
-              {visibleTabs.length > 0 && (
-                <>
-                  {visibleTabs.length === 1 ? (
-                    visibleTabs[0].content
-                  ) : (
-                    <>
-                      <Tabs
-                        sx={{
-                          display: "flex",
-                          fontSize: 16,
-                          fontWeight: 500,
-                        }}
-                        value={selectedTab}
-                        indicatorColor="secondary"
-                        onChange={handleChange}
-                        aria-label="Governance action content description"
-                      >
-                        {visibleTabs.map((tab) => (
-                          <StyledTab
-                            key={tab.dataTestId}
-                            data-testid={tab.dataTestId}
-                            label={tab.label}
-                            isMobile={isMobile}
-                          />
-                        ))}
-                      </Tabs>
-                      {renderAllTabContent()}
-                    </>
-                  )}
-                </>
-              )}
-              {governanceAction?.description &&
-                governanceAction?.type ===
-                  GovernanceActionType.TreasuryWithdrawals &&
-                Array.isArray(governanceAction?.description) &&
-                governanceAction?.description?.map((withdrawal) => (
-                  <GovernanceActionCardTreasuryWithdrawalElement
-                    key={withdrawal.receivingAddress}
-                    receivingAddress={withdrawal.receivingAddress}
-                    amount={withdrawal.amount}
-                  />
-                ))}
-              {governanceAction?.type !==
-                GovernanceActionType.NewConstitution && (
-                <>
-                  <GovernanceActionElement
-                    title={t("outcome.metadataLink")}
-                    type="link"
-                    content={governanceAction?.url}
-                    isCopyable
-                    dataTestId="metadata-anchor-link"
-                  />
-                  <GovernanceActionElement
-                    title={t("outcome.metadataHash")}
-                    type="text"
-                    content={governanceAction?.data_hash}
-                    isCopyable
-                    dataTestId="metadata-anchor-hash"
-                  />
-                </>
-              )}
-              {metadataValid && content.references.length > 0 && (
-                <References links={content.references} />
-              )}
+            <Box display="flex" flexDirection="column">
               <Box
+                ref={headerContentRef}
                 sx={{
                   display: "flex",
                   flexDirection: "column",
-                  gap: 0.5,
+                  gap: 3,
+                  mb: 3,
                 }}
               >
-                <Typography
-                  data-testid={`related-proposal-label`}
+                <Header
+                  title={content.title}
+                  isGovernanceActionLoading={isGovernanceActionLoading}
+                  isMetadataLoading={isMetadataLoading}
+                  isDataMissing={isDataMissing}
+                />
+                <DataMissingInfoBox isDataMissing={isDataMissing} />
+                <ActionIdentity
+                  governanceAction={governanceAction}
+                  metadata={metadata}
+                />
+              </Box>
+
+              <Collapse
+                in={isExpanded || !showExpandButton}
+                timeout={300}
+                unmountOnExit={false}
+                collapsedSize={showExpandButton ? `${collapsedHeight}px` : 0}
+                sx={{
+                  "& .MuiCollapse-wrapper": {
+                    overflow:
+                      showExpandButton && !isExpanded ? "hidden" : "visible",
+                  },
+                  "& .MuiCollapse-wrapperInner": {
+                    overflow:
+                      showExpandButton && !isExpanded ? "hidden" : "visible",
+                  },
+                }}
+              >
+                <Box
+                  ref={contentRef}
                   sx={{
-                    color: "textGray",
-                    fontWeight: 600,
-                    fontSize: 14,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 3,
                   }}
                 >
-                  {t("proposalDiscussion.title")}
-                </Typography>
-                {isProposalLoading ? (
-                  <ProposalCardLoader />
-                ) : proposal?.data?.length > 0 ? (
-                  <ProposalCard proposal={proposal?.data?.[0]} />
-                ) : (
-                  <Typography
-                    sx={{
-                      fontSize: 16,
-                      fontWeight: 400,
-                      color: "neutralGray",
-                      p: 0,
-                    }}
-                  >
-                    {t("proposalDiscussion.notFound")}
-                  </Typography>
-                )}
-              </Box>
+                  {renderCollapsibleContent()}
+                </Box>
+              </Collapse>
+
+              {showExpandButton && (
+                <Button
+                  data-testid={`action-details-expand-collapse-button`}
+                  variant="contained"
+                  color="primary"
+                  onClick={handleToggleExpand}
+                  sx={{
+                    marginTop: 2.75,
+                  }}
+                >
+                  {isExpanded ? t("common.viewLess") : t("common.viewMore")}
+                </Button>
+              )}
             </Box>
           )}
         </Box>
 
         <Box
+          ref={actionVotesRef}
           className="action-votes"
           data-testid={`single-action-${idCIP129}-outcome-numbers`}
           sx={{

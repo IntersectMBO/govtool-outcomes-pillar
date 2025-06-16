@@ -202,4 +202,10 @@ export type GovernanceActionVoteData = {
   voting_power: string;
   vote_epoch: number;
   vote_time: string;
+  drep_metadata_url: string | null;
+  drep_metadata_hash: string | null;
+  drep_payment_address: string | null;
+  drep_given_name: string | null;
+  drep_image_url: string | null;
+  drep_image_hash: string | null;
 };
