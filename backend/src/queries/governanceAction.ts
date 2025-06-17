@@ -316,6 +316,7 @@ SELECT
                 'null'::jsonb
         END
     ) AS proposal_params,
+    off_chain_vote_data.json AS json_metadata,
     off_chain_vote_gov_action_data.title,
     off_chain_vote_gov_action_data.abstract,
     off_chain_vote_gov_action_data.motivation,
@@ -403,6 +404,7 @@ GROUP BY
     voting_anchor.data_hash,
     prev_gov_action.index,
     prev_gov_action_tx.hash,
+    off_chain_vote_data.json,
     off_chain_vote_gov_action_data.title,
     off_chain_vote_gov_action_data.abstract,
     off_chain_vote_gov_action_data.motivation,

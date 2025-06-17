@@ -148,7 +148,6 @@ build_govtool:
           --create-namespace \
           -f ./charts/values.yaml \
           --set namespace=$NAMESPACE \
-          --set ingress.hosts[0]=$INGRESS_HOST \
           --set image.backend.tag=$CI_APPLICATION_TAG \
           --set image.backend.replicaCount=$REPLICACOUNT \
           --set cardano_node[0].tcp_host=$NODE_TCP_HOST \
