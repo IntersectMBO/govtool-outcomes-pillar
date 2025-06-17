@@ -34,6 +34,7 @@ import ProposalCard from "../Components/SingleAction/ProposalCard";
 import { Typography } from "../Components/Atoms/Typography";
 import ProposalCardLoader from "../Components/Loaders/ProposalCardLoader";
 import { useTranslation } from "../contexts/I18nContext";
+import GovernanceActionAuthors from "../Components/Molecules/GovernanceActionAuthors";
 
 type GovernanceActionProps = {
   id: string;
@@ -107,6 +108,10 @@ function GovernanceAction({ id }: GovernanceActionProps) {
           governanceAction?.prev_gov_action_index
         )
       : null;
+
+  const authors = governanceAction?.json_metadata
+    ? governanceAction?.json_metadata?.authors
+    : metadata?.data?.authors;
 
   const mappedArraysToObjectsProtocolParams = useMemo(
     () =>
@@ -211,6 +216,8 @@ function GovernanceAction({ id }: GovernanceActionProps) {
         content: (
           <GovernanceActionNewConstitutionDetailsTabContent
             description={governanceAction?.description}
+            authors={authors}
+            metadataUrl={governanceAction?.url}
           />
         ),
         visible: showNewConstitutionTab,
@@ -316,10 +323,7 @@ function GovernanceAction({ id }: GovernanceActionProps) {
                 isDataMissing={isDataMissing}
               />
               <DataMissingInfoBox isDataMissing={isDataMissing} />
-              <ActionIdentity
-                governanceAction={governanceAction}
-                metadata={metadata}
-              />
+              <ActionIdentity governanceAction={governanceAction} />
               {!hasAnyContent && (!governanceAction || isMetadataLoading) && (
                 <>
                   <Skeleton variant="rounded" width="20%" height={15} />
@@ -384,6 +388,10 @@ function GovernanceAction({ id }: GovernanceActionProps) {
                     content={governanceAction?.data_hash}
                     isCopyable
                     dataTestId="metadata-anchor-hash"
+                  />
+                  <GovernanceActionAuthors
+                    authors={authors}
+                    metadataUrl={governanceAction?.url}
                   />
                 </>
               )}

@@ -43,7 +43,6 @@
     "newConstitutionHash": "New constitution hash",
     "newConstitutionScriptHash": "New constitution script hash",
     "epoch": "Epoch",
-    "authors": "Author(s)",
     "toEpoch": "To Epoch",
     "fromEpoch": "from Epoch",
     "newThreshold": "New threshold value",
@@ -51,6 +50,15 @@
     "treasury": {
       "receivingAddress": "Receiving Address:",
       "amount": "Amount:"
+    },
+    "authors": {
+      "noDataAvailable": "No author data available",
+      "title": "Author(s)",
+      "publicKey": "Public Key",
+      "signature": "Signature",
+      "witnessAlgorithm": "Witness Algorithm",
+      "verificationFailed": "Witness Verification Failed",
+      "witnessVerified": "Witness Verified"
     },
     "status": {
       "title": "Status",

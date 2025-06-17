@@ -6,6 +6,8 @@ export type TooltipProps = {
   heading?: string;
   paragraphOne?: string;
   paragraphTwo?: string;
+  paragraphThree?: string;
+  paragraphFour?: string;
   children: React.ReactElement<any>;
 };
 
@@ -13,6 +15,8 @@ export const Tooltip = ({
   heading,
   paragraphOne,
   paragraphTwo,
+  paragraphThree,
+  paragraphFour,
   children,
 }: TooltipProps) => (
   <MUIToolTip
@@ -25,22 +29,21 @@ export const Tooltip = ({
             {heading}
           </Typography>
         )}
-        <Typography
-          variant="body2"
-          fontWeight={400}
-          color={"rgb(170, 170, 170)"}
-          sx={{
-            mt: heading ? 0.5 : 0,
-          }}
-        >
-          {paragraphOne && <>{paragraphOne}</>}
-          {paragraphTwo && (
-            <>
-              <br></br>
-              {paragraphTwo}
-            </>
-          )}
-        </Typography>
+        {[paragraphOne, paragraphTwo, paragraphThree, paragraphFour]
+          .filter(Boolean)
+          .map((paragraph, index) => (
+            <Typography
+              key={index}
+              variant="body2"
+              fontWeight={400}
+              color={"rgb(170, 170, 170)"}
+              sx={{
+                mt: heading && index === 0 ? 0.5 : index > 0 ? 0.5 : 0,
+              }}
+            >
+              {paragraph}
+            </Typography>
+          ))}
       </>
     }
     arrow
