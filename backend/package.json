@@ -21,6 +21,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@emurgo/cardano-serialization-lib-nodejs": "^14.1.2",
     "@nestjs/axios": "^4.0.0",
     "@nestjs/common": "^11.0.10",
     "@nestjs/config": "^4.0.0",
@@ -32,6 +33,7 @@
     "axios": "^1.7.9",
     "blake2b": "^2.1.4",
     "blakejs": "^1.2.1",
+    "cbor": "^10.0.3",
     "jsonld": "^8.3.2",
     "pg": "^8.13.3",
     "reflect-metadata": "^0.2.2",
