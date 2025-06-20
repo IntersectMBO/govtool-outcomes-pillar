@@ -16,7 +16,6 @@ export interface SignatureVerificationDto {
 
 export interface SignatureVerificationResult {
   isValid: boolean;
-  author: string;
   message?: string;
   error?: string;
 }

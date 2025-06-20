@@ -9,6 +9,7 @@ import { catchError, finalize } from "rxjs/operators";
 import { ConfigService } from "@nestjs/config";
 import * as ed from "@noble/ed25519";
 import * as blake from "blakejs";
+import { verifyCIP8Signature } from "src/utils/cardano-utils";
 import {
   SignatureVerificationDto,
   SignatureVerificationResult,
@@ -53,11 +54,8 @@ export class MiscellaneousService {
     const { author, metadataUrl } = data;
 
     try {
-      if (
-        !author?.witness?.witnessAlgorithm ||
-        author.witness.witnessAlgorithm !== "ed25519"
-      ) {
-        throw new BadRequestException("Only ed25519 signatures are supported");
+      if (!author?.witness?.witnessAlgorithm) {
+        throw new BadRequestException("Algorithm is missing in witness");
       }
 
       if (!author.witness.publicKey || !author.witness.signature) {
@@ -118,28 +116,54 @@ export class MiscellaneousService {
       const canonizedBytes = new TextEncoder().encode(canonized);
       const hashedBody = blake.blake2b(canonizedBytes, undefined, 32);
 
-      const signatureBytes = ed.etc.hexToBytes(author.witness.signature);
-      const publicKeyBytes = ed.etc.hexToBytes(author.witness.publicKey);
-
-      const isValid = await ed.verifyAsync(
-        signatureBytes,
-        hashedBody,
-        publicKeyBytes
-      );
-
-      return {
-        isValid,
-        author: author.name,
-        message: isValid
-          ? "Signature is valid"
-          : "Signature verification failed",
-      };
+      switch (author.witness.witnessAlgorithm?.toLowerCase()) {
+        case "ed25519":
+          return await this.verifyEd25519Signature({
+            signature: author.witness.signature,
+            hashedBody,
+            publicKey: author.witness.publicKey,
+          });
+        case "cip-0008":
+          return (await verifyCIP8Signature({
+            signature: author.witness.signature,
+            vkey: author.witness.publicKey,
+            message: canonizedBytes,
+          })) as unknown as SignatureVerificationResult;
+        default:
+          throw new BadRequestException(
+            `Unsupported witness algorithm: ${author.witness.witnessAlgorithm}`
+          );
+      }
     } catch (error) {
       return {
         isValid: false,
-        author: author.name,
         error: error.message || "Unknown error during signature verification",
       };
     }
+  }
+
+  async verifyEd25519Signature({
+    signature,
+    hashedBody,
+    publicKey,
+  }: {
+    signature: string;
+    hashedBody: Uint8Array;
+    publicKey: string;
+    authorName?: string;
+  }) {
+    const signatureBytes = ed.etc.hexToBytes(signature);
+    const publicKeyBytes = ed.etc.hexToBytes(publicKey);
+
+    const isValid = await ed.verifyAsync(
+      signatureBytes,
+      hashedBody,
+      publicKeyBytes
+    );
+
+    return {
+      isValid,
+      message: isValid ? "Signature is valid" : "Signature verification failed",
+    };
   }
 }
