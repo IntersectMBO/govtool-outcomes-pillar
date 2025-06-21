@@ -103,6 +103,7 @@ const GovActionDatesInfo = ({
             display: "flex",
             alignItems: "center",
             flexWrap: "nowrap",
+            gap: 0.5,
           }}
         >
           <Typography variant="caption">
@@ -145,6 +146,7 @@ const GovActionDatesInfo = ({
             display: "flex",
             alignItems: "center",
             flexWrap: "nowrap",
+            gap: 0.5,
           }}
         >
           <Typography variant="caption">

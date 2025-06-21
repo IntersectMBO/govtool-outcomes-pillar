@@ -17,6 +17,7 @@ export interface GovernanceAction {
   url: string;
   data_hash: string;
   proposal_params: EpochParams | null;
+  json_metadata: any | null;
   title?: string;
   abstract?: string;
   status: Status;
@@ -209,3 +210,26 @@ export type GovernanceActionVoteData = {
   drep_image_url: string | null;
   drep_image_hash: string | null;
 };
+
+export interface AuthorWitness {
+  witnessAlgorithm: string;
+  publicKey: string;
+  signature: string;
+}
+
+export interface Author {
+  name: string;
+  witness: AuthorWitness;
+}
+
+export interface SignatureVerificationDto {
+  author: Author;
+  metadataUrl: string;
+}
+
+export interface SignatureVerificationResult {
+  isValid: boolean;
+  author: string;
+  message?: string;
+  error?: string;
+}

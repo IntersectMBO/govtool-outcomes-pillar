@@ -2,10 +2,19 @@ import { Box } from "@mui/material";
 import { GovernanceAction, NewConstitutionAnchor } from "../../types/api";
 import GovernanceActionElement from "./GovernanceActionElement";
 import { useTranslation } from "../../contexts/I18nContext";
+import GovernanceActionAuthors from "../Molecules/GovernanceActionAuthors";
+
+type GovernanceActionNewConstitutionDetailsTabContentProps = {
+  description: GovernanceAction["description"];
+  authors: any[];
+  metadataUrl?: string;
+};
 
 export const GovernanceActionNewConstitutionDetailsTabContent = ({
   description,
-}: Pick<GovernanceAction, "description">) => {
+  authors,
+  metadataUrl,
+}: GovernanceActionNewConstitutionDetailsTabContentProps) => {
   const { t } = useTranslation();
 
   return (
@@ -34,6 +43,7 @@ export const GovernanceActionNewConstitutionDetailsTabContent = ({
         dataTestId="new-constitution-script-hash"
         isCopyable
       />
+      <GovernanceActionAuthors authors={authors} metadataUrl={metadataUrl} />
     </Box>
   );
 };

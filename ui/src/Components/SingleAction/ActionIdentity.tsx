@@ -7,14 +7,14 @@ import GovernanceActionElement from "./GovernanceActionElement";
 import { Typography } from "../Atoms/Typography";
 import { primaryBlue } from "../../consts/colors";
 import StatusChip from "../Molecules/StatusChip";
-import { GovActionMetadata, GovernanceAction } from "../../types/api";
+import { GovernanceAction } from "../../types/api";
 import { useTranslation } from "../../contexts/I18nContext";
 
 type ActionIdentityProps = {
   governanceAction: GovernanceAction;
-  metadata: GovActionMetadata;
 };
-function ActionIdentity({ governanceAction, metadata }: ActionIdentityProps) {
+
+function ActionIdentity({ governanceAction }: ActionIdentityProps) {
   const { t } = useTranslation();
 
   const idCIP129 = encodeCIP129Identifier({
@@ -64,38 +64,6 @@ function ActionIdentity({ governanceAction, metadata }: ActionIdentityProps) {
         </Box>
       </Box>
       <GovActionDatesInfo action={governanceAction} />
-      {metadata && metadata?.data?.authors?.length > 0 && (
-        <Box
-          data-testid="single-action-authors"
-          display="flex"
-          flexDirection="column"
-          gap={0.5}
-        >
-          <Typography
-            sx={{
-              color: "textGray",
-              fontWeight: 600,
-              fontSize: 14,
-            }}
-          >
-            {t("outcome.authors")}
-          </Typography>
-          <Box display="flex" gap={2} flexWrap="wrap">
-            {metadata?.data?.authors?.map((author: { name: string }, index) => (
-              <Typography
-                key={index}
-                sx={{
-                  color: "textGray",
-                  fontWeight: 400,
-                  fontSize: 16,
-                }}
-              >
-                @{author?.name}
-              </Typography>
-            ))}
-          </Box>
-        </Box>
-      )}
       <GovernanceActionStatus
         status={governanceAction?.status}
         actionId={idCIP129}

@@ -52,10 +52,8 @@ function ReasoningElement({ label, text, dataTestId }: ReasoningElementProps) {
                     fontSize: 16,
                     fontWeight: 400,
                     lineHeight: 1.7,
-                    maxWidth: "auto",
                     color: "textBlack",
                     whiteSpace: "pre-wrap",
-                    width: "100%",
                   }}
                 >
                   {children}
@@ -78,6 +76,83 @@ function ReasoningElement({ label, text, dataTestId }: ReasoningElementProps) {
                 >
                   <table>{children}</table>
                 </Box>
+              );
+            },
+            ul(props) {
+              return (
+                <Box
+                  component="ul"
+                  sx={{
+                    pl: 4,
+                    color: "textBlack",
+                    fontSize: 16,
+                    lineHeight: 1.7,
+                    listStyleType: "disc",
+                  }}
+                >
+                  {props.children}
+                </Box>
+              );
+            },
+            ol(props) {
+              return (
+                <Box
+                  component="ol"
+                  sx={{
+                    pl: 4,
+                    color: "textBlack",
+                    fontSize: 16,
+                    lineHeight: 1.7,
+                    listStyleType: "decimal",
+                  }}
+                >
+                  {props.children}
+                </Box>
+              );
+            },
+            li(props) {
+              return (
+                <Box
+                  component="li"
+                  sx={{
+                    color: "textBlack",
+                    fontSize: 16,
+                    lineHeight: 1.7,
+                    mb: 0.5,
+                  }}
+                >
+                  {props.children}
+                </Box>
+              );
+            },
+            strong(props) {
+              return (
+                <Typography
+                  component="span"
+                  sx={{
+                    fontWeight: 700,
+                    color: "textBlack",
+                    fontSize: 16,
+                    lineHeight: 1.7,
+                  }}
+                >
+                  {props.children}
+                </Typography>
+              );
+            },
+            em(props) {
+              return (
+                <Typography
+                  component="span"
+                  sx={{
+                    fontStyle: "italic",
+                    color: "textBlack",
+                    fontSize: 16,
+                    lineHeight: 1.7,
+                  }}
+                >
+                  {props.children}
+                </Typography>
               );
             },
           }}
