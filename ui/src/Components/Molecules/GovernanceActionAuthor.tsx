@@ -1,4 +1,4 @@
-import { Box, Icon, Typography } from "@mui/material";
+import { Box, Icon, Skeleton, Typography } from "@mui/material";
 import { useState, useEffect } from "react";
 import { Tooltip } from "../Atoms/Tooltip";
 import {
@@ -83,13 +83,15 @@ function GovernanceActionAuthor({
   }, [author, metadataUrl]);
 
   const renderVerificationIcon = () => {
-    if (isLoading) return null;
+    if (isLoading) {
+      return <Skeleton variant="circular" width={20} height={20} />;
+    }
 
     if (verificationResult?.isValid) {
       return (
-        <Tooltip paragraphOne={t("outcome.authors.witnessVerified")}>
+        <Tooltip heading={t("outcome.authors.witnessVerified")}>
           <Icon>
-            <IconCheckCircle fill={successGreen.c400} width={19} height={19} />
+            <IconCheckCircle fill={successGreen.c400} width={20} height={20} />
           </Icon>
         </Tooltip>
       );
@@ -119,7 +121,7 @@ function GovernanceActionAuthor({
       {renderVerificationIcon()}
       <Typography
         sx={{
-          color: "textGray",
+          color: "textBlack",
           fontWeight: 400,
           fontSize: 16,
         }}
