@@ -616,20 +616,20 @@ function GovernanceAction({ id }: GovernanceActionProps) {
             gap={isMobile ? 1 : 1.5}
           >
             <RadioComponent
-              queryParam="votes"
-              options={GOVERNANCE_ACTION_VOTES_FILTERS}
-              defaultValue="AllVotes"
-              titleTranslationKey="outcome.votes.shortTitle"
-              fullTitleTranslationKey="outcome.votes.shortTitle"
-              testIdPrefix="votes"
-            />
-            <RadioComponent
               queryParam="role"
               options={GOVERNANCE_ACTION_ROLES_FILTERS}
               defaultValue="AllVoters"
               titleTranslationKey="outcome.votes.roles"
               fullTitleTranslationKey="outcome.votes.roles"
               testIdPrefix="role"
+            />
+            <RadioComponent
+              queryParam="votes"
+              options={GOVERNANCE_ACTION_VOTES_FILTERS}
+              defaultValue="AllVotes"
+              titleTranslationKey="outcome.votes.shortTitle"
+              fullTitleTranslationKey="outcome.votes.shortTitle"
+              testIdPrefix="votes"
             />
           </Box>
         </Box>

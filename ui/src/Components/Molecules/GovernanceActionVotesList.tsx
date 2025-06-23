@@ -5,8 +5,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Typography,
-  Chip,
   Box,
   CircularProgress,
 } from "@mui/material";
@@ -15,20 +13,14 @@ import {
   IconArrowDown,
   IconArrowUp,
 } from "@intersect.mbo/intersectmbo.org-icons-set";
-import CopyButton from "../Atoms/CopyButton";
 import { Button } from "../Atoms/Button";
 import { useGetGovActionVotesQuery } from "../../hooks/useGetGovActionVotesQuery";
 import { ActionsEmptyState } from "./ActionsEmptyState";
-import {
-  correctAdaFormatWithSuffix,
-  formatTimeStamp,
-  truncateString,
-} from "../../lib/utils";
-import { formatDistanceToNow } from "date-fns";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "../../contexts/I18nContext";
 import { VoteLoader } from "../Loaders/VoteLoader";
 import { GovernanceActionVoteData } from "../../types/api";
+import { GovernanceActionVote } from "./GovernanceActionVote";
 
 const StyledTableContainer = styled(TableContainer)(() => ({
   backgroundColor: "white",
@@ -59,35 +51,6 @@ const StyledHeaderCell = styled(TableCell)<{ sortable?: boolean }>(
     }),
   })
 );
-
-const StyledTableRow = styled(TableRow)(() => ({
-  "&:hover": {
-    backgroundColor: "#f8f9fa",
-  },
-  "& td": {
-    borderBottom: "1px solid #f0f0f0",
-    padding: "16px",
-  },
-}));
-
-const VoteChip = styled(Chip)(({ vote }: { vote: string }) => ({
-  fontWeight: 400,
-  fontSize: "12px",
-  height: "28px",
-  width: "auto",
-  ...(vote === "Yes" && {
-    backgroundColor: "#4caf50",
-    color: "white",
-  }),
-  ...(vote === "No" && {
-    backgroundColor: "#f44336",
-    color: "white",
-  }),
-  ...(vote === "Abstain" && {
-    backgroundColor: "#ff9800",
-    color: "white",
-  }),
-}));
 
 interface GovernanceActionVotesListProps {
   actionId: string;
@@ -207,66 +170,7 @@ export default function GovernanceActionVotesList({
           </StyledTableHead>
           <TableBody>
             {displayedVotes.map((vote) => (
-              <StyledTableRow key={vote.id}>
-                <TableCell>
-                  <Box>
-                    <Typography
-                      variant="body2"
-                      fontWeight={400}
-                      color="textBlack"
-                    >
-                      {vote.drep_given_name ? vote.drep_given_name : "Unknown"}
-                    </Typography>
-                    <Box display="flex" alignItems="center" gap={1.25}>
-                      <Typography variant="caption" color="textLightGray">
-                        {truncateString(vote.voter_identity)}
-                      </Typography>
-                      <CopyButton
-                        text={vote.voter_identity}
-                        width={15}
-                        height={15}
-                        color="black"
-                      />
-                    </Box>
-                  </Box>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body2" fontWeight={400}>
-                    {vote.voter_role === "ConstitutionalCommittee"
-                      ? "CC"
-                      : vote.voter_role}
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <VoteChip label={vote.vote} size="small" vote={vote.vote} />
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body2" fontWeight={400}>
-                    {!!vote.voting_power
-                      ? `₳${correctAdaFormatWithSuffix(
-                          Number(vote.voting_power)
-                        )}`
-                      : "--"}
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body2" fontWeight={400}>
-                    {vote.vote_epoch}
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Box>
-                    <Typography variant="body2" fontWeight={400}>
-                      {formatDistanceToNow(new Date(vote.vote_time), {
-                        addSuffix: true,
-                      })}
-                    </Typography>
-                    <Typography variant="caption" color="textLightGray">
-                      {formatTimeStamp(vote.vote_time)}
-                    </Typography>
-                  </Box>
-                </TableCell>
-              </StyledTableRow>
+              <GovernanceActionVote key={vote.id} vote={vote} />
             ))}
           </TableBody>
         </Table>

@@ -16,6 +16,11 @@ import {
 } from "src/types/signature.types";
 import * as jsonld from "jsonld";
 
+interface FetchMetadataOptions {
+  parseJson?: boolean;
+  returnRaw?: boolean;
+}
+
 @Injectable()
 export class MiscellaneousService {
   constructor(
@@ -48,72 +53,99 @@ export class MiscellaneousService {
     return url;
   }
 
+  private async fetchMetadata(url: string, options: FetchMetadataOptions = {}) {
+    const { parseJson = true, returnRaw = false } = options;
+    const httpUrl = this.processUrl(url);
+
+    const response = await firstValueFrom(
+      this.httpService
+        .get(httpUrl, {
+          headers: {
+            "User-Agent": "GovTool/Signature-Verification-Tool",
+            "Content-Type": "application/json",
+          },
+          responseType: "text",
+        })
+        .pipe(
+          finalize(() => Logger.log(`Fetching ${httpUrl} completed`)),
+          catchError((error) => {
+            Logger.error("Error fetching metadata", JSON.stringify(error));
+            return throwError(
+              () => new BadRequestException("Failed to fetch metadata")
+            );
+          })
+        )
+    );
+
+    const rawData = (response as any).data;
+
+    // If raw data is requested, return it as-is
+    if (returnRaw) {
+      return rawData;
+    }
+
+    // Parse JSON if needed
+    if (parseJson && typeof rawData !== "object") {
+      try {
+        return JSON.parse(rawData);
+      } catch (error) {
+        throw new BadRequestException("Invalid JSON format in metadata");
+      }
+    }
+
+    return typeof rawData === "object" ? rawData : rawData;
+  }
+
+
+  private validateMetadataStructure(metadata: any): void {
+    if (!metadata?.body) {
+      throw new BadRequestException("Metadata does not contain body field");
+    }
+  }
+
+
+  private validateWitnessData(author: any): void {
+    if (!author?.witness?.witnessAlgorithm) {
+      throw new BadRequestException("Algorithm is missing in witness");
+    }
+
+    if (!author.witness.publicKey || !author.witness.signature) {
+      throw new BadRequestException(
+        "Missing publicKey or signature in witness"
+      );
+    }
+  }
+
+
+  private async canonicalizeMetadata(metadata: any): Promise<Uint8Array> {
+    const jsonToCanonicalize = {
+      "@context": metadata["@context"],
+      body: metadata.body,
+    };
+
+    const canonized = await jsonld.canonize(jsonToCanonicalize, {
+      algorithm: "URDNA2015",
+      format: "application/n-quads",
+    });
+
+    return new TextEncoder().encode(canonized);
+  }
+
   async verifySignature(
     data: SignatureVerificationDto
   ): Promise<SignatureVerificationResult> {
     const { author, metadataUrl } = data;
 
     try {
-      if (!author?.witness?.witnessAlgorithm) {
-        throw new BadRequestException("Algorithm is missing in witness");
-      }
+      this.validateWitnessData(author);
 
-      if (!author.witness.publicKey || !author.witness.signature) {
-        throw new BadRequestException(
-          "Missing publicKey or signature in witness"
-        );
-      }
-
-      const httpUrl = this.processUrl(metadataUrl);
-
-      const response = await firstValueFrom(
-        this.httpService
-          .get(httpUrl, {
-            headers: {
-              "User-Agent": "GovTool/Signature-Verification-Tool",
-              "Content-Type": "application/json",
-            },
-            responseType: "text",
-          })
-          .pipe(
-            finalize(() => Logger.log(`Fetching ${httpUrl} completed`)),
-            catchError((error) => {
-              Logger.error("Error fetching metadata", JSON.stringify(error));
-              return throwError(
-                () => new BadRequestException("Failed to fetch metadata")
-              );
-            })
-          )
-      );
-
-      const rawData = (response as any).data;
-      let parsedData;
-
-      if (typeof rawData !== "object") {
-        try {
-          parsedData = JSON.parse(rawData);
-        } catch (error) {
-          throw new BadRequestException("Invalid JSON format in metadata");
-        }
-      } else {
-        parsedData = rawData;
-      }
-
-      if (!parsedData?.body) {
-        throw new BadRequestException("Metadata does not contain body field");
-      }
-
-      const jsonToCanonicalize = {
-        "@context": parsedData["@context"],
-        body: parsedData.body,
-      };
-
-      const canonized = await jsonld.canonize(jsonToCanonicalize, {
-        algorithm: "URDNA2015",
-        format: "application/n-quads",
+      const parsedData = await this.fetchMetadata(metadataUrl, {
+        parseJson: true,
       });
 
-      const canonizedBytes = new TextEncoder().encode(canonized);
+      this.validateMetadataStructure(parsedData);
+
+      const canonizedBytes = await this.canonicalizeMetadata(parsedData);
       const hashedBody = blake.blake2b(canonizedBytes, undefined, 32);
 
       switch (author.witness.witnessAlgorithm?.toLowerCase()) {
@@ -165,5 +197,12 @@ export class MiscellaneousService {
       isValid,
       message: isValid ? "Signature is valid" : "Signature verification failed",
     };
+  }
+
+  async getExternalMetadata(url: string) {
+    return await this.fetchMetadata(url, {
+      parseJson: false,
+      returnRaw: true,
+    });
   }
 }

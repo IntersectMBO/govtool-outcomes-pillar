@@ -209,6 +209,18 @@ export type GovernanceActionVoteData = {
   drep_given_name: string | null;
   drep_image_url: string | null;
   drep_image_hash: string | null;
+  pool_metadata_url: string | null;
+  pool_metadata_hash: string | null;
+  pool_ticker_name: string | null;
+  pool_metadata_json: {
+    name: string | null;
+    ticker: string | null;
+    homepage: string | null;
+    description: string | null;
+  };
+  vote_anchor_url: string | null;
+  vote_anchor_hash: string | null;
+  vote_anchor_json: any | null;
 };
 
 export interface AuthorWitness {

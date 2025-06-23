@@ -20,4 +20,9 @@ export class MiscellaneousController {
   async verifySignature(@Body() data: SignatureVerificationDto) {
     return await this.miscellaneousService.verifySignature(data);
   }
+
+  @Get("/external/metadata")
+  async getExternalMetadata(@Query("url") url:string) {
+    return await this.miscellaneousService.getExternalMetadata(url);
+  }
 }

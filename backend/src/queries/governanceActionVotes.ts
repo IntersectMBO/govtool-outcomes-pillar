@@ -1,6 +1,5 @@
 export const governanceActionVotesQuery = `
 WITH TargetAction AS (
-    -- Find the specific governance action proposal
     SELECT
         gap.id,
         gap.tx_id,
@@ -10,7 +9,6 @@ WITH TargetAction AS (
     WHERE concat(encode(tx.hash, 'hex'), '#', gap.index) ILIKE $1
 ),
 LatestVotes AS (
-    -- Get the latest vote for each voter (in case they voted multiple times)
     SELECT
         vp.*,
         ROW_NUMBER() OVER (
@@ -24,7 +22,6 @@ LatestVotes AS (
     FROM voting_procedure vp
     JOIN TargetAction ta ON vp.gov_action_proposal_id = ta.id
 ),
--- DRep metadata related CTEs
 LatestExistingVotingAnchor AS (
     SELECT
         subquery.drep_registration_id,
@@ -52,14 +49,34 @@ LatestExistingVotingAnchor AS (
     WHERE
         subquery.rn = 1
 ),
+LatestPoolMetadata AS (
+    SELECT
+        subquery.pool_id,
+        subquery.pmr_id,
+        subquery.url,
+        subquery.metadata_hash,
+        subquery.ocpd_id
+    FROM (
+        SELECT
+            pmr.pool_id,
+            pmr.id AS pmr_id,
+            pmr.url,
+            encode(pmr.hash, 'hex') AS metadata_hash,
+            ocpd.id AS ocpd_id,
+            ROW_NUMBER() OVER (PARTITION BY pmr.pool_id ORDER BY pmr.registered_tx_id DESC) AS rn
+        FROM
+            pool_metadata_ref pmr
+        LEFT JOIN off_chain_pool_data ocpd ON pmr.id = ocpd.pmr_id
+    ) subquery
+    WHERE
+        subquery.rn = 1
+),
 VotesWithPower AS (
-    -- Join votes with voting power and voter identity
     SELECT
         lv.voter_role,
         lv.vote,
         lv.tx_id,
         lv.id,
-        -- Voter identity based on role
         CASE
             WHEN lv.voter_role = 'ConstitutionalCommittee' THEN
                 encode(ch.raw, 'hex')
@@ -68,61 +85,61 @@ VotesWithPower AS (
             WHEN lv.voter_role = 'SPO' THEN
                 COALESCE(ph.view, encode(ph.hash_raw, 'hex'))
         END AS voter_identity,
-        -- Voting power based on role and vote epoch
         CASE
             WHEN lv.voter_role = 'DRep' THEN dd.amount
             WHEN lv.voter_role = 'SPO' THEN ps.voting_power
             ELSE NULL  -- Committee members have null voting power
         END AS voting_power,
-        -- Transaction and block info
         b.epoch_no as vote_epoch,
         b.time as vote_time,
-        -- DRep metadata fields (only populated for DReps)
         CASE WHEN lv.voter_role = 'DRep' THEN leva.url END AS drep_metadata_url,
         CASE WHEN lv.voter_role = 'DRep' THEN leva.metadata_hash END AS drep_metadata_hash,
-        CASE WHEN lv.voter_role = 'DRep' THEN ocvdd.payment_address END AS drep_payment_address,
         CASE WHEN lv.voter_role = 'DRep' THEN ocvdd.given_name END AS drep_given_name,
         CASE WHEN lv.voter_role = 'DRep' THEN ocvdd.image_url END AS drep_image_url,
-        CASE WHEN lv.voter_role = 'DRep' THEN ocvdd.image_hash END AS drep_image_hash
+        CASE WHEN lv.voter_role = 'SPO' THEN lpm.url END AS pool_metadata_url,
+        CASE WHEN lv.voter_role = 'SPO' THEN lpm.metadata_hash END AS pool_metadata_hash,
+        CASE WHEN lv.voter_role = 'SPO' THEN ocpd.ticker_name END AS pool_ticker_name,
+        CASE WHEN lv.voter_role = 'SPO' THEN ocpd.json END AS pool_metadata_json,
+        va_vote.url AS vote_anchor_url,
+        encode(va_vote.data_hash, 'hex') AS vote_anchor_hash,
+        ocvd_vote.json AS vote_anchor_json
     FROM LatestVotes lv
     JOIN tx vote_tx ON vote_tx.id = lv.tx_id
     JOIN block b ON b.id = vote_tx.block_id
-    -- Left joins for voter identity tables
     LEFT JOIN committee_hash ch ON ch.id = lv.committee_voter
     LEFT JOIN drep_hash dh ON dh.id = lv.drep_voter
     LEFT JOIN pool_hash ph ON ph.id = lv.pool_voter
-    -- Left join for DRep voting power at the epoch the vote was cast
     LEFT JOIN drep_distr dd ON dd.hash_id = lv.drep_voter
         AND dd.epoch_no = b.epoch_no
         AND lv.voter_role = 'DRep'
-    -- Left join for SPO voting power at the epoch the vote was cast
     LEFT JOIN pool_stat ps ON ps.pool_hash_id = lv.pool_voter
         AND ps.epoch_no = b.epoch_no
         AND lv.voter_role = 'SPO'
-    -- Left joins for DRep metadata (only relevant for DRep voters)
     LEFT JOIN LatestExistingVotingAnchor leva ON leva.drep_hash_id = lv.drep_voter
         AND lv.voter_role = 'DRep'
     LEFT JOIN off_chain_vote_data ocvd ON ocvd.voting_anchor_id = leva.voting_anchor_id
         AND lv.voter_role = 'DRep'
     LEFT JOIN off_chain_vote_drep_data ocvdd ON ocvdd.off_chain_vote_data_id = ocvd.id
         AND lv.voter_role = 'DRep'
-    WHERE lv.rn = 1  -- Only latest vote per voter
+    LEFT JOIN LatestPoolMetadata lpm ON lpm.pool_id = lv.pool_voter
+        AND lv.voter_role = 'SPO'
+    LEFT JOIN off_chain_pool_data ocpd ON ocpd.id = lpm.ocpd_id
+        AND lv.voter_role = 'SPO'
+    LEFT JOIN voting_anchor va_vote ON va_vote.id = lv.voting_anchor_id
+    LEFT JOIN off_chain_vote_data ocvd_vote ON ocvd_vote.voting_anchor_id = lv.voting_anchor_id
+    WHERE lv.rn = 1
 ),
 FilteredVotes AS (
-    -- Apply filters
     SELECT *
     FROM VotesWithPower
     WHERE 1=1
-        -- Vote filter
         AND ($2 = 'AllVotes' OR vote::text = $2)
-        -- Role filter
         AND ($3 = 'AllVoters' OR
              ($3 = 'DReps' AND voter_role = 'DRep') OR
              ($3 = 'SPOs' AND voter_role = 'SPO') OR
              ($3 = 'CCMembers' AND voter_role = 'ConstitutionalCommittee')
             )
 ),
--- Additional deduplication step to ensure unique voters
 UniqueVotes AS (
     SELECT 
         *,
@@ -132,7 +149,6 @@ UniqueVotes AS (
         ) as final_rn
     FROM FilteredVotes
 )
--- Final result with sorting and pagination
 SELECT
     id,
     voter_role,
@@ -143,10 +159,15 @@ SELECT
     vote_time,
     drep_metadata_url,
     drep_metadata_hash,
-    drep_payment_address,
     drep_given_name,
     drep_image_url,
-    drep_image_hash
+    pool_metadata_url,
+    pool_metadata_hash,
+    pool_ticker_name,
+    pool_metadata_json,
+    vote_anchor_url,
+    vote_anchor_hash,
+    vote_anchor_json
 FROM UniqueVotes
 WHERE final_rn = 1
 ORDER BY
@@ -168,7 +189,6 @@ ORDER BY
     CASE
         WHEN $4 = 'vote_time' AND $5 = 'desc' THEN vote_time
     END DESC NULLS LAST,
-    -- Default fallback ordering when no specific sort is applied
     CASE WHEN $4 NOT IN ('vote', 'voting_power', 'vote_time') THEN vote_time END DESC,
     CASE WHEN $4 NOT IN ('vote', 'voting_power', 'vote_time') THEN
         CASE voter_role

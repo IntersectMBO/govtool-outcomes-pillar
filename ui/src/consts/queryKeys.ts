@@ -4,4 +4,5 @@ export const queryKeys = {
   getGovernanceAction: "getGovernanceAction",
   getProposal: "getProposal",
   getGovActionVotes: "getGovActionVotes",
+  getUnvalidatedMetadata: "getUnvalidatedMetadata"
 };
