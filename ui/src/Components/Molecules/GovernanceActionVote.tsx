@@ -220,7 +220,7 @@ export function GovernanceActionVote({ vote }: GovernanceActionVoteProps) {
       <TableCell>
         <Box>
           <Typography variant="body2" fontWeight={400} color="textBlack">
-            {displayName}
+            {truncateString(displayName)}
           </Typography>
           <Box display="flex" alignItems="center" gap={1.25}>
             <Typography variant="caption" color="textLightGray">
@@ -246,7 +246,7 @@ export function GovernanceActionVote({ vote }: GovernanceActionVoteProps) {
       <TableCell>
         <Typography variant="body2" fontWeight={400}>
           {!!vote.voting_power
-            ? `₳${correctAdaFormatWithSuffix(Number(vote.voting_power))}`
+            ? `₳${correctAdaFormatWithSuffix(Number(vote.voting_power), 3)}`
             : "--"}
         </Typography>
       </TableCell>
