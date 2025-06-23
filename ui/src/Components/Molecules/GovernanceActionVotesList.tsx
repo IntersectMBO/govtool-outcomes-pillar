@@ -40,7 +40,6 @@ const StyledHeaderCell = styled(TableCell)<{ sortable?: boolean }>(
     padding: "16px",
     fontWeight: 500,
     fontSize: "15px",
-    color: "textBlack",
     whiteSpace: "nowrap",
     ...(sortable && {
       cursor: "pointer",
@@ -67,8 +66,8 @@ export default function GovernanceActionVotesList({
   const [searchParams, setSearchParams] = useSearchParams();
   const { t } = useTranslation();
 
-  const votesType = searchParams.get("votes") || "AllVotes";
-  const roleType = searchParams.get("role") || "AllVoters";
+  const votesType = searchParams.get("votes") || "all_votes";
+  const roleType = searchParams.get("role") || "all_voters";
 
   const currentSortBy = searchParams.get("sortBy");
   const currentSortOrder = searchParams.get("sortOrder");
@@ -118,16 +117,16 @@ export default function GovernanceActionVotesList({
     if (sortBy !== field) {
       return (
         <Box display="flex" alignItems="center" sx={{ opacity: 0.3 }}>
-          <IconArrowUp fontSize={14} />
-          <IconArrowDown fontSize={14} />
+          <IconArrowUp fontSize={15} />
+          <IconArrowDown fontSize={15} />
         </Box>
       );
     }
 
     return sortOrder === "asc" ? (
-      <IconArrowUp fontSize={14} />
+      <IconArrowUp fontSize={20} />
     ) : (
-      <IconArrowDown fontSize={14} />
+      <IconArrowDown fontSize={20} />
     );
   };
 
@@ -137,17 +136,24 @@ export default function GovernanceActionVotesList({
         <Table>
           <StyledTableHead>
             <TableRow>
-              <StyledHeaderCell sx={{ minWidth: "260px" }}>
+              <StyledHeaderCell sx={{ minWidth: "260px", color: "textGray" }}>
                 Voter
               </StyledHeaderCell>
-              <StyledHeaderCell>Role</StyledHeaderCell>
-              <StyledHeaderCell sortable onClick={() => handleSort("vote")}>
+              <StyledHeaderCell sx={{ color: "textGray" }}>
+                Role
+              </StyledHeaderCell>
+              <StyledHeaderCell
+                sx={{ color: "textGray" }}
+                sortable
+                onClick={() => handleSort("vote")}
+              >
                 <Box display="flex" alignItems="center" gap={0.5}>
                   {getSortIcon("vote")}
                   Vote
                 </Box>
               </StyledHeaderCell>
               <StyledHeaderCell
+                sx={{ color: "textGray" }}
                 sortable
                 onClick={() => handleSort("voting_power")}
               >
@@ -156,8 +162,11 @@ export default function GovernanceActionVotesList({
                   Voting Power
                 </Box>
               </StyledHeaderCell>
-              <StyledHeaderCell>Submission Epoch</StyledHeaderCell>
+              <StyledHeaderCell sx={{ color: "textGray" }}>
+                Submission Epoch
+              </StyledHeaderCell>
               <StyledHeaderCell
+                sx={{ color: "textGray" }}
                 sortable
                 onClick={() => handleSort("vote_time")}
               >

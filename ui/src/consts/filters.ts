@@ -48,25 +48,25 @@ export enum GOVERNANCE_ACTION_FILTERS_ENUM {
 
 export const GOVERNANCE_ACTION_VOTES_FILTERS = [
   {
-    value: "AllVotes",
+    value: "all_votes",
     label: "All Votes",
     displayLabel: "All votes",
     dataTestId: "all-votes",
   },
   {
-    value: "Yes",
+    value: "yes",
     label: "Yes",
     displayLabel: "Yes",
     dataTestId: "yes-votes",
   },
   {
-    value: "No",
+    value: "no",
     label: "No",
     displayLabel: "No",
     dataTestId: "no-votes",
   },
   {
-    value: "Abstain",
+    value: "abstain",
     label: "Abstain",
     displayLabel: "Abstain",
     dataTestId: "abstain-votes",
@@ -75,25 +75,25 @@ export const GOVERNANCE_ACTION_VOTES_FILTERS = [
 
 export const GOVERNANCE_ACTION_ROLES_FILTERS = [
   {
-    value: "AllVoters",
+    value: "all_voters",
     label: "All Voters",
     displayLabel: "All voters",
     dataTestId: "role-all-voters",
   },
   {
-    value: "DReps",
+    value: "dReps",
     label: "DReps",
     displayLabel: "DReps",
     dataTestId: "role-DReps",
   },
   {
-    value: "SPOs",
+    value: "spos",
     label: "SPOs",
     displayLabel: "SPOs",
     dataTestId: "role-SPOs",
   },
   {
-    value: "CCMembers",
+    value: "cc_embers",
     label: "CC Members",
     displayLabel: "CC members",
     dataTestId: "role-CCMembers",

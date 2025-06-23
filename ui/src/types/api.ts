@@ -199,6 +199,7 @@ export type GovernanceActionVoteData = {
   id: string;
   voter_role: string;
   voter_identity: string;
+  has_script: Boolean;
   vote: string;
   voting_power: string;
   vote_epoch: number;

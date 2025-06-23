@@ -618,7 +618,7 @@ function GovernanceAction({ id }: GovernanceActionProps) {
             <RadioComponent
               queryParam="role"
               options={GOVERNANCE_ACTION_ROLES_FILTERS}
-              defaultValue="AllVoters"
+              defaultValue="all_voters"
               titleTranslationKey="outcome.votes.roles"
               fullTitleTranslationKey="outcome.votes.roles"
               testIdPrefix="role"
@@ -626,7 +626,7 @@ function GovernanceAction({ id }: GovernanceActionProps) {
             <RadioComponent
               queryParam="votes"
               options={GOVERNANCE_ACTION_VOTES_FILTERS}
-              defaultValue="AllVotes"
+              defaultValue="all_votes"
               titleTranslationKey="outcome.votes.shortTitle"
               fullTitleTranslationKey="outcome.votes.shortTitle"
               testIdPrefix="votes"

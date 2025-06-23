@@ -49,8 +49,8 @@ export class GovernanceActionsController {
   findVotes(
     @Param("id") id: string,
     @Query("index") index: number,
-    @Query("votesType") votesType: string = "AllVotes",
-    @Query("roleType") roleType: string = "AllVoters",
+    @Query("votesType") votesType: string = "all_votes",
+    @Query("roleType") roleType: string = "all_voters",
     @Query("sortBy") sortBy: string = "vote_time",
     @Query("sortOrder") sortOrder: string = "desc",
     @Query("page") page: number = 1,

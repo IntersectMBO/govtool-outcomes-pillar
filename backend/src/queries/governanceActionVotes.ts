@@ -81,14 +81,22 @@ VotesWithPower AS (
             WHEN lv.voter_role = 'ConstitutionalCommittee' THEN
                 encode(ch.raw, 'hex')
             WHEN lv.voter_role = 'DRep' THEN
-                COALESCE(dh.view, encode(dh.raw, 'hex'))
+                COALESCE(encode(dh.raw, 'hex'), dh.view)
             WHEN lv.voter_role = 'SPO' THEN
                 COALESCE(ph.view, encode(ph.hash_raw, 'hex'))
         END AS voter_identity,
         CASE
+            WHEN lv.voter_role = 'ConstitutionalCommittee' THEN
+                ch.has_script
+            WHEN lv.voter_role = 'DRep' THEN
+                dh.has_script
+            WHEN lv.voter_role = 'SPO' THEN
+                NULL
+        END AS has_script,
+        CASE
             WHEN lv.voter_role = 'DRep' THEN dd.amount
             WHEN lv.voter_role = 'SPO' THEN ps.voting_power
-            ELSE NULL  -- Committee members have null voting power
+            ELSE NULL
         END AS voting_power,
         b.epoch_no as vote_epoch,
         b.time as vote_time,
@@ -133,11 +141,11 @@ FilteredVotes AS (
     SELECT *
     FROM VotesWithPower
     WHERE 1=1
-        AND ($2 = 'AllVotes' OR vote::text = $2)
-        AND ($3 = 'AllVoters' OR
-             ($3 = 'DReps' AND voter_role = 'DRep') OR
-             ($3 = 'SPOs' AND voter_role = 'SPO') OR
-             ($3 = 'CCMembers' AND voter_role = 'ConstitutionalCommittee')
+        AND ($2 = 'all_votes' OR LOWER(vote::text) = $2)
+        AND ($3 = 'all_voters' OR
+            ($3 = 'dReps' AND voter_role = 'DRep') OR
+            ($3 = 'spos' AND voter_role = 'SPO') OR
+            ($3 = 'cc_embers' AND voter_role = 'ConstitutionalCommittee')
             )
 ),
 UniqueVotes AS (
@@ -153,6 +161,7 @@ SELECT
     id,
     voter_role,
     voter_identity,
+    has_script,
     vote,
     voting_power,
     vote_epoch,
