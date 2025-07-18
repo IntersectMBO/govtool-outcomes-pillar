@@ -40,7 +40,7 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
 
   return (
     <Box display="flex" flexDirection="column" gap={3}>
-      {membersToBeAdded.length > 0 && (
+      {membersToBeAdded?.length > 0 && (
         <Box
           data-testid="members-to-be-added-to-the-committee"
           sx={{
@@ -92,7 +92,9 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
           </Box>
         </Box>
       )}
-      {(description?.membersToBeRemoved as string[]).length > 0 && (
+      {(description?.membersToBeRemoved as string[])?.filter(
+        (hash) => hash != null && hash !== ""
+      )?.length > 0 && (
         <Box
           data-testid="members-to-be-removed-from-the-committee"
           sx={{
@@ -116,44 +118,47 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
             {t("outcome.membersToBeRemovedToCommittee")}
           </Typography>
           <Box display="flex" flexDirection="column">
-            {(description?.membersToBeRemoved as string[]).map((hash) => (
-              <Box
-                key={hash}
-                display="flex"
-                flexDirection="row"
-                alignItems="center"
-                gap={1}
-              >
-                <Typography
-                  data-testid="members-to-be-removed-from-the-committee-id"
-                  sx={{
-                    fontSize: 16,
-                    fontWeight: 400,
-                    maxWidth: "auto",
-                    lineHeight: "24px",
-                    color: "primaryBlue",
-                  }}
+            {(description?.membersToBeRemoved as string[]).map((hash) => {
+              if (!hash) return null;
+              return (
+                <Box
+                  key={hash}
+                  display="flex"
+                  flexDirection="row"
+                  alignItems="center"
+                  gap={1}
                 >
-                  {encodeCIP129Identifier({
-                    txID: hash,
-                    bech32Prefix: "cc_cold",
-                  })}
-                </Typography>
-                <Box>
-                  <CopyButton
-                    text={encodeCIP129Identifier({
+                  <Typography
+                    data-testid="members-to-be-removed-from-the-committee-id"
+                    sx={{
+                      fontSize: 16,
+                      fontWeight: 400,
+                      maxWidth: "auto",
+                      lineHeight: "24px",
+                      color: "primaryBlue",
+                    }}
+                  >
+                    {encodeCIP129Identifier({
                       txID: hash,
                       bech32Prefix: "cc_cold",
                     })}
-                  />
+                  </Typography>
+                  <Box>
+                    <CopyButton
+                      text={encodeCIP129Identifier({
+                        txID: hash,
+                        bech32Prefix: "cc_cold",
+                      })}
+                    />
+                  </Box>
                 </Box>
-              </Box>
-            ))}
+              );
+            })}
           </Box>
         </Box>
       )}
 
-      {membersToBeUpdated.length > 0 && (
+      {membersToBeUpdated?.length > 0 && (
         <Box
           data-testid="change-to-terms-of-existing-members"
           sx={{
