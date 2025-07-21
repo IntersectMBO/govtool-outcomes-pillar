@@ -18,25 +18,16 @@ CurrentEpoch AS (
             ELSE $1::integer
         END AS no
 ),
-CommitteeMembers AS (
-    SELECT DISTINCT ON (cm.committee_hash_id)
-        cr.id,
-        block.time,
-        encode(cold_key_hash.raw, 'hex') cold_key,
-        encode(hot_key_hash.raw, 'hex') hot_key
+ActiveCommittees AS (
+    SELECT DISTINCT 
+        cr.cold_key_id
     FROM committee_registration cr
-    JOIN tx ON tx.id = cr.tx_id
-    JOIN block ON block.id = tx.block_id
-    JOIN committee_hash cold_key_hash ON cr.cold_key_id = cold_key_hash.id
-    JOIN committee_hash hot_key_hash ON cr.hot_key_id = hot_key_hash.id
-    JOIN committee_member cm ON cm.committee_hash_id = cold_key_hash.id OR cm.committee_hash_id = hot_key_hash.id
-    LEFT JOIN committee_de_registration cdr ON cdr.cold_key_id = cold_key_hash.id
-    CROSS JOIN CurrentEpoch
-    WHERE
-        cdr.id IS NULL AND cm.expiration_epoch > CurrentEpoch.no 
+    LEFT JOIN committee_de_registration cdr ON cdr.cold_key_id = cr.cold_key_id
+    WHERE 
+        cdr.id IS NULL
 ),
-NoOfCommitteeMembers AS (
-    SELECT COUNT(*) total FROM CommitteeMembers
+NoOfCommittees AS (
+    SELECT COUNT(*) AS total FROM ActiveCommittees
 ),
 ActiveDRepBoundaryEpoch AS (
     SELECT epoch_no - drep_activity AS epoch_no FROM DRepActivity
@@ -189,7 +180,7 @@ SELECT
     AlwaysNoConfidenceVotingPower.amount AS always_no_confidence_voting_power,
     SPOsAbstainVotingPower.total AS spos_abstain_voting_power,
     SPOsNoConfidenceVotingPower.total AS spos_no_confidence_voting_power,
-    NoOfCommitteeMembers.total AS no_of_committee_members,
+    NoOfCommittees.total AS no_of_committee_members,
     CommitteeThreshold.quorum_numerator,
     CommitteeThreshold.quorum_denominator
 FROM CurrentEpoch
@@ -199,5 +190,5 @@ CROSS JOIN AlwaysAbstainVotingPower
 CROSS JOIN AlwaysNoConfidenceVotingPower
 CROSS JOIN SPOsAbstainVotingPower
 CROSS JOIN SPOsNoConfidenceVotingPower
-CROSS JOIN NoOfCommitteeMembers
+CROSS JOIN NoOfCommittees
 CROSS JOIN CommitteeThreshold`;
