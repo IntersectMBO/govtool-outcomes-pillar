@@ -16,7 +16,7 @@ import { useMetadata } from "../hooks/useMetadata";
 import References from "../Components/SingleAction/References";
 import ActionIdentity from "../Components/SingleAction/ActionIdentity";
 import { encodeCIP129Identifier, getFullGovActionId } from "../lib/utils";
-import GovernanceVotingUI from "../Components/SingleAction/GovernanceVoting";
+import GovernanceVoting from "../Components/SingleAction/GovernanceVoting";
 import { DataMissingInfoBox } from "../Components/Molecules/DataMissingInfoBox";
 import GovernanceActionElement from "../Components/SingleAction/GovernanceActionElement";
 import { useMemo } from "react";
@@ -581,7 +581,7 @@ function GovernanceAction({ id, index }: GovernanceActionProps) {
             height: "auto",
           }}
         >
-          <GovernanceVotingUI action={governanceAction} />
+          <GovernanceVoting action={governanceAction} />
         </Box>
       </Box>
 
