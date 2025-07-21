@@ -60,6 +60,21 @@ function ReasoningElement({ label, text, dataTestId }: ReasoningElementProps) {
                 </Typography>
               );
             },
+            img(props) {
+              const { ref, ...imgProps } = props;
+              return (
+                <Box
+                  component="img"
+                  {...imgProps}
+                  sx={{
+                    maxWidth: "100%",
+                    height: "auto",
+                    display: "block",
+                    marginY: 2,
+                  }}
+                />
+              );
+            },
             table(props) {
               const { children } = props;
               return (
