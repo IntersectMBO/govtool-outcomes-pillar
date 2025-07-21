@@ -76,7 +76,7 @@ export default function GovernanceActionVotesList({
     const newParams = new URLSearchParams(searchParams);
     if (!currentSortBy) newParams.set("sortBy", "vote_time");
     if (!currentSortOrder) newParams.set("sortOrder", "desc");
-    setSearchParams(newParams, { replace: true });
+    setSearchParams(newParams);
   }
 
   const sortBy = (searchParams.get("sortBy") || "vote_time") as SortField;

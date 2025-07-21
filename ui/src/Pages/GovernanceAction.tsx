@@ -596,6 +596,7 @@ function GovernanceAction({ id }: GovernanceActionProps) {
           display="flex"
           flexDirection="row"
           justifyContent="space-between"
+          flexWrap="wrap"
           alignItems="center"
         >
           <Typography
@@ -613,6 +614,7 @@ function GovernanceAction({ id }: GovernanceActionProps) {
             display="flex"
             flexDirection="row"
             justifyContent="flex-end"
+            flexWrap="wrap"
             gap={isMobile ? 1 : 1.5}
           >
             <RadioComponent

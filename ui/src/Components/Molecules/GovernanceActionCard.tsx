@@ -127,7 +127,7 @@ function GovernanceActionCard({ action }: GovernanceActionCardProps) {
         data-testid={`${idCIP129}-outcome-card-actions`}
         sx={{ paddingX: 0, paddingY: 3 }}
       >
-        <ViewDetailsLink id={fullGovActionId} />
+        <ViewDetailsLink id={idCIP129} />
       </CardActions>
     </Card>
   );
