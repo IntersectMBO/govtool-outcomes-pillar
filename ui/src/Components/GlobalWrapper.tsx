@@ -12,7 +12,12 @@ function GlobalWrapper() {
   const { modal, openModal, modals } = useModal();
 
   const getActionId = () => {
-    return location.pathname.split("/").pop() + location.hash;
+    const pathParts = location.pathname.split("/");
+    return pathParts[pathParts.length - 1];
+  };
+
+  const getActionIndex = () => {
+    return Number(location.hash.split("?")[0].replace("#", ""));
   };
 
   const renderComponentBasedOnPath = () => {
@@ -22,7 +27,7 @@ function GlobalWrapper() {
       location.pathname.includes("outcomes/governance_actions/") &&
       getActionId()
     ) {
-      return <GovernanceAction id={getActionId()} />;
+      return <GovernanceAction id={getActionId()} index={getActionIndex()} />;
     } else if (location.pathname.includes("my/votes_and_favorites")) {
       return <VotesAndFavorites />;
     } else {
@@ -43,7 +48,7 @@ function GlobalWrapper() {
           handleClose={
             !modals[modal.type].preventDismiss
               ? callAll(modals[modal.type]?.onClose, () =>
-                  openModal({ type: "none", state: null }),
+                  openModal({ type: "none", state: null })
                 )
               : undefined
           }

@@ -47,6 +47,7 @@ import GovernanceActionAuthors from "../Components/Molecules/GovernanceActionAut
 
 type GovernanceActionProps = {
   id: string;
+  index?: number;
 };
 
 type TabPanelProps = {
@@ -77,10 +78,10 @@ const StyledTab = styled(({ isMobile, ...props }: StyledTabProps) => (
   },
 }));
 
-function GovernanceAction({ id }: GovernanceActionProps) {
+function GovernanceAction({ id, index }: GovernanceActionProps) {
   const { isMobile } = useScreenDimension();
   const { governanceAction, isGovernanceActionLoading } =
-    useGetGovernanceActionQuery(id);
+    useGetGovernanceActionQuery(id, index);
   const { metadata, metadataValid, isMetadataLoading } =
     useMetadata(governanceAction);
   const { proposal, isProposalLoading } = useGetProposalQuery(

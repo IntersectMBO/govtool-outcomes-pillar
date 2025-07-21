@@ -33,23 +33,23 @@ const StyledTableHead = styled(TableHead)(() => ({
   backgroundColor: "white",
 }));
 
-const StyledHeaderCell = styled(TableCell)<{ sortable?: boolean }>(
-  ({ sortable }) => ({
-    backgroundColor: "white",
-    borderBottom: "1px solid #e0e0e0",
-    padding: "16px",
-    fontWeight: 500,
-    fontSize: "15px",
-    whiteSpace: "nowrap",
-    ...(sortable && {
-      cursor: "pointer",
-      userSelect: "none",
-      "&:hover": {
-        backgroundColor: "#f5f5f5",
-      },
-    }),
-  })
-);
+const StyledHeaderCell = styled(TableCell, {
+  shouldForwardProp: (prop) => prop !== "sortable",
+})<{ sortable?: boolean }>(({ sortable }) => ({
+  backgroundColor: "white",
+  borderBottom: "1px solid #e0e0e0",
+  padding: "16px",
+  fontWeight: 500,
+  fontSize: "15px",
+  whiteSpace: "nowrap",
+  ...(sortable && {
+    cursor: "pointer",
+    userSelect: "none",
+    "&:hover": {
+      backgroundColor: "#f5f5f5",
+    },
+  }),
+}));
 
 interface GovernanceActionVotesListProps {
   actionId: string;
@@ -68,16 +68,6 @@ export default function GovernanceActionVotesList({
 
   const votesType = searchParams.get("votes") || "all_votes";
   const roleType = searchParams.get("role") || "all_voters";
-
-  const currentSortBy = searchParams.get("sortBy");
-  const currentSortOrder = searchParams.get("sortOrder");
-
-  if (!currentSortBy || !currentSortOrder) {
-    const newParams = new URLSearchParams(searchParams);
-    if (!currentSortBy) newParams.set("sortBy", "vote_time");
-    if (!currentSortOrder) newParams.set("sortOrder", "desc");
-    setSearchParams(newParams);
-  }
 
   const sortBy = (searchParams.get("sortBy") || "vote_time") as SortField;
   const sortOrder = (searchParams.get("sortOrder") || "desc") as SortOrder;

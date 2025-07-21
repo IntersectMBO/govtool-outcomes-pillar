@@ -58,11 +58,9 @@ export default function RadioComponent({
   useEffect(() => {
     const currentValue = searchParams.get(queryParam);
     if (!currentValue && defaultValue) {
-      const newParams = new URLSearchParams(searchParams);
-      newParams.set(queryParam, defaultValue);
-      setSearchParams(newParams);
+      setFilterValue(defaultValue);
     }
-  }, [queryParam, defaultValue, searchParams, setSearchParams]);
+  }, [queryParam, defaultValue, searchParams]);
 
   const handleShowOptions = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);

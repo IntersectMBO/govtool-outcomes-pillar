@@ -4,7 +4,7 @@ import { getGovernanceAction } from "../services/requests/getGovernanceAction";
 import { GovernanceAction } from "../types/api";
 import { decodeCIP129Identifier, getFullGovActionId } from "../lib/utils";
 
-export const useGetGovernanceActionQuery = (id: string) => {
+export const useGetGovernanceActionQuery = (id: string, index?: number) => {
   const actionId = (() => {
     if (id.startsWith("gov_action")) {
       try {
@@ -15,9 +15,9 @@ export const useGetGovernanceActionQuery = (id: string) => {
         return id;
       }
     }
-    return id;
+    return !!index ? getFullGovActionId(id, index) : id;
   })();
-  
+
   const { data, isLoading, error } = useQuery({
     queryKey: [queryKeys.getGovernanceAction, actionId],
     queryFn: async () => await getGovernanceAction(actionId),
