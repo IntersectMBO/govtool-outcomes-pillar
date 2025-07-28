@@ -43,8 +43,8 @@
     "newConstitutionHash": "New constitution hash",
     "newConstitutionScriptHash": "New constitution script hash",
     "epoch": "Epoch",
-    "toEpoch": "To Epoch",
-    "fromEpoch": "from Epoch",
+    "expirationEpoch": "Expiration epoch",
+    "newExpirationEpoch": "New expiration epoch",
     "newThreshold": "New threshold value",
     "supportingLinks": "Supporting links",
     "treasury": {

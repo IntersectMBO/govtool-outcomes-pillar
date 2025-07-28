@@ -98,10 +98,31 @@ ParsedDescription AS (
 MembersToBeRemoved AS (
     SELECT
         id,
-        json_agg(VALUE->>'keyHash') AS members_to_be_removed
+        json_agg(
+            json_build_object(
+                'hash', COALESCE(
+                    VALUE->>'keyHash',
+                    VALUE->>'scriptHash'
+                ),
+                'type', CASE 
+                    WHEN VALUE->>'keyHash' IS NOT NULL THEN 'keyHash'
+                    WHEN VALUE->>'scriptHash' IS NOT NULL THEN 'scriptHash'
+                    ELSE 'unknown'
+                END,
+                'hasScript', CASE 
+                    WHEN VALUE->>'scriptHash' IS NOT NULL THEN true
+                    ELSE false
+                END
+            )
+        ) AS members_to_be_removed
     FROM
         ParsedDescription pd,
-        json_array_elements(members_to_be_removed::json) AS value
+        json_array_elements(
+            CASE 
+                WHEN pd.members_to_be_removed IS NULL THEN '[]'::json
+                ELSE pd.members_to_be_removed::json
+            END
+        ) AS value
     GROUP BY
         id
 ),
@@ -110,7 +131,15 @@ ProcessedCurrentMembers AS (
         pd.id,
         json_agg(
             json_build_object(
-                'hash', regexp_replace(kv.key, '^keyHash-', ''),
+                'hash', COALESCE(
+                    regexp_replace(kv.key, '^keyHash-', ''),
+                    regexp_replace(kv.key, '^scriptHash-', '')
+                ),
+                'type', CASE 
+                    WHEN kv.key LIKE 'keyHash-%' THEN 'keyHash'
+                    WHEN kv.key LIKE 'scriptHash-%' THEN 'scriptHash'
+                    ELSE 'unknown'
+                END,
                 'newExpirationEpoch', kv.value::int
             )
         ) AS current_members
@@ -125,16 +154,24 @@ EnrichedCurrentMembers AS (
         pcm.id,
         json_agg(
             json_build_object(
-                'hash', cm.hash,
+                'hash', CASE 
+                    WHEN (member->>'hash') LIKE 'scriptHash-%' THEN 
+                        regexp_replace(member->>'hash', '^scriptHash-', '')
+                    WHEN (member->>'hash') LIKE 'keyHash-%' THEN 
+                        regexp_replace(member->>'hash', '^keyHash-', '')
+                    ELSE 
+                        member->>'hash'
+                END,
+                'type', member->>'type',
                 'expirationEpoch', cm.expiration_epoch,
-                'hasScript', cm.has_script,
+                'hasScript', COALESCE(cm.has_script, member->>'type' = 'scriptHash'),
                 'newExpirationEpoch', (member->>'newExpirationEpoch')::int
             )
         ) AS enriched_members
     FROM
         ProcessedCurrentMembers pcm
     LEFT JOIN
-     json_array_elements(pcm.current_members) AS member ON true
+        json_array_elements(pcm.current_members) AS member ON true
     LEFT JOIN CommitteeData cm 
         ON (CASE 
             WHEN (member->>'hash') ~ '^[0-9a-fA-F]+$' 
@@ -284,9 +321,9 @@ SELECT
                     )
                 FROM
                     ParsedDescription pd
-                JOIN
+                LEFT JOIN
                     MembersToBeRemoved mtr ON pd.id = mtr.id
-                JOIN
+                LEFT JOIN
                     EnrichedCurrentMembers em ON pd.id = em.id
                 WHERE
                     pd.id = ta.id

@@ -82,6 +82,29 @@ export const decodeCIP129Identifier = (cip129Identifier: string) => {
   return { txID, index, prefix };
 };
 
+/**
+ * Encodes a CIP-129 identifier using the provided key hash and type prefix.
+ * @param keyHash - The 28-byte key hash (hex).
+ * @param typePrefix - The CIP-129 prefix (e.g., '01', '02', '13').
+ * @param bech32Prefix - The bech32 prefix (e.g., 'cc_cold', 'cc_hot').
+ * @returns Bech32-encoded CIP-129 identifier.
+ */
+export const encodeCIP129CcIdentifier = ({
+  keyHash,
+  typePrefix,
+  bech32Prefix,
+}: {
+  keyHash: string;
+  typePrefix: string;
+  bech32Prefix: string;
+}): string => {
+  if (!keyHash || keyHash.length !== 56) return "";
+  const identifierHex = typePrefix + keyHash;
+  const bytes = Buffer.from(identifierHex, "hex");
+  const words = bech32.toWords(bytes);
+  return bech32.encode(bech32Prefix, words);
+};
+
 export const getFullGovActionId = (txHash: string, index: number | string) =>
   `${txHash}#${index}`;
 
@@ -261,7 +284,9 @@ export const formatValue = (
   isCC: boolean,
   addAdaPrefix: boolean = true
 ) =>
-  isCC ? value : `${addAdaPrefix ? "₳" : ""} ${correctAdaFormatWithSuffix(value)}`;
+  isCC
+    ? value
+    : `${addAdaPrefix ? "₳" : ""} ${correctAdaFormatWithSuffix(value)}`;
 
 export const correctAdaFormatWithSuffix = (
   lovelace: number | undefined,
@@ -284,11 +309,9 @@ export const correctAdaFormatWithSuffix = (
   }
 };
 
-export const getRawAdaValue = (
-  lovelace: number | undefined
-) => {
+export const getRawAdaValue = (lovelace: number | undefined) => {
   if (!lovelace) return 0;
-  return Math.ceil(lovelace / LOVELACE)
+  return Math.ceil(lovelace / LOVELACE);
 };
 
 export function getItemFromLocalStorage(key: string) {
