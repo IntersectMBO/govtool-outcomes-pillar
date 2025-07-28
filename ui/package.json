@@ -71,7 +71,7 @@
   "dependencies": {
     "@fontsource/poppins": "^5.0.14",
     "@intersect.mbo/intersectmbo.org-icons-set": "^1.0.8",
-    "axios": "^1.8.4",
+    "axios": "^1.10.0",
     "bech32": "^2.0.0",
     "buffer": "^6.0.3",
     "react-diff-view": "^3.2.1",
