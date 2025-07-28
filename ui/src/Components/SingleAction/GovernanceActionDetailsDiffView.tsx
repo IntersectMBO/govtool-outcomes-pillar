@@ -68,9 +68,6 @@ export const GovernanceActionDetailsDiffView = ({
       >
         {(hunks) =>
           hunks.map((hunk) => (
-            // Hunk component does not allow to pass children as a prop
-            // but that is the typing issue as passing the children
-            // is recommended by documentation approach.
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-expect-error
             <Hunk key={hunk.content} hunk={hunk}>

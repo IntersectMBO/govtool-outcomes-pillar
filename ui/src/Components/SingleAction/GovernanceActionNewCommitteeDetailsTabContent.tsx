@@ -1,15 +1,23 @@
 import { Box } from "@mui/material";
 import { GovernanceAction } from "../../types/api";
-import { encodeCIP129Identifier } from "../../lib/utils";
+import { encodeCIP129CcIdentifier } from "../../lib/utils";
 import { Typography } from "../Atoms/Typography";
 import CopyButton from "../Atoms/CopyButton";
 import { useTranslation } from "../../contexts/I18nContext";
+import { EpochDiffView } from "../Molecules/EpochDiffView";
 
 type CCMember = {
-  expirationEpoch: number;
+  expirationEpoch: number | null;
   hasScript: boolean;
   hash: string;
-  newExpirationEpoch?: number;
+  type: string;
+  newExpirationEpoch?: number | null;
+};
+
+type CCMemberToBeRemoved = {
+  hash: string;
+  type: string;
+  hasScript: boolean;
 };
 
 export const GovernanceActionNewCommitteeDetailsTabContent = ({
@@ -17,25 +25,53 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
 }: Pick<GovernanceAction, "description">) => {
   const { t } = useTranslation();
 
-  const membersToBeAdded = ((description?.members as CCMember[]) || [])
-    .filter((member) => member.newExpirationEpoch === undefined)
-    .map((member) => ({
-      cip129Identifier: encodeCIP129Identifier({
-        txID: (member.hasScript ? "02" : "13") + member.hash,
-        bech32Prefix: member.hasScript ? "cc_hot" : "cc_cold",
-      }),
-      expirationEpoch: member.expirationEpoch,
-    }));
+  const members = (description?.members as CCMember[]) || [];
+  const membersToBeRemoved =
+    (description?.membersToBeRemoved as CCMemberToBeRemoved[]) || [];
 
-  const membersToBeUpdated = ((description?.members as CCMember[]) || [])
-    .filter((member) => member.newExpirationEpoch !== undefined)
+  const membersToBeAdded = members
+    .filter(
+      (member) =>
+        member?.expirationEpoch === undefined ||
+        member?.expirationEpoch === null
+    )
+    .filter((member) => member?.hash)
     .map((member) => ({
-      cip129Identifier: encodeCIP129Identifier({
-        txID: (member.hasScript ? "02" : "13") + member.hash,
-        bech32Prefix: member.hasScript ? "cc_hot" : "cc_cold",
+      cip129Identifier: encodeCIP129CcIdentifier({
+        keyHash: member.hash,
+        typePrefix: member.hasScript ? "13" : "02",
+        bech32Prefix: "cc_cold",
       }),
       expirationEpoch: member.expirationEpoch,
       newExpirationEpoch: member.newExpirationEpoch,
+      hash: member.hash,
+    }));
+
+  const membersToBeUpdated = members
+    .filter(
+      (member) => !!member?.expirationEpoch && !!member?.newExpirationEpoch
+    )
+    .filter((member) => member?.hash)
+    .map((member) => ({
+      cip129Identifier: encodeCIP129CcIdentifier({
+        keyHash: member.hash,
+        typePrefix: member.hasScript ? "13" : "02",
+        bech32Prefix: "cc_cold",
+      }),
+      expirationEpoch: member.expirationEpoch,
+      newExpirationEpoch: member.newExpirationEpoch,
+      hash: member.hash,
+    }));
+
+  const removedMembers = membersToBeRemoved
+    .filter((member) => member?.hash && member.hash.trim() !== "")
+    .map((member) => ({
+      hash: member.hash,
+      cip129Identifier: encodeCIP129CcIdentifier({
+        keyHash: member.hash,
+        typePrefix: member.hasScript ? "13" : "02",
+        bech32Prefix: "cc_cold",
+      }),
     }));
 
   return (
@@ -64,37 +100,52 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
             {t("outcome.membersToBeAddedToCommittee")}
           </Typography>
           <Box display="flex" flexDirection="column">
-            {membersToBeAdded.map(({ cip129Identifier }) => (
-              <Box
-                key={cip129Identifier}
-                display="flex"
-                flexDirection="row"
-                alignItems="center"
-                gap={1}
-              >
-                <Typography
-                  data-testid={`member-to-be-added-to-the-committee-id-${cip129Identifier}`}
-                  sx={{
-                    fontSize: 16,
-                    fontWeight: 400,
-                    width: "100%",
-                    lineHeight: "24px",
-                    color: "primaryBlue",
-                  }}
-                >
-                  {cip129Identifier}
-                </Typography>
-                <Box>
-                  <CopyButton text={cip129Identifier.toString()} />
+            {membersToBeAdded.map(
+              ({ cip129Identifier, hash, newExpirationEpoch }) => (
+                <Box key={hash} display="flex" flexDirection="column">
+                  <Box
+                    display="flex"
+                    flexDirection="row"
+                    alignItems="center"
+                    gap={1}
+                  >
+                    <Typography
+                      data-testid={`member-to-be-added-to-the-committee-id-${cip129Identifier}`}
+                      sx={{
+                        fontSize: 16,
+                        fontWeight: 400,
+                        width: "auto",
+                        lineHeight: "24px",
+                        color: "primaryBlue",
+                      }}
+                    >
+                      {cip129Identifier}
+                    </Typography>
+                    <Box>
+                      <CopyButton text={cip129Identifier} />
+                    </Box>
+                  </Box>
+                  <Typography
+                    data-testid="member-expiration-date"
+                    sx={{
+                      fontSize: 14,
+                      fontWeight: 400,
+                      lineHeight: "24px",
+                      color: "textGray",
+                    }}
+                  >
+                    {`${t("outcome.expirationEpoch")} ${
+                      newExpirationEpoch ?? "-"
+                    }`}
+                  </Typography>
                 </Box>
-              </Box>
-            ))}
+              )
+            )}
           </Box>
         </Box>
       )}
-      {(description?.membersToBeRemoved as string[])?.filter(
-        (hash) => hash != null && hash !== ""
-      )?.length > 0 && (
+
+      {removedMembers?.length > 0 && (
         <Box
           data-testid="members-to-be-removed-from-the-committee"
           sx={{
@@ -118,42 +169,31 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
             {t("outcome.membersToBeRemovedToCommittee")}
           </Typography>
           <Box display="flex" flexDirection="column">
-            {(description?.membersToBeRemoved as string[]).map((hash) => {
-              if (!hash) return null;
-              return (
-                <Box
-                  key={hash}
-                  display="flex"
-                  flexDirection="row"
-                  alignItems="center"
-                  gap={1}
+            {removedMembers.map(({ hash, cip129Identifier }) => (
+              <Box
+                key={hash}
+                display="flex"
+                flexDirection="row"
+                alignItems="center"
+                gap={1}
+              >
+                <Typography
+                  data-testid="members-to-be-removed-from-the-committee-id"
+                  sx={{
+                    fontSize: 16,
+                    fontWeight: 400,
+                    maxWidth: "auto",
+                    lineHeight: "24px",
+                    color: "primaryBlue",
+                  }}
                 >
-                  <Typography
-                    data-testid="members-to-be-removed-from-the-committee-id"
-                    sx={{
-                      fontSize: 16,
-                      fontWeight: 400,
-                      maxWidth: "auto",
-                      lineHeight: "24px",
-                      color: "primaryBlue",
-                    }}
-                  >
-                    {encodeCIP129Identifier({
-                      txID: hash,
-                      bech32Prefix: "cc_cold",
-                    })}
-                  </Typography>
-                  <Box>
-                    <CopyButton
-                      text={encodeCIP129Identifier({
-                        txID: hash,
-                        bech32Prefix: "cc_cold",
-                      })}
-                    />
-                  </Box>
+                  {cip129Identifier}
+                </Typography>
+                <Box>
+                  <CopyButton text={cip129Identifier} />
                 </Box>
-              );
-            })}
+              </Box>
+            ))}
           </Box>
         </Box>
       )}
@@ -182,10 +222,14 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
             {t("outcome.changeToTermsOfExistingMembers")}
           </Typography>
           {membersToBeUpdated.map(
-            ({ cip129Identifier, newExpirationEpoch, expirationEpoch }) => (
-              <Box display="flex" flexDirection="column">
+            ({
+              cip129Identifier,
+              newExpirationEpoch,
+              expirationEpoch,
+              hash,
+            }) => (
+              <Box key={hash} display="flex" flexDirection="column">
                 <Box
-                  key={cip129Identifier}
                   display="flex"
                   flexDirection="row"
                   alignItems="center"
@@ -204,28 +248,20 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
                     {cip129Identifier}
                   </Typography>
                   <Box>
-                    <CopyButton text={cip129Identifier.toString()} />
+                    <CopyButton text={cip129Identifier} />
                   </Box>
                 </Box>
-                <Typography
-                  data-testid="member-expiration-update"
-                  sx={{
-                    fontSize: 14,
-                    fontWeight: 400,
-                    lineHeight: "24px",
-                    color: "textGray",
-                  }}
-                >
-                  {`${t("outcome.toEpoch")} ${newExpirationEpoch || "-"} ${t(
-                    "outcome.fromEpoch"
-                  )} ${expirationEpoch || "-"}`}
-                </Typography>
+                <EpochDiffView
+                  expirationEpoch={expirationEpoch}
+                  newExpirationEpoch={newExpirationEpoch}
+                />
               </Box>
             )
           )}
         </Box>
       )}
-      {description?.threshold && (
+
+      {description?.threshold != null && (
         <Box
           data-testid="new-threshold-container"
           sx={{
@@ -258,7 +294,9 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
               color: "textGray",
             }}
           >
-            {(description?.threshold as number).toString()}
+            {typeof description.threshold === "number"
+              ? description.threshold.toString()
+              : String(description.threshold)}
           </Typography>
         </Box>
       )}
