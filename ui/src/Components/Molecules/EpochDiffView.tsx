@@ -1,7 +1,7 @@
 import { diffLines, formatLines } from "unidiff";
 import { parseDiff, Diff, Hunk } from "react-diff-view";
 import "react-diff-view/style/index.css";
-import { Box } from "@mui/material";
+import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslation } from "../../contexts/I18nContext";
 
 type EpochDiffViewProps = {
@@ -14,6 +14,8 @@ export const EpochDiffView = ({
   newExpirationEpoch,
 }: EpochDiffViewProps) => {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const oldJson = {
     [t("outcome.expirationEpoch")]: expirationEpoch ?? "-",
@@ -34,7 +36,11 @@ export const EpochDiffView = ({
 
   return (
     <Box sx={{ mt: 1 }}>
-      <Diff viewType="split" diffType={diff.type} hunks={diff.hunks || []}>
+      <Diff
+        viewType={isSmallScreen ? "unified" : "split"}
+        diffType={diff.type}
+        hunks={diff.hunks || []}
+      >
         {(hunks) =>
           hunks.map((hunk) => (
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment

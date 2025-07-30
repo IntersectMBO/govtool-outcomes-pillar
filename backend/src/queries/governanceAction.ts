@@ -80,6 +80,21 @@ CommitteeData AS (
     FROM
         committee_member cm
     JOIN committee_hash ch ON cm.committee_hash_id = ch.id
+    WHERE EXISTS (
+        SELECT 1 
+        FROM committee_registration cr
+        WHERE cr.cold_key_id = ch.id
+    )
+    AND NOT EXISTS (
+        SELECT 1 
+        FROM committee_de_registration cdr
+        WHERE cdr.cold_key_id = ch.id
+        AND cdr.tx_id > (
+            SELECT MAX(cr2.tx_id)
+            FROM committee_registration cr2
+            WHERE cr2.cold_key_id = ch.id
+        )
+    )
     ORDER BY
         ch.raw, cm.expiration_epoch DESC
 ),

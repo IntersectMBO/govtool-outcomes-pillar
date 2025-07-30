@@ -44,9 +44,9 @@ function ActionIdentity({ governanceAction }: ActionIdentityProps) {
       <Box
         data-testid={`single-action-type`}
         sx={{
-          width: "100%",
           display: "flex",
           flexDirection: "column",
+          width: "auto",
           gap: 0.5,
         }}
       >
