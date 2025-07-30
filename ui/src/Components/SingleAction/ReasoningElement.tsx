@@ -12,12 +12,10 @@ type ReasoningElementProps = {
   dataTestId?: string;
 };
 function ReasoningElement({ label, text, dataTestId }: ReasoningElementProps) {
-  const { isMobile, screenWidth } = useScreenDimension();
-
   return (
     <Box
       data-testid={dataTestId}
-      sx={{ display: "flex", flexDirection: "column", gap: 0.5, width: "100%" }}
+      sx={{ display: "flex", flexDirection: "column", gap: 0.5, width: "auto" }}
     >
       <Typography
         data-testid={`${label}-label`}
@@ -37,7 +35,7 @@ function ReasoningElement({ label, text, dataTestId }: ReasoningElementProps) {
           overflow: "hidden",
           flexDirection: "column",
           fontFamily: "Poppins, Arial",
-          width: "100%",
+          width: "auto",
         }}
       >
         <Markdown
@@ -78,19 +76,9 @@ function ReasoningElement({ label, text, dataTestId }: ReasoningElementProps) {
             table(props) {
               const { children } = props;
               return (
-                <Box
-                  sx={{
-                    display: "block",
-                    overflow: "scroll",
-                    maxWidth: isMobile ? `${screenWidth - 64}px` : "100%",
-                    marginY: 2,
-                    WebkitOverflowScrolling: "touch",
-                    touchAction: "pan-x pan-y",
-                  }}
-                  className="markdown-table-wrapper"
-                >
+                <div className="markdown-table-wrapper">
                   <table>{children}</table>
-                </Box>
+                </div>
               );
             },
             ul(props) {

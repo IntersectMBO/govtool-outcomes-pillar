@@ -68,7 +68,7 @@ const GovActionDatesInfo = ({
       sx={{
         display: "flex",
         flexDirection: "column",
-        width: "100%",
+        width: "auto",
         borderRadius: "12px",
         textAlign: "center",
         border: 1,

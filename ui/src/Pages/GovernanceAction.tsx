@@ -47,7 +47,7 @@ type TabPanelProps = {
 };
 
 const CustomTabPanel = ({ children, value, index }: TabPanelProps) =>
-  value === index && <Box sx={{ overflow: "auto" }}>{children}</Box>;
+  value === index && <Box>{children}</Box>;
 
 type StyledTabProps = {
   label: string;
@@ -304,6 +304,7 @@ function GovernanceAction({ id }: GovernanceActionProps) {
           data-testid={`single-action-${idCIP129}-description`}
           sx={{
             height: "auto",
+            width: "auto",
             boxShadow: "0px 4px 15px 0px #DDE3F5",
             borderRadius: "16px",
             paddingX: 2,
@@ -315,7 +316,12 @@ function GovernanceAction({ id }: GovernanceActionProps) {
           }}
         >
           {governanceAction && (
-            <Box display="flex" flexDirection="column" gap={3}>
+            <Box
+              display="flex"
+              flexDirection="column"
+              overflow="hidden"
+              gap={3}
+            >
               <Header
                 title={content.title}
                 isGovernanceActionLoading={isGovernanceActionLoading}
@@ -449,6 +455,7 @@ function GovernanceAction({ id }: GovernanceActionProps) {
             paddingX: 2,
             paddingY: 2.75,
             height: "auto",
+            width: "auto",
           }}
         >
           <GovernanceVoting action={governanceAction} />

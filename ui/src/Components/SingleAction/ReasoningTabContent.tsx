@@ -11,7 +11,7 @@ export const ReasoningTabContent = ({
   const { t } = useTranslation();
 
   return (
-    <Box display="flex" flexDirection="column" gap={3} width="100%">
+    <Box display="flex" flexDirection="column" gap={3} width="auto">
       <ReasoningElement
         label={t("outcome.abstract")}
         text={abstract as string}

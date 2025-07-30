@@ -39,7 +39,7 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
     .map((member) => ({
       cip129Identifier: encodeCIP129CcIdentifier({
         keyHash: member.hash,
-        typePrefix: member.hasScript ? "13" : "02",
+        typePrefix: member.hasScript ? "13" : "12",
         bech32Prefix: "cc_cold",
       }),
       expirationEpoch: member.expirationEpoch,
@@ -55,7 +55,7 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
     .map((member) => ({
       cip129Identifier: encodeCIP129CcIdentifier({
         keyHash: member.hash,
-        typePrefix: member.hasScript ? "13" : "02",
+        typePrefix: member.hasScript ? "13" : "12",
         bech32Prefix: "cc_cold",
       }),
       expirationEpoch: member.expirationEpoch,
@@ -69,7 +69,7 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
       hash: member.hash,
       cip129Identifier: encodeCIP129CcIdentifier({
         keyHash: member.hash,
-        typePrefix: member.hasScript ? "13" : "02",
+        typePrefix: member.hasScript ? "13" : "12",
         bech32Prefix: "cc_cold",
       }),
     }));
@@ -93,8 +93,7 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
               lineHeight: "20px",
               color: "textGray",
               overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
+              wordBreak: "break-word",
             }}
           >
             {t("outcome.membersToBeAddedToCommittee")}
@@ -117,6 +116,7 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
                         width: "auto",
                         lineHeight: "24px",
                         color: "primaryBlue",
+                        wordBreak: "break-word",
                       }}
                     >
                       {cip129Identifier}
@@ -132,6 +132,7 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
                       fontWeight: 400,
                       lineHeight: "24px",
                       color: "textGray",
+                      wordBreak: "break-word",
                     }}
                   >
                     {`${t("outcome.expirationEpoch")} ${
@@ -162,8 +163,7 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
               lineHeight: "20px",
               color: "textGray",
               overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
+              wordBreak: "break-word",
             }}
           >
             {t("outcome.membersToBeRemovedToCommittee")}
@@ -185,6 +185,7 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
                     maxWidth: "auto",
                     lineHeight: "24px",
                     color: "primaryBlue",
+                    wordBreak: "break-word",
                   }}
                 >
                   {cip129Identifier}
@@ -215,8 +216,7 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
               lineHeight: "20px",
               color: "textGray",
               overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
+              wordBreak: "break-word",
             }}
           >
             {t("outcome.changeToTermsOfExistingMembers")}
@@ -243,6 +243,7 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
                       maxWidth: "auto",
                       lineHeight: "24px",
                       color: "primaryBlue",
+                      wordBreak: "break-word",
                     }}
                   >
                     {cip129Identifier}
@@ -278,8 +279,7 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
               lineHeight: "20px",
               color: "textGray",
               overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
+              wordBreak: "break-word",
             }}
           >
             {t("outcome.newThreshold")}
@@ -292,6 +292,7 @@ export const GovernanceActionNewCommitteeDetailsTabContent = ({
               maxWidth: "auto",
               lineHeight: "24px",
               color: "textGray",
+              wordBreak: "break-word",
             }}
           >
             {typeof description.threshold === "number"
