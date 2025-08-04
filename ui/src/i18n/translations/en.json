@@ -118,7 +118,11 @@
       "details": "Details"
     },
     "viewDetails": "View Details",
-    "seeDiscussion": "See discussion"
+    "seeDiscussion": "See discussion",
+    "noResults": {
+      "title": "Governance action not found",
+      "description": "The governance action you're looking for could not be found. The ID might be incorrect, or there could be a temporary issue loading the data."
+    }
   },
   "proposalDiscussion": {
     "title": "Discussion forum",

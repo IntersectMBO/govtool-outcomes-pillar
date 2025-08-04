@@ -15,6 +15,8 @@ type GovernanceVotingProps = {
   action: GovernanceAction;
 };
 const GovernanceVoting = ({ action }: GovernanceVotingProps) => {
+  if (!action) return null;
+
   const {
     yes_votes,
     no_votes,
@@ -29,6 +31,7 @@ const GovernanceVoting = ({ action }: GovernanceVotingProps) => {
     type,
     status,
   } = action;
+
   const {
     networkMetrics,
     epochParams,
@@ -37,7 +40,9 @@ const GovernanceVoting = ({ action }: GovernanceVotingProps) => {
     areSPOVoteTotalsDisplayed,
     areCCVoteTotalsDisplayed,
   } = useNetworkMetrics(action);
+
   const { t } = useTranslation();
+
   const {
     palette: {
       textBlack,
