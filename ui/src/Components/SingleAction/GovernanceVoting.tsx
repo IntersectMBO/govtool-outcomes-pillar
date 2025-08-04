@@ -100,13 +100,9 @@ const GovernanceVoting = ({ action }: GovernanceVotingProps) => {
     Number(networkMetrics?.spos_no_confidence_voting_power) ?? 0;
   const totalStakeControlledByDReps =
     Number(networkMetrics?.total_stake_controlled_by_active_dreps) ?? 0;
-  const totalActiveStakeControlledByDReps =
-    totalStakeControlledByDReps - totalStakeControlledByAlwaysAbstain;
   const totalStakeControlledBySPOs = Number(
     networkMetrics?.total_stake_controlled_by_stake_pools
   );
-  const totalActiveStakeControlledBySPOs =
-    totalStakeControlledBySPOs - totalStakeControlledByAlwaysAbstainForSPOs;
   const noOfCommitteeMembers =
     Number(networkMetrics?.no_of_committee_members) ?? 0;
   const ccThreshold = (
