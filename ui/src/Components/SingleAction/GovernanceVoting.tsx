@@ -155,8 +155,8 @@ const GovernanceVoting = ({ action }: GovernanceVotingProps) => {
   );
 
   // DReps vote percentages
-  const dRepYesVotesPercentage = totalActiveStakeControlledByDReps
-    ? (dRepYesVotes / totalActiveStakeControlledByDReps) * 100
+  const dRepYesVotesPercentage = dRepRatificationThresholdStake
+    ? (dRepYesVotes / dRepRatificationThresholdStake) * 100
     : undefined;
   const dRepNoVotesPercentage =
     dRepYesVotesPercentage !== undefined
@@ -164,8 +164,8 @@ const GovernanceVoting = ({ action }: GovernanceVotingProps) => {
       : undefined;
 
   // SPOs vote percentages
-  const poolYesVotesPercentage = totalActiveStakeControlledBySPOs
-    ? (poolYesVotes / totalActiveStakeControlledBySPOs) * 100
+  const poolYesVotesPercentage = poolRatificationThresholdStake
+    ? (poolYesVotes / poolRatificationThresholdStake) * 100
     : undefined;
   const poolNoVotesPercentage =
     poolYesVotesPercentage !== undefined
