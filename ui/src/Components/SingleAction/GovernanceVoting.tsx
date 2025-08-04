@@ -15,6 +15,8 @@ type GovernanceVotingProps = {
   action: GovernanceAction;
 };
 const GovernanceVoting = ({ action }: GovernanceVotingProps) => {
+  if (!action) return null;
+
   const {
     yes_votes,
     no_votes,
@@ -29,6 +31,7 @@ const GovernanceVoting = ({ action }: GovernanceVotingProps) => {
     type,
     status,
   } = action;
+
   const {
     networkMetrics,
     epochParams,
@@ -37,7 +40,9 @@ const GovernanceVoting = ({ action }: GovernanceVotingProps) => {
     areSPOVoteTotalsDisplayed,
     areCCVoteTotalsDisplayed,
   } = useNetworkMetrics(action);
+
   const { t } = useTranslation();
+
   const {
     palette: {
       textBlack,
@@ -100,13 +105,9 @@ const GovernanceVoting = ({ action }: GovernanceVotingProps) => {
     Number(networkMetrics?.spos_no_confidence_voting_power) ?? 0;
   const totalStakeControlledByDReps =
     Number(networkMetrics?.total_stake_controlled_by_active_dreps) ?? 0;
-  const totalActiveStakeControlledByDReps =
-    totalStakeControlledByDReps - totalStakeControlledByAlwaysAbstain;
   const totalStakeControlledBySPOs = Number(
     networkMetrics?.total_stake_controlled_by_stake_pools
   );
-  const totalActiveStakeControlledBySPOs =
-    totalStakeControlledBySPOs - totalStakeControlledByAlwaysAbstainForSPOs;
   const noOfCommitteeMembers =
     Number(networkMetrics?.no_of_committee_members) ?? 0;
   const ccThreshold = (
@@ -155,8 +156,8 @@ const GovernanceVoting = ({ action }: GovernanceVotingProps) => {
   );
 
   // DReps vote percentages
-  const dRepYesVotesPercentage = totalActiveStakeControlledByDReps
-    ? (dRepYesVotes / totalActiveStakeControlledByDReps) * 100
+  const dRepYesVotesPercentage = dRepRatificationThresholdStake
+    ? (dRepYesVotes / dRepRatificationThresholdStake) * 100
     : undefined;
   const dRepNoVotesPercentage =
     dRepYesVotesPercentage !== undefined
@@ -164,8 +165,8 @@ const GovernanceVoting = ({ action }: GovernanceVotingProps) => {
       : undefined;
 
   // SPOs vote percentages
-  const poolYesVotesPercentage = totalActiveStakeControlledBySPOs
-    ? (poolYesVotes / totalActiveStakeControlledBySPOs) * 100
+  const poolYesVotesPercentage = poolRatificationThresholdStake
+    ? (poolYesVotes / poolRatificationThresholdStake) * 100
     : undefined;
   const poolNoVotesPercentage =
     poolYesVotesPercentage !== undefined

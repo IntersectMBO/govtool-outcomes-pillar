@@ -6,5 +6,5 @@ export const getGovernanceAction = async (id: string) => {
   const response = await axiosInstance.get(`/governance-actions/${hash}`, {
     params: { index },
   });
-  return response.data[0];
+  return response.data;
 };

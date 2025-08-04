@@ -35,6 +35,7 @@ import { Typography } from "../Components/Atoms/Typography";
 import ProposalCardLoader from "../Components/Loaders/ProposalCardLoader";
 import { useTranslation } from "../contexts/I18nContext";
 import GovernanceActionAuthors from "../Components/Molecules/GovernanceActionAuthors";
+import { ActionsEmptyState } from "../Components/Molecules/ActionsEmptyState";
 
 type GovernanceActionProps = {
   id: string;
@@ -70,7 +71,7 @@ const StyledTab = styled(({ isMobile, ...props }: StyledTabProps) => (
 
 function GovernanceAction({ id }: GovernanceActionProps) {
   const { isMobile } = useScreenDimension();
-  const { governanceAction, isGovernanceActionLoading } =
+  const { governanceAction, isGovernanceActionLoading, governanceActionError } =
     useGetGovernanceActionQuery(id);
   const { metadata, metadataValid, isMetadataLoading } =
     useMetadata(governanceAction);
@@ -263,6 +264,28 @@ function GovernanceAction({ id }: GovernanceActionProps) {
           }}
         >
           <CircularProgress />
+        </Box>
+      </Box>
+    );
+  }
+
+  if (governanceActionError || !governanceAction) {
+    return (
+      <Box display="flex" flex={1} flexDirection="column" width="100%">
+        <Box
+          data-testid={`single-action-page-circular-loader`}
+          sx={{
+            alignItems: "center",
+            display: "flex",
+            flex: 1,
+            justifyContent: "center",
+            minHeight: "75vh",
+          }}
+        >
+          <ActionsEmptyState
+            title={t("outcome.noResults.title")}
+            description={t("outcome.noResults.description")}
+          />
         </Box>
       </Box>
     );

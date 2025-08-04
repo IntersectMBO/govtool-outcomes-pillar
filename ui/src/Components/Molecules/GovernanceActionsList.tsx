@@ -55,7 +55,10 @@ const GovernanceActionsList = () => {
 
       {!isGovActionsLoading && !displayedActions.length ? (
         <Box sx={{ paddingY: 3 }}>
-          <ActionsEmptyState />
+          <ActionsEmptyState
+            title={t("outcomesList.noResults.title")}
+            description={t("outcomesList.noResults.description")}
+          />
         </Box>
       ) : null}
 
@@ -90,7 +93,9 @@ const GovernanceActionsList = () => {
             {isFetchingNextPage ? (
               <CircularProgress size={20} sx={{ mr: 1 }} />
             ) : null}
-            {isFetchingNextPage ? t("loaders.loading") : t("outcomesList.showMore")}
+            {isFetchingNextPage
+              ? t("loaders.loading")
+              : t("outcomesList.showMore")}
           </Button>
         </Box>
       )}

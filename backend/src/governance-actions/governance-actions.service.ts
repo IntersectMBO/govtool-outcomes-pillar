@@ -1,4 +1,4 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { InjectDataSource } from "@nestjs/typeorm";
 import { getGovernanceAction } from "src/queries/governanceAction";
 import { getGovernanceActions } from "src/queries/governanceActions";
@@ -24,29 +24,55 @@ export class GovernanceActionsService {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService
   ) {}
-  findAll(
+  async findAll(
     search: string,
     filters: string[],
     sort: string,
     page: number = 1,
     limit: number = 12
   ) {
-    const searchTerm = search ? search.trim() : "";
-    const filterArray = filters?.length > 0 ? filters : null;
-    const sortOption = sort || "newestFirst";
-    const offset = (page - 1) * limit;
+    try {
+      const searchTerm = search ? search.trim() : "";
+      const filterArray = filters?.length > 0 ? filters : null;
+      const sortOption = sort || "newestFirst";
+      const offset = (page - 1) * limit;
 
-    return this.cexplorerService.manager.query(getGovernanceActions, [
-      searchTerm,
-      filterArray,
-      sortOption,
-      offset,
-      limit,
-    ]);
+      const result = await this.cexplorerService.manager.query(
+        getGovernanceActions,
+        [searchTerm, filterArray, sortOption, offset, limit]
+      );
+
+      if (!result) {
+        return [];
+      }
+
+      return result;
+    } catch (error) {
+      if (error) {
+        throw error;
+      }
+    }
   }
 
-  findOne(id: string) {
-    return this.cexplorerService.manager.query(getGovernanceAction, [id]);
+  async findOne(id: string) {
+    try {
+      const result = await this.cexplorerService.manager.query(
+        getGovernanceAction,
+        [id]
+      );
+
+      if (!result || result.length === 0) {
+        throw new NotFoundException(
+          `Governance action with ID '${id}' not found`
+        );
+      }
+
+      return result?.[0];
+    } catch (error) {
+      if (error) {
+        throw error;
+      }
+    }
   }
 
   async findProposal(hash: string): Promise<any> {
