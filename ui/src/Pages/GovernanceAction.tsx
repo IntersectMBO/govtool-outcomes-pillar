@@ -446,8 +446,8 @@ function GovernanceAction({ id }: GovernanceActionProps) {
                 </Typography>
                 {isProposalLoading ? (
                   <ProposalCardLoader />
-                ) : proposal?.data?.length > 0 ? (
-                  <ProposalCard proposal={proposal?.data?.[0]} />
+                ) : !!proposal?.data ? (
+                  <ProposalCard proposal={proposal?.data} />
                 ) : (
                   <Typography
                     sx={{

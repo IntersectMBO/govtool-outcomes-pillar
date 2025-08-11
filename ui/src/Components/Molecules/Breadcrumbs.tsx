@@ -53,6 +53,9 @@ export const Breadcrumbs = ({
             fontSize: 12,
             fontWeight: 400,
             lineHeight: 2,
+            "&:hover": {
+              fontWeight: 500,
+            },
           }}
         >
           {elementOne}
