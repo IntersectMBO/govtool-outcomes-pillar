@@ -112,14 +112,14 @@ export function getProposalStatus(status: Status): string {
   if (status.enacted_epoch !== null) {
     return "Enacted";
   }
+  if (status.ratified_epoch !== null) {
+    return "Ratified";
+  }
   if (status.expired_epoch !== null) {
     return "Expired";
   }
   if (status.dropped_epoch !== null) {
     return "Not Ratified";
-  }
-  if (status.ratified_epoch !== null) {
-    return "Ratified";
   }
   if (
     status.enacted_epoch === null &&

@@ -195,7 +195,7 @@ function GovernanceAction({ id }: GovernanceActionProps) {
         dataTestId: "hardfork-details-tab",
         content: (
           <HardForkDetailsTabContent
-            description={governanceAction?.description}
+            action={governanceAction}
             prevGovActionId={prevGovActionId}
           />
         ),

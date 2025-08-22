@@ -25,11 +25,12 @@ ActionEpoch AS (
     SELECT
         ta.id,
         CASE
-            WHEN ta.ratified_epoch IS NOT NULL THEN ta.ratified_epoch
-            WHEN ta.enacted_epoch IS NOT NULL THEN ta.enacted_epoch
-            WHEN ta.expired_epoch IS NOT NULL THEN ta.expired_epoch
-            WHEN ta.dropped_epoch IS NOT NULL THEN ta.dropped_epoch
-            ELSE (SELECT MAX(no) FROM epoch)
+            WHEN ta.ratified_epoch IS NULL 
+                AND ta.enacted_epoch IS NULL 
+                AND ta.expired_epoch IS NULL 
+                AND ta.dropped_epoch IS NULL 
+            THEN (SELECT MAX(no) FROM epoch)
+            ELSE ta.expiration - 1
         END AS relevant_epoch_no
     FROM
         TargetAction ta
@@ -52,25 +53,6 @@ LatestEpoch AS (
     ORDER BY
         no DESC
     LIMIT 1
-),
-RelevantEpoch AS (
-    SELECT 
-        e.start_time AS start_time,
-        ae.relevant_epoch_no AS no
-    FROM 
-        ActionEpoch ae
-    JOIN 
-        epoch e ON e.no = ae.relevant_epoch_no
-),
-DRepVotingPower AS (
-    SELECT
-        SUM(CASE WHEN drep_hash.view = 'drep_always_no_confidence' THEN amount ELSE 0 END) AS no_confidence,
-        SUM(CASE WHEN drep_hash.view = 'drep_always_abstain' THEN amount ELSE 0 END) AS abstain
-    FROM
-        drep_hash
-    LEFT JOIN drep_distr ON drep_hash.id = drep_distr.hash_id 
-    JOIN ActionEpoch ae ON drep_distr.epoch_no = ae.relevant_epoch_no
-    WHERE drep_hash.view IN ('drep_always_no_confidence', 'drep_always_abstain')
 ),
 CommitteeData AS (
     SELECT DISTINCT ON (ch.raw)
@@ -206,24 +188,37 @@ RankedPoolVotes AS (
     WHERE 
         vp.pool_voter IS NOT NULL
 ),
+RankedPoolStats AS (
+    SELECT 
+        ps.*,
+        ae.relevant_epoch_no,
+        ae.id as action_id,
+        ROW_NUMBER() OVER (
+            PARTITION BY ps.pool_hash_id, ae.id 
+            ORDER BY ps.epoch_no DESC
+        ) as rn
+    FROM 
+        pool_stat ps
+    CROSS JOIN ActionEpoch ae
+    WHERE 
+        ps.epoch_no <= ae.relevant_epoch_no
+),
 PoolVotes AS (
     SELECT
         rpv.gov_action_proposal_id,
-        ps.epoch_no,
-        SUM(CASE WHEN rpv.vote = 'Yes' THEN ps.voting_power ELSE 0 END) AS poolYesVotes,
-        SUM(CASE WHEN rpv.vote = 'No' THEN ps.voting_power ELSE 0 END) AS poolNoVotes,
-        SUM(CASE WHEN rpv.vote = 'Abstain' THEN ps.voting_power ELSE 0 END) AS poolAbstainVotes
+        SUM(CASE WHEN rpv.vote = 'Yes' THEN rps.voting_power ELSE 0 END) AS poolYesVotes,
+        SUM(CASE WHEN rpv.vote = 'No' THEN rps.voting_power ELSE 0 END) AS poolNoVotes,
+        SUM(CASE WHEN rpv.vote = 'Abstain' THEN rps.voting_power ELSE 0 END) AS poolAbstainVotes
     FROM 
         RankedPoolVotes rpv
     JOIN 
-        pool_stat ps
-        ON rpv.pool_voter = ps.pool_hash_id
-    JOIN
-        ActionEpoch ae ON ps.epoch_no = ae.relevant_epoch_no
+        RankedPoolStats rps ON rpv.pool_voter = rps.pool_hash_id 
+                            AND rpv.gov_action_proposal_id = rps.action_id
+                            AND rps.rn = 1
     WHERE
         rpv.rn = 1
     GROUP BY
-        rpv.gov_action_proposal_id, ps.epoch_no
+        rpv.gov_action_proposal_id
 ),
 RankedDRepVotes AS (
     SELECT DISTINCT ON (vp.drep_voter, vp.gov_action_proposal_id)
@@ -237,15 +232,6 @@ RankedDRepVotes AS (
         vp.drep_voter,
         vp.gov_action_proposal_id,
         vp.tx_id DESC
-),
-RankedDRepRegistration AS (
-    SELECT DISTINCT ON (dr.drep_hash_id)
-        *
-    FROM 
-        drep_registration dr
-    ORDER BY 
-        dr.drep_hash_id,
-        dr.tx_id DESC
 ),
 CommitteeVotes AS (
     SELECT
@@ -373,18 +359,8 @@ SELECT
     off_chain_vote_gov_action_data.abstract,
     off_chain_vote_gov_action_data.motivation,
     off_chain_vote_gov_action_data.rationale,
-    COALESCE(SUM(ldd_drep.amount) FILTER (WHERE rdv.vote::text = 'Yes'), 0) + (
-        CASE WHEN ta.type = 'NoConfidence' THEN
-            drep_voting_power.no_confidence
-        ELSE
-            0
-        END) yes_votes,
-    COALESCE(SUM(ldd_drep.amount) FILTER (WHERE rdv.vote::text = 'No'), 0) + (
-        CASE WHEN ta.type = 'NoConfidence' THEN
-            0
-        ELSE
-            drep_voting_power.no_confidence
-        END) no_votes,
+    COALESCE(SUM(ldd_drep.amount) FILTER (WHERE rdv.vote::text = 'Yes'), 0) AS yes_votes,
+    COALESCE(SUM(ldd_drep.amount) FILTER (WHERE rdv.vote::text = 'No'), 0) AS no_votes,
     COALESCE(SUM(ldd_drep.amount) FILTER (WHERE rdv.vote::text = 'Abstain'), 0) abstain_votes,
     COALESCE(ps.poolYesVotes, 0) pool_yes_votes,
     COALESCE(ps.poolNoVotes, 0) pool_no_votes,
@@ -411,7 +387,6 @@ FROM
     TargetAction ta
     JOIN ActionEpoch ae ON ta.id = ae.id
     CROSS JOIN LatestEpoch AS latest_epoch
-    CROSS JOIN DRepVotingPower AS drep_voting_power
     CROSS JOIN meta
     LEFT JOIN tx AS creator_tx ON creator_tx.id = ta.tx_id
     LEFT JOIN block AS creator_block ON creator_block.id = creator_tx.block_id
@@ -423,8 +398,7 @@ FROM
     LEFT JOIN PoolVotes ps ON ta.id = ps.gov_action_proposal_id
     LEFT JOIN CommitteeVotes cv ON ta.id = cv.gov_action_proposal_id
     LEFT JOIN RankedDRepVotes rdv ON rdv.gov_action_proposal_id = ta.id
-    LEFT JOIN RankedDRepRegistration rdr ON rdr.drep_hash_id = rdv.drep_voter AND COALESCE(rdr.deposit, 0) >= 0
-    LEFT JOIN LatestDrepDistr ldd_drep ON ldd_drep.hash_id = rdr.drep_hash_id AND ldd_drep.rn = 1
+    LEFT JOIN LatestDrepDistr ldd_drep ON ldd_drep.hash_id = rdv.drep_voter AND ldd_drep.rn = 1
     LEFT JOIN gov_action_proposal AS prev_gov_action ON ta.prev_gov_action_proposal = prev_gov_action.id
     LEFT JOIN tx AS prev_gov_action_tx ON prev_gov_action.tx_id = prev_gov_action_tx.id
     CROSS JOIN StatusTimes st
@@ -442,8 +416,6 @@ GROUP BY
     creator_block.id,
     latest_epoch.start_time,
     latest_epoch.no,
-    drep_voting_power.no_confidence,
-    drep_voting_power.abstain,
     cv.ccYesVotes,
     cv.ccNoVotes,
     cv.ccAbstainVotes,
