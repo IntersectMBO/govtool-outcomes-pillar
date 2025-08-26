@@ -1,162 +1,120 @@
 export const getNetworkMetrics = `
 WITH CurrentEpoch AS (
     SELECT 
-        CASE 
-            WHEN $1::integer IS NULL THEN (SELECT MAX(no) FROM epoch)
-            ELSE $1::integer
-        END AS no
+        COALESCE($1::integer, (SELECT MAX(no) FROM epoch)) AS no
 ),
 DRepActivity AS (
-    SELECT
-        drep_activity AS drep_activity,
-        epoch_no AS epoch_no
-    FROM
-        epoch_param
-    CROSS JOIN CurrentEpoch
-    WHERE
-        epoch_no <= CurrentEpoch.no
-        AND epoch_no IS NOT NULL
-    ORDER BY
-        epoch_no DESC
+    SELECT drep_activity
+    FROM epoch_param ep, CurrentEpoch ce
+    WHERE ep.epoch_no <= ce.no
+    ORDER BY ep.epoch_no DESC
     LIMIT 1
 ),
 ActiveCommittees AS (
-    SELECT DISTINCT 
-        cr.cold_key_id
+    SELECT DISTINCT cr.cold_key_id
     FROM committee_registration cr
     JOIN tx cr_tx ON cr_tx.id = cr.tx_id
     JOIN block cr_block ON cr_block.id = cr_tx.block_id
-    LEFT JOIN committee_de_registration cdr ON cdr.cold_key_id = cr.cold_key_id
+    LEFT JOIN committee_de_registration cdr 
+           ON cdr.cold_key_id = cr.cold_key_id
     LEFT JOIN tx cdr_tx ON cdr_tx.id = cdr.tx_id
     LEFT JOIN block cdr_block ON cdr_block.id = cdr_tx.block_id
-    CROSS JOIN CurrentEpoch
-    WHERE 
-        cr_block.epoch_no <= CurrentEpoch.no
-        AND (
-            cdr.id IS NULL 
-            OR 
-            cdr_block.epoch_no > CurrentEpoch.no
-        )
+    CROSS JOIN CurrentEpoch ce
+    WHERE cr_block.epoch_no <= ce.no
+      AND (cdr.id IS NULL OR cdr_block.epoch_no > ce.no)
 ),
 NoOfCommittees AS (
     SELECT COUNT(*) AS total FROM ActiveCommittees
 ),
 LatestVotingProcedure AS (
-    SELECT
-        vp.*,
-        ROW_NUMBER() OVER (PARTITION BY drep_voter ORDER BY tx_id DESC) AS rn
-    FROM
-        voting_procedure vp
+    SELECT DISTINCT ON (vp.drep_voter) 
+        vp.drep_voter, tx.id as tx_id, block.epoch_no
+    FROM voting_procedure vp
     JOIN tx ON tx.id = vp.tx_id
     JOIN block ON block.id = tx.block_id
-    CROSS JOIN CurrentEpoch
-    WHERE
-        block.epoch_no <= CurrentEpoch.no
-),
-LatestVoteEpoch AS (
-    SELECT
-        block.epoch_no,
-        lvp.drep_voter AS drep_id
-    FROM
-        LatestVotingProcedure lvp
-        JOIN tx ON tx.id = lvp.tx_id
-        JOIN block ON block.id = tx.block_id
-    WHERE
-        lvp.rn = 1
+    CROSS JOIN CurrentEpoch ce
+    WHERE block.epoch_no <= ce.no
+    ORDER BY vp.drep_voter, tx.id DESC
 ),
 RankedDRepRegistration AS (
-    SELECT
+    SELECT DISTINCT ON (dr.drep_hash_id)
         dr.id,
         dr.drep_hash_id,
         dr.deposit,
         dr.voting_anchor_id,
-        ROW_NUMBER() OVER (PARTITION BY dr.drep_hash_id ORDER BY dr.tx_id DESC) AS rn,
         encode(tx.hash, 'hex') AS tx_hash,
         block.epoch_no
-    FROM
-        drep_registration dr
+    FROM drep_registration dr
     JOIN tx ON tx.id = dr.tx_id
     JOIN block ON block.id = tx.block_id
-    CROSS JOIN CurrentEpoch
-    WHERE
-        block.epoch_no <= CurrentEpoch.no
+    CROSS JOIN CurrentEpoch ce
+    WHERE block.epoch_no <= ce.no
+    ORDER BY dr.drep_hash_id, dr.tx_id DESC
 ),
 DRepDistr AS (
-    SELECT
-        drep_distr.*,
-        ROW_NUMBER() OVER (
-            PARTITION BY drep_distr.hash_id 
-            ORDER BY drep_distr.epoch_no DESC
-        ) AS rn
-    FROM drep_distr
-    CROSS JOIN CurrentEpoch
-    WHERE drep_distr.epoch_no <= CurrentEpoch.no
+    SELECT DISTINCT ON (dd.hash_id)
+        dd.hash_id,
+        dd.amount,
+        dd.epoch_no
+    FROM drep_distr dd
+    CROSS JOIN CurrentEpoch ce
+    WHERE dd.epoch_no <= ce.no
+    ORDER BY dd.hash_id, dd.epoch_no DESC
 ),
 PoolStats AS (
-    SELECT
-        ps.*,
-        ROW_NUMBER() OVER (
-            PARTITION BY ps.pool_hash_id 
-            ORDER BY ps.epoch_no DESC
-        ) AS rn
+    SELECT DISTINCT ON (ps.pool_hash_id)
+        ps.pool_hash_id,
+        ps.voting_power
     FROM pool_stat ps
-    CROSS JOIN CurrentEpoch
-    WHERE ps.epoch_no <= CurrentEpoch.no
+    CROSS JOIN CurrentEpoch ce
+    WHERE ps.epoch_no <= ce.no
+    ORDER BY ps.pool_hash_id, ps.epoch_no DESC
 ),
 TotalStakeControlledByActiveDReps AS (
-    SELECT
-        COALESCE(SUM(dd.amount), 0)::bigint AS total
-    FROM
-        drep_hash dh
-    LEFT JOIN DRepDistr dd ON dd.hash_id = dh.id AND dd.rn = 1
-    LEFT JOIN RankedDRepRegistration rd ON dd.hash_id = rd.drep_hash_id AND rd.rn = 1
-    LEFT JOIN LatestVoteEpoch lve ON lve.drep_id = dh.id
-    CROSS JOIN DRepActivity
-    CROSS JOIN CurrentEpoch
-    WHERE
-        dd.epoch_no <= CurrentEpoch.no
-        AND COALESCE(rd.deposit, 0) >= 0
-        AND ((CurrentEpoch.no - GREATEST(COALESCE(lve.epoch_no, 0), COALESCE(rd.epoch_no, 0))) <= DRepActivity.drep_activity)
-        AND dh.view NOT IN ('drep_always_abstain', 'drep_always_no_confidence')
+    SELECT COALESCE(SUM(dd.amount),0)::bigint AS total
+    FROM drep_hash dh
+    LEFT JOIN DRepDistr dd ON dd.hash_id = dh.id
+    LEFT JOIN RankedDRepRegistration rd ON rd.drep_hash_id = dh.id
+    LEFT JOIN LatestVotingProcedure lve ON lve.drep_voter = dh.id
+    CROSS JOIN DRepActivity da
+    CROSS JOIN CurrentEpoch ce
+    WHERE dd.epoch_no <= ce.no
+      AND COALESCE(rd.deposit,0) >= 0
+      AND (ce.no - GREATEST(COALESCE(lve.epoch_no, 0), COALESCE(rd.epoch_no, 0))) <= da.drep_activity
+      AND dh.view NOT IN ('drep_always_abstain', 'drep_always_no_confidence')
 ),
 TotalStakeControlledByStakePools AS (
-    SELECT
-        COALESCE(SUM(ps.voting_power), 0)::bigint AS total
-    FROM
-        PoolStats ps
-    WHERE
-        ps.rn = 1
+    SELECT COALESCE(SUM(ps.voting_power),0)::bigint AS total
+    FROM PoolStats ps
 ),
 AlwaysAbstainVotingPower AS (
     SELECT COALESCE((
-        SELECT amount FROM drep_hash
-        LEFT JOIN drep_distr ON drep_hash.id = drep_distr.hash_id
-        CROSS JOIN CurrentEpoch
+        SELECT dd.amount
+        FROM drep_hash
+        JOIN drep_distr dd ON drep_hash.id = dd.hash_id
+        CROSS JOIN CurrentEpoch ce
         WHERE drep_hash.view = 'drep_always_abstain'
-        AND drep_distr.epoch_no <= CurrentEpoch.no
-        ORDER BY drep_distr.epoch_no DESC 
+          AND dd.epoch_no <= ce.no
+        ORDER BY dd.epoch_no DESC 
         LIMIT 1
-    ), 0) AS amount
+    ),0) AS amount
 ),
 AlwaysNoConfidenceVotingPower AS (
     SELECT COALESCE((
-        SELECT amount FROM drep_hash
-        LEFT JOIN drep_distr ON drep_hash.id = drep_distr.hash_id
-        CROSS JOIN CurrentEpoch
+        SELECT dd.amount
+        FROM drep_hash
+        JOIN drep_distr dd ON drep_hash.id = dd.hash_id
+        CROSS JOIN CurrentEpoch ce
         WHERE drep_hash.view = 'drep_always_no_confidence'
-        AND drep_distr.epoch_no <= CurrentEpoch.no
-        ORDER BY drep_distr.epoch_no DESC 
+          AND dd.epoch_no <= ce.no
+        ORDER BY dd.epoch_no DESC 
         LIMIT 1
-    ), 0) AS amount
+    ),0) AS amount
 ),
 LatestPoolDelegations AS (
-    SELECT
+    SELECT DISTINCT ON (ph.id)
         ph.id AS pool_hash_id,
-        dh.view AS drep_view,
-        ROW_NUMBER() OVER (
-            PARTITION BY ph.id 
-            ORDER BY dv_block.epoch_no DESC, dv_tx.id DESC
-        ) AS rn
+        dh.view AS drep_view
     FROM delegation_vote dv
     JOIN tx dv_tx ON dv.tx_id = dv_tx.id
     JOIN block dv_block ON dv_tx.block_id = dv_block.id
@@ -165,41 +123,34 @@ LatestPoolDelegations AS (
     JOIN pool_update pu ON pu.id = po.pool_update_id
     JOIN pool_hash ph ON pu.hash_id = ph.id
     JOIN drep_hash dh ON dv.drep_hash_id = dh.id
-    CROSS JOIN CurrentEpoch
-    WHERE dv_block.epoch_no <= CurrentEpoch.no
+    CROSS JOIN CurrentEpoch ce
+    WHERE dv_block.epoch_no <= ce.no
+    ORDER BY ph.id, dv_block.epoch_no DESC, dv_tx.id DESC
 ),
 SPOsAbstainVotingPower AS (
-    SELECT 
-        COALESCE(SUM(ps.voting_power), 0)::bigint AS total
+    SELECT COALESCE(SUM(ps.voting_power), 0)::bigint AS total
     FROM LatestPoolDelegations lpd
     JOIN PoolStats ps ON ps.pool_hash_id = lpd.pool_hash_id
-    WHERE lpd.rn = 1
-    AND lpd.drep_view = 'drep_always_abstain'
-    AND ps.rn = 1
+    WHERE lpd.drep_view = 'drep_always_abstain'
 ),
 SPOsNoConfidenceVotingPower AS (
-    SELECT 
-        COALESCE(SUM(ps.voting_power), 0)::bigint AS total
+    SELECT COALESCE(SUM(ps.voting_power), 0)::bigint AS total
     FROM LatestPoolDelegations lpd
     JOIN PoolStats ps ON ps.pool_hash_id = lpd.pool_hash_id
-    WHERE lpd.rn = 1
-    AND lpd.drep_view = 'drep_always_no_confidence'
-    AND ps.rn = 1
+    WHERE lpd.drep_view = 'drep_always_no_confidence'
 ),
 LatestGovAction AS (
     SELECT gap.id, gap.enacted_epoch
-    FROM gov_action_proposal gap
-    JOIN CurrentEpoch ce ON gap.enacted_epoch <= ce.no
+    FROM gov_action_proposal gap, CurrentEpoch ce
+    WHERE gap.enacted_epoch <= ce.no
     ORDER BY gap.id DESC
     LIMIT 1
 ),
 CommitteeThreshold AS (
-    SELECT
-        c.*
+    SELECT c.*
     FROM committee c
     LEFT JOIN LatestGovAction lga ON c.gov_action_proposal_id = lga.id
-    WHERE (c.gov_action_proposal_id IS NOT NULL AND lga.id IS NOT NULL)
-        OR (c.gov_action_proposal_id IS NULL)
+    WHERE (c.gov_action_proposal_id IS NULL OR lga.id IS NOT NULL)
 )
 SELECT
     CurrentEpoch.no AS epoch_no,
