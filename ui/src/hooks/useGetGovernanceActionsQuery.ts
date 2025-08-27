@@ -12,8 +12,8 @@ export const useGetGovernanceActionsQuery = (
   const searchPhrase = (() => {
     if (search.startsWith("gov_action")) {
       try {
-        const { txID } = decodeCIP129Identifier(search);
-        return getFullGovActionId(txID, 0);
+        const { txID, index } = decodeCIP129Identifier(search);
+        return getFullGovActionId(txID, index);
       } catch (error) {
         console.log("Failed to decode gov_action identifier:", error);
         return search;

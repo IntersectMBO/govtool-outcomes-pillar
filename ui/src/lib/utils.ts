@@ -78,7 +78,7 @@ export const decodeCIP129Identifier = (cip129Identifier: string) => {
   const { prefix, words } = bech32.decode(cip129Identifier);
   const buffer = Buffer.from(bech32.fromWords(words));
   const txID = buffer.subarray(0, 32).toString("hex");
-  const index = buffer.subarray(32).toString("hex");
+  const index = buffer.subarray(32).toString("hex").replace(/^0+/, "") || "0";
   return { txID, index, prefix };
 };
 
