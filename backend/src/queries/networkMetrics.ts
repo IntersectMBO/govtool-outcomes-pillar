@@ -75,12 +75,9 @@ TotalStakeControlledByActiveDReps AS (
     FROM drep_hash dh
     LEFT JOIN DRepDistr dd ON dd.hash_id = dh.id
     LEFT JOIN RankedDRepRegistration rd ON rd.drep_hash_id = dh.id
-    LEFT JOIN LatestVotingProcedure lve ON lve.drep_voter = dh.id
-    CROSS JOIN DRepActivity da
     CROSS JOIN CurrentEpoch ce
     WHERE dd.epoch_no <= ce.no
       AND COALESCE(rd.deposit,0) >= 0
-      AND (ce.no - GREATEST(COALESCE(lve.epoch_no, 0), COALESCE(rd.epoch_no, 0))) <= da.drep_activity
       AND dh.view NOT IN ('drep_always_abstain', 'drep_always_no_confidence')
 ),
 TotalStakeControlledByStakePools AS (

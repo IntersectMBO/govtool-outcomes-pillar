@@ -22,27 +22,31 @@ WITH TargetAction AS (
         concat(encode(tx.hash, 'hex'), '#', gov_action_proposal.index) ILIKE $1
 ),
 ActionEpoch AS (
-    SELECT
+    SELECT 
         ta.id,
-        CASE
-            WHEN ta.ratified_epoch IS NULL 
-                AND ta.enacted_epoch IS NULL 
-                AND ta.expired_epoch IS NULL 
-                AND ta.dropped_epoch IS NULL 
-            THEN (SELECT MAX(no) FROM epoch)
-            ELSE ta.expiration - 1
+        CASE 
+            WHEN ta.ratified_epoch IS NOT NULL 
+                THEN ta.ratified_epoch
+            WHEN ta.expired_epoch IS NOT NULL 
+                THEN ta.expired_epoch
+            WHEN ta.dropped_epoch IS NOT NULL 
+                THEN ta.dropped_epoch
+            ELSE (SELECT MAX(no) FROM epoch)
         END AS relevant_epoch_no
-    FROM
+    FROM 
         TargetAction ta
 ),
 LatestDrepDistr AS (
-    SELECT
-        dd.*,
-        ROW_NUMBER() OVER (PARTITION BY dd.hash_id ORDER BY dd.epoch_no DESC) AS rn
-    FROM
+    SELECT DISTINCT ON (dd.hash_id)
+        dd.hash_id,
+        dd.amount,
+        dd.epoch_no
+    FROM 
         drep_distr dd
-    JOIN
+    JOIN 
         ActionEpoch ae ON dd.epoch_no <= ae.relevant_epoch_no
+    ORDER BY 
+        dd.hash_id, dd.epoch_no DESC
 ),
 LatestEpoch AS (
     SELECT
@@ -222,12 +226,17 @@ PoolVotes AS (
 ),
 RankedDRepVotes AS (
     SELECT DISTINCT ON (vp.drep_voter, vp.gov_action_proposal_id)
-        *
+        vp.*,
+        block.epoch_no as vote_epoch_no
     FROM 
         voting_procedure vp
     JOIN TargetAction ta ON vp.gov_action_proposal_id = ta.id
+    JOIN ActionEpoch ae ON ta.id = ae.id
+    JOIN tx ON tx.id = vp.tx_id
+    JOIN block ON block.id = tx.block_id
     WHERE 
         vp.drep_voter IS NOT NULL
+        AND block.epoch_no <= ae.relevant_epoch_no
     ORDER BY 
         vp.drep_voter,
         vp.gov_action_proposal_id,
@@ -398,7 +407,7 @@ FROM
     LEFT JOIN PoolVotes ps ON ta.id = ps.gov_action_proposal_id
     LEFT JOIN CommitteeVotes cv ON ta.id = cv.gov_action_proposal_id
     LEFT JOIN RankedDRepVotes rdv ON rdv.gov_action_proposal_id = ta.id
-    LEFT JOIN LatestDrepDistr ldd_drep ON ldd_drep.hash_id = rdv.drep_voter AND ldd_drep.rn = 1
+    LEFT JOIN LatestDrepDistr ldd_drep ON ldd_drep.hash_id = rdv.drep_voter
     LEFT JOIN gov_action_proposal AS prev_gov_action ON ta.prev_gov_action_proposal = prev_gov_action.id
     LEFT JOIN tx AS prev_gov_action_tx ON prev_gov_action.tx_id = prev_gov_action_tx.id
     CROSS JOIN StatusTimes st

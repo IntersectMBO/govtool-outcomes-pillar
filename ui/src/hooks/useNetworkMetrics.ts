@@ -18,16 +18,15 @@ const BOOTSTRAPPING_PHASE_MAJOR = 9;
  */
 export const useNetworkMetrics = (action: GovernanceAction) => {
   const getEpochForMetrics = useMemo(() => {
-    if (
-      !action?.status?.ratified_epoch &&
-      !action?.status?.enacted_epoch &&
-      !action?.status?.expired_epoch &&
-      !action?.status?.dropped_epoch
-    ) {
+    if (action?.status?.ratified_epoch) {
+      return action.status.ratified_epoch;
+    } else if (action?.status?.expired_epoch) {
+      return action?.status?.expired_epoch;
+    } else if (action?.status?.dropped_epoch) {
+      return action?.status?.dropped_epoch;
+    } else {
       return null;
     }
-    // If any status epoch exists, use expiration - 1
-    return action?.expiration ? action.expiration - 1 : null;
   }, [action]);
 
   const queries = useQueries([
