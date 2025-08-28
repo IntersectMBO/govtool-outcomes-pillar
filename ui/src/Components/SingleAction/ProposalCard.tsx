@@ -1,10 +1,8 @@
-import { IconInformationCircle } from "@intersect.mbo/intersectmbo.org-icons-set";
 import { Box, Button } from "@mui/material";
 
 import { Link } from "react-router-dom";
 import { formatTimeStamp } from "../../lib/utils";
 import { theme } from "../../theme";
-import { Tooltip } from "../Atoms/Tooltip";
 import { Typography } from "../Atoms/Typography";
 import { useTranslation } from "../../contexts/I18nContext";
 

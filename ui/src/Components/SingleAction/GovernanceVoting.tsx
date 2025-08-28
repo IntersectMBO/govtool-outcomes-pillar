@@ -122,8 +122,14 @@ const GovernanceVoting = ({ action }: GovernanceVotingProps) => {
     Number(abstain_votes) + totalStakeControlledByAlwaysAbstain;
   const dRepRatificationThresholdStake =
     totalStakeControlledByDReps - dRepAbstainVotes;
-  const dRepYesVotes = Number(yes_votes);
-  const dRepNoVotes = Number(no_votes);
+  const dRepYesVotes =
+    action.type === "NoConfidence"
+      ? Number(yes_votes) + totalStakeControlledByNoConfidence
+      : Number(yes_votes);
+  const dRepNoVotes =
+    action.type !== "NoConfidence"
+      ? Number(no_votes) + totalStakeControlledByNoConfidence
+      : Number(no_votes);
   const dRepNoTotalVotes = dRepRatificationThresholdStake - dRepYesVotes;
   const dRepNotVotedVotes = Number(
     dRepRatificationThresholdStake - (dRepYesVotes + dRepNoVotes)

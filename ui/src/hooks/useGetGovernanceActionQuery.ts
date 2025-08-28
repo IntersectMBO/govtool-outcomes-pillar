@@ -8,8 +8,8 @@ export const useGetGovernanceActionQuery = (id: string) => {
   const actionId = (() => {
     if (id.startsWith("gov_action")) {
       try {
-        const { txID } = decodeCIP129Identifier(id);
-        return getFullGovActionId(txID, 0);
+        const { txID, index } = decodeCIP129Identifier(id);
+        return getFullGovActionId(txID, index);
       } catch (error) {
         console.log("Failed to decode gov_action identifier:", error);
         return id;
@@ -17,7 +17,7 @@ export const useGetGovernanceActionQuery = (id: string) => {
     }
     return id;
   })();
-  
+
   const { data, isLoading, error } = useQuery({
     queryKey: [queryKeys.getGovernanceAction, actionId],
     queryFn: async () => await getGovernanceAction(actionId),

@@ -1,17 +1,18 @@
 import { Box } from "@mui/material";
 import { Typography } from "../Atoms/Typography";
 import { GovernanceAction } from "../../types/api";
-import { useAppContext } from "../../contexts/AppContext";
 import CopyButton from "../Atoms/CopyButton";
 import { useTranslation } from "../../contexts/I18nContext";
+import { useNetworkMetrics } from "../../hooks/useNetworkMetrics";
 
 export const HardForkDetailsTabContent = ({
-  description,
+  action,
   prevGovActionId,
-}: Pick<GovernanceAction, "description"> & {
+}: {
+  action: GovernanceAction;
   prevGovActionId: string | null;
 }) => {
-  const { epochParams } = useAppContext();
+  const { epochParams } = useNetworkMetrics(action);
   const { t } = useTranslation();
 
   return (
@@ -51,7 +52,9 @@ export const HardForkDetailsTabContent = ({
           {t("outcome.proposedVersion")}
         </Typography>
         <Typography variant="body1">
-          {description ? `${description.major}.${description.minor}` : "-"}
+          {action?.description
+            ? `${action.description.major}.${action.description.minor}`
+            : "-"}
         </Typography>
       </Box>
       <Box

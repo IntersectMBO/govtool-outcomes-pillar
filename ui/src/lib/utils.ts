@@ -78,7 +78,7 @@ export const decodeCIP129Identifier = (cip129Identifier: string) => {
   const { prefix, words } = bech32.decode(cip129Identifier);
   const buffer = Buffer.from(bech32.fromWords(words));
   const txID = buffer.subarray(0, 32).toString("hex");
-  const index = buffer.subarray(32).toString("hex");
+  const index = buffer.subarray(32).toString("hex").replace(/^0+/, "") || "0";
   return { txID, index, prefix };
 };
 
@@ -112,14 +112,14 @@ export function getProposalStatus(status: Status): string {
   if (status.enacted_epoch !== null) {
     return "Enacted";
   }
+  if (status.ratified_epoch !== null) {
+    return "Ratified";
+  }
   if (status.expired_epoch !== null) {
     return "Expired";
   }
   if (status.dropped_epoch !== null) {
     return "Not Ratified";
-  }
-  if (status.ratified_epoch !== null) {
-    return "Ratified";
   }
   if (
     status.enacted_epoch === null &&

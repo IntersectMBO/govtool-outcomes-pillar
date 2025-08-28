@@ -1,4 +1,10 @@
-import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectDataSource } from "@nestjs/typeorm";
 import { getGovernanceAction } from "src/queries/governanceAction";
 import { getGovernanceActions } from "src/queries/governanceActions";
@@ -84,14 +90,8 @@ export class GovernanceActionsService {
     try {
       const response = await firstValueFrom(
         this.httpService
-          .get(`${baseUrl}`, {
-            params: {
-              "filters[$and][0][prop_submitted]": "true",
-              "filters[$and][1][prop_submission_tx_hash]": hash,
-              "pagination[page]": "1",
-              "pagination[pageSize]": "25",
-              "sort[createdAt]": "desc",
-            },
+          .get(`${baseUrl}/${hash}`, {
+            params: {},
             headers: {
               "User-Agent": "GovTool/Proposal-Fetch-Tool",
               "Content-Type": "application/json",
@@ -104,14 +104,37 @@ export class GovernanceActionsService {
                 `Error fetching proposal with hash ${hash}`,
                 JSON.stringify(error)
               );
-              return throwError(() => error);
+
+              if (error.response) {
+                const httpException = new HttpException(
+                  error.response.data ||
+                    error.response.statusText ||
+                    "External API error",
+                  error.response.status
+                );
+                return throwError(() => httpException);
+              }
+
+              const serviceException = new HttpException(
+                "External service unavailable",
+                HttpStatus.SERVICE_UNAVAILABLE
+              );
+              return throwError(() => serviceException);
             })
           )
       );
       return response.data;
     } catch (error) {
       Logger.error(`Failed to fetch proposal with hash ${hash}`, error);
-      throw error;
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        "Internal server error",
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 
