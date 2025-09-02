@@ -116,8 +116,7 @@ LatestPoolDelegations AS (
     JOIN tx dv_tx ON dv.tx_id = dv_tx.id
     JOIN block dv_block ON dv_tx.block_id = dv_block.id
     JOIN stake_address sa ON dv.addr_id = sa.id
-    JOIN pool_owner po ON po.addr_id = sa.id
-    JOIN pool_update pu ON pu.id = po.pool_update_id
+    JOIN pool_update pu ON pu.reward_addr_id = sa.id
     JOIN pool_hash ph ON pu.hash_id = ph.id
     JOIN drep_hash dh ON dv.drep_hash_id = dh.id
     CROSS JOIN CurrentEpoch ce

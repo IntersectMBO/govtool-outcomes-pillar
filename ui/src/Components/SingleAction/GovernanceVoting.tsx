@@ -98,11 +98,15 @@ const GovernanceVoting = ({ action }: GovernanceVotingProps) => {
   const totalStakeControlledByAlwaysAbstain =
     Number(networkMetrics?.always_abstain_voting_power) ?? 0;
   const totalStakeControlledByAlwaysAbstainForSPOs =
-    Number(networkMetrics?.spos_abstain_voting_power) ?? 0;
+    action.type !== "HardForkInitiation"
+      ? Number(networkMetrics?.spos_abstain_voting_power)
+      : 0;
   const totalStakeControlledByNoConfidence =
     Number(networkMetrics?.always_no_confidence_voting_power) ?? 0;
   const totalStakeControlledByNoConfidenceForSPOs =
-    Number(networkMetrics?.spos_no_confidence_voting_power) ?? 0;
+    action.type !== "HardForkInitiation"
+      ? Number(networkMetrics?.spos_no_confidence_voting_power)
+      : 0;
   const totalStakeControlledByDReps =
     Number(networkMetrics?.total_stake_controlled_by_active_dreps) ?? 0;
   const totalStakeControlledBySPOs = Number(
