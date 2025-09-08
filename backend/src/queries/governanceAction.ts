@@ -264,10 +264,10 @@ CommitteeVotes AS (
 ),
 StatusTimes AS (
     SELECT
-        e_ratified.end_time AS ratified_time,
-        e_enacted.end_time AS enacted_time,
-        e_dropped.end_time AS dropped_time,
-        e_expired.end_time AS expired_time
+        e_ratified.start_time AS ratified_time,
+        e_enacted.start_time AS enacted_time,
+        e_dropped.start_time AS dropped_time,
+        e_expired.start_time AS expired_time
     FROM
         TargetAction ta
     LEFT JOIN epoch e_ratified ON ta.ratified_epoch = e_ratified.no

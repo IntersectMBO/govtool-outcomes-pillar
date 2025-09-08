@@ -19,7 +19,7 @@ LatestEpoch AS (
 EpochTimes AS (
     SELECT
         no,
-        end_time
+        start_time
     FROM
         epoch
 ),
@@ -209,10 +209,10 @@ SELECT
         'expired_epoch', gov_action_proposal.expired_epoch
     ) AS status,
     JSON_BUILD_OBJECT(
-        'ratified_time', e_ratified.end_time,
-        'enacted_time', e_enacted.end_time,
-        'dropped_time', e_dropped.end_time,
-        'expired_time', e_expired.end_time
+        'ratified_time', e_ratified.start_time,
+        'enacted_time', e_enacted.start_time,
+        'dropped_time', e_dropped.start_time,
+        'expired_time', e_expired.start_time
     ) AS status_times
 FROM
     RankedProposals rp
