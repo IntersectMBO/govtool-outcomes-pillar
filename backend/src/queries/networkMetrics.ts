@@ -11,20 +11,18 @@ DRepActivity AS (
     LIMIT 1
 ),
 ActiveCommittees AS (
-    SELECT DISTINCT cr.cold_key_id
-    FROM committee_registration cr
-    JOIN tx cr_tx ON cr_tx.id = cr.tx_id
-    JOIN block cr_block ON cr_block.id = cr_tx.block_id
-    LEFT JOIN committee_de_registration cdr 
-           ON cdr.cold_key_id = cr.cold_key_id
-    LEFT JOIN tx cdr_tx ON cdr_tx.id = cdr.tx_id
-    LEFT JOIN block cdr_block ON cdr_block.id = cdr_tx.block_id
+    SELECT 
+        COUNT(DISTINCT cm.committee_hash_id) AS no_of_committee_members
+    FROM committee_member cm
+    JOIN committee c ON c.id = cm.committee_id
+    LEFT JOIN gov_action_proposal gap ON gap.id = c.gov_action_proposal_id
     CROSS JOIN CurrentEpoch ce
-    WHERE cr_block.epoch_no <= ce.no
-      AND (cdr.id IS NULL OR cdr_block.epoch_no > ce.no)
-),
-NoOfCommittees AS (
-    SELECT COUNT(*) AS total FROM ActiveCommittees
+    WHERE (
+        (c.gov_action_proposal_id IS NULL)
+        OR 
+        (gap.enacted_epoch IS NOT NULL AND gap.enacted_epoch <= ce.no)
+    )
+    AND cm.expiration_epoch >= ce.no
 ),
 LatestVotingProcedure AS (
     SELECT DISTINCT ON (vp.drep_voter) 
@@ -156,7 +154,7 @@ SELECT
     AlwaysNoConfidenceVotingPower.amount AS always_no_confidence_voting_power,
     SPOsAbstainVotingPower.total AS spos_abstain_voting_power,
     SPOsNoConfidenceVotingPower.total AS spos_no_confidence_voting_power,
-    NoOfCommittees.total AS no_of_committee_members,
+    ActiveCommittees.no_of_committee_members,
     CommitteeThreshold.quorum_numerator,
     CommitteeThreshold.quorum_denominator
 FROM CurrentEpoch
@@ -166,5 +164,5 @@ CROSS JOIN AlwaysAbstainVotingPower
 CROSS JOIN AlwaysNoConfidenceVotingPower
 CROSS JOIN SPOsAbstainVotingPower
 CROSS JOIN SPOsNoConfidenceVotingPower
-CROSS JOIN NoOfCommittees
+CROSS JOIN ActiveCommittees
 CROSS JOIN CommitteeThreshold`;
