@@ -4,13 +4,13 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
-import { useScreenDimension } from "../../hooks/useDimensions";
 
 type ReasoningElementProps = {
   label: string;
   text: string;
   dataTestId?: string;
 };
+
 function ReasoningElement({ label, text, dataTestId }: ReasoningElementProps) {
   return (
     <Box

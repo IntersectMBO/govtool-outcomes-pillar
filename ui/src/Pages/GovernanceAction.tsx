@@ -88,7 +88,10 @@ function GovernanceAction({ id }: GovernanceActionProps) {
     abstract: governanceAction?.abstract || metadata?.data?.abstract,
     motivation: governanceAction?.motivation || metadata?.data?.motivation,
     rationale: governanceAction?.rationale || metadata?.data?.rationale,
-    references: metadata?.data?.references || [],
+    references:
+      governanceAction?.json_metadata?.body?.references ||
+      metadata?.data?.references ||
+      [],
   };
 
   const hasAnyContent =
