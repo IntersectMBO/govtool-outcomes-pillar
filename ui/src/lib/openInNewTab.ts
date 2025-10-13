@@ -1,5 +1,4 @@
 export const openInNewTab = (url: string, ipfsGateway: string) => {
-  // Ensure the URL is absolute
   const fullUrl =
     url.startsWith("http://") || url.startsWith("https://")
       ? url

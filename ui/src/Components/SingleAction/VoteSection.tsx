@@ -253,7 +253,7 @@ export const VoteSection = ({
 
   const thresholdValue = threshold
     ? isCC
-      ? Number(Math.ceil((totalControlled - totalAbstainVotes) * threshold))
+      ? Number(Math.round((totalControlled - totalAbstainVotes) * threshold))
       : threshold * ratificationThreshold
     : 0;
 
