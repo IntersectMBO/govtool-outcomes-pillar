@@ -27,7 +27,7 @@ jobs:
 
       - name: Add GitLab remote
         run: |
-          git remote add gitlab "https://oauth2:${GITLAB_TOKEN}@gitlab.lidonation.com/voltaire/govtool-outcomes-pillar.git"
+          git remote add gitlab "https://oauth2:${GITLAB_TOKEN}@gitlab.2lovelaces.io/voltaire/govtool-outcomes-pillar.git"
         env:
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
 
@@ -56,7 +56,7 @@ jobs:
             RELEASE_DESC="${{ github.event.release.body }}"
             
             # Create/Update release in GitLab using API
-            curl --request POST "https://gitlab.lidonation.com/api/v4/projects/${GITLAB_PROJECT_ID}/releases" \
+            curl --request POST "https://gitlab.2lovelaces.io/api/v4/projects/${GITLAB_PROJECT_ID}/releases" \
               --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
               --header "Content-Type: application/json" \
               --data "{
@@ -66,7 +66,7 @@ jobs:
               }"
           elif [[ "${{ github.event.action }}" == "deleted" ]]; then
             # Delete release in GitLab
-            curl --request DELETE "https://gitlab.lidonation.com/api/v4/projects/${GITLAB_PROJECT_ID}/releases/${{ github.event.release.tag_name }}" \
+            curl --request DELETE "https://gitlab.2lovelaces.io/api/v4/projects/${GITLAB_PROJECT_ID}/releases/${{ github.event.release.tag_name }}" \
               --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}"
           fi
         env:
