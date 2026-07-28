@@ -1,4 +1,4 @@
-import { NavLink, To } from "react-router-dom";
+import { NavLink, To } from "react-router";
 import { Box, Divider, Skeleton } from "@mui/material";
 import { Typography } from "../Atoms/Typography";
 import { MetadataValidationStatus } from "../../types/api";

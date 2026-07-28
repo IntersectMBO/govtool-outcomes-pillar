@@ -1,4 +1,4 @@
-import { useQueries } from "react-query";
+import { useQueries } from "@tanstack/react-query";
 import {
   EpochParams,
   GovernanceAction,
@@ -29,24 +29,26 @@ export const useNetworkMetrics = (action: GovernanceAction) => {
     }
   }, [action]);
 
-  const queries = useQueries([
-    {
-      queryKey: ["networkMetrics", getEpochForMetrics],
-      queryFn: () =>
-        getEpochForMetrics !== null
-          ? getNetworkMetrics(getEpochForMetrics)
-          : getNetworkMetrics(),
-      enabled: !!action,
-    },
-    {
-      queryKey: ["epochParams", getEpochForMetrics],
-      queryFn: () =>
-        getEpochForMetrics !== null
-          ? getEpochParams(getEpochForMetrics)
-          : getEpochParams(),
-      enabled: !!action,
-    },
-  ]);
+  const queries = useQueries({
+    queries: [
+      {
+        queryKey: ["networkMetrics", getEpochForMetrics],
+        queryFn: () =>
+          getEpochForMetrics !== null
+            ? getNetworkMetrics(getEpochForMetrics)
+            : getNetworkMetrics(),
+        enabled: !!action,
+      },
+      {
+        queryKey: ["epochParams", getEpochForMetrics],
+        queryFn: () =>
+          getEpochForMetrics !== null
+            ? getEpochParams(getEpochForMetrics)
+            : getEpochParams(),
+        enabled: !!action,
+      },
+    ],
+  });
 
   const [metricsQuery, epochParamsQuery] = queries;
 

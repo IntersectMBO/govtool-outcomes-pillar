@@ -1,5 +1,5 @@
 import { Box, CircularProgress } from "@mui/material";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router";
 import { Button } from "../Atoms/Button";
 import GovernanceActionCard from "./GovernanceActionCard";
 import { ActionsEmptyState } from "./ActionsEmptyState";

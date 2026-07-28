@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import React from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router";
 import { GOVERNANCE_ACTION_SORT_OPTIONS } from "../../consts/sort-options";
 import { useTranslation } from "../../contexts/I18nContext";
 import { theme } from "../../theme";

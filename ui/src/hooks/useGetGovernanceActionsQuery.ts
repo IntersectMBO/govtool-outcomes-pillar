@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from "react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { queryKeys } from "../consts/queryKeys";
 import { getGovernanceActions } from "../services/requests/getGovernanceActions";
 import { decodeCIP129Identifier, getFullGovActionId } from "../lib/utils";
@@ -47,6 +47,7 @@ export const useGetGovernanceActionsQuery = (
       );
       return response;
     },
+    initialPageParam: 1,
     getNextPageParam: (lastPage, allPages) => {
       return lastPage.length === limit ? allPages.length + 1 : undefined;
     },
