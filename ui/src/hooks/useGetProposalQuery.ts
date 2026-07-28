@@ -1,4 +1,4 @@
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../consts/queryKeys";
 import { getProposal } from "../services/requests/getProposal";
 
