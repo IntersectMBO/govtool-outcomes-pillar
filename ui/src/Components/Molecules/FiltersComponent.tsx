@@ -14,7 +14,7 @@ import { useState } from "react";
 import { theme } from "../../theme";
 import { GOVERNANCE_ACTION_FILTERS } from "../../consts/filters";
 import { GOVERNANCE_ACTION_STATUS_FILTERS } from "../../consts/status-filters";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router";
 import { fadedPurple } from "../../consts/colors";
 import { useTranslation } from "../../contexts/I18nContext";
 import {

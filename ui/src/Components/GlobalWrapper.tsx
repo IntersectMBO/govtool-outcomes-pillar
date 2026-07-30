@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom";
+import { useLocation } from "react-router";
 import Outcomes from "../Pages/Outcomes";
 import VotesAndFavorites from "../Pages/VotesAndFavorites";
 import { Box } from "@mui/material";
