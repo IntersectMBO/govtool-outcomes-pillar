@@ -5,7 +5,7 @@ import { theme } from "../../theme";
 import FiltersComponent from "./FiltersComponent";
 import SortComponent from "./SortComponent";
 import { useScreenDimension } from "../../hooks/useDimensions";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router";
 import { useTranslation } from "../../contexts/I18nContext";
 import { orange, primaryBlue } from "../../consts/colors";
 import { GOVERNANCE_ACTION_FILTERS } from "../../consts/filters";

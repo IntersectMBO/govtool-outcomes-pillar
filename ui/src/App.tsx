@@ -1,7 +1,7 @@
 import { ThemeProvider } from "@mui/material";
 import { SnackbarProvider } from "./contexts/Snackbar";
 import { theme } from "./theme";
-import { QueryClient, QueryClientProvider } from "react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { setAxiosBaseURL } from "./services/axiosInstance";
 import GlobalWrapper from "./Components/GlobalWrapper";
 import { AppContextProvider } from "./contexts/AppContext";

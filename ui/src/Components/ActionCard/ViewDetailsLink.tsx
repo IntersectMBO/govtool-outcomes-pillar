@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink } from "react-router";
 import { Button } from "../Atoms/Button";
 import { useTranslation } from "../../contexts/I18nContext";
 

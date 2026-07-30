@@ -2,7 +2,7 @@ import { createContext, useContext, useMemo, useReducer } from "react";
 import { MuiModalChildren } from "../Components/modal/Modal";
 import { ExternalLinkModal } from "../Components/modal/ExternalLinkModal";
 import { callAll } from "../lib/callAll";
-import { basicReducer, BasicReducer } from "../lib/basicReducer";
+import { basicReducer } from "../lib/basicReducer";
 
 interface ProviderProps {
   children: React.ReactNode;
@@ -49,8 +49,8 @@ ModalContext.displayName = "ModalContext";
 
 // eslint-disable-next-line react/function-component-definition
 function ModalProvider<T>({ children, ...props }: ProviderProps) {
-  const [modal, openModal] = useReducer<BasicReducer<ModalState<T>>>(
-    basicReducer,
+  const [modal, openModal] = useReducer(
+    basicReducer<ModalState<T>>,
     {
       state: null,
       type: "none",

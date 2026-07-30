@@ -1,6 +1,6 @@
 import { Box, Button } from "@mui/material";
 
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { formatTimeStamp } from "../../lib/utils";
 import { theme } from "../../theme";
 import { Typography } from "../Atoms/Typography";
