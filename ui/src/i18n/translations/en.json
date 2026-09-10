@@ -77,10 +77,24 @@
       "expired": {
         "title": "Expiration Date",
         "label": "Expired:",
-        "paragraphOne": "The date when the governance action will expiry if it doesn't reach ratification thresholds.",
+        "paragraphOne": "The date when the governance action expired.",
         "paragraphTwo": "IMPORTANT: If the governance action is ratified before the expiry date it will be considered ratified and it will not be available to vote on afterwards."
       },
-      "expiry": "Expiry Date",
+      "notRatified": {
+        "title": "Not Ratified Date",
+        "label": "Not Ratified:",
+        "paragraphOne": "The date when the governance action was dropped without being ratified."
+      },
+      "enacted": {
+        "title": "Enactment Date",
+        "label": "Enacted:",
+        "paragraphOne": "The date when the governance action was enacted on-chain."
+      },
+      "expiry": {
+        "title": "Expiry Date",
+        "paragraphOne": "The date when the governance action will expire if it doesn't reach ratification thresholds.",
+        "paragraphTwo": "IMPORTANT: If the governance action is ratified before the expiry date it will be considered ratified and it will not be available to vote on afterwards."
+      },
       "expires": "Expires:",
       "submitted": "Submitted:"
     },
