@@ -25,9 +25,41 @@ const GovActionDatesInfo = ({
 
   const proposalStatus = getProposalStatus(action.status);
 
-  const isExpired = ["Expired", "Not Ratified", "Enacted"].includes(
-    proposalStatus
-  );
+// provide correct status
+  const getDateDisplayInfo = () => {
+    switch (proposalStatus) {
+      case "Expired":
+        return {
+          label: t("outcome.dates.expired.label"),
+          date: action.status_times.expired_time as string,
+          epoch: action.status.expired_epoch as number,
+          tooltipType: "expired",
+        };
+      case "Not Ratified":
+        return {
+          label: t("outcome.dates.notRatified.label"),
+          date: action.status_times.dropped_time as string,
+          epoch: action.status.dropped_epoch as number,
+          tooltipType: "notRatified",
+        };
+      case "Enacted":
+        return {
+          label: t("outcome.dates.enacted.label"),
+          date: action.status_times.enacted_time as string,
+          epoch: action.status.enacted_epoch as number,
+          tooltipType: "enacted",
+        };
+      default:
+        return {
+          label: t("outcome.dates.expires"),
+          date: action.expiry_date,
+          epoch: action.expiration,
+          tooltipType: "expiry",
+        };
+    }
+  };
+
+  const dateDisplayInfo = getDateDisplayInfo();
 
   const idCIP129 = encodeCIP129Identifier({
     txID: action?.tx_hash,
@@ -48,12 +80,18 @@ const GovActionDatesInfo = ({
     );
   };
 
-  const renderExpirationInfoTooltip = () => {
+  const renderDateInfoTooltip = () => {
+    const tooltipTranslationKey = `outcome.dates.${dateDisplayInfo.tooltipType}`;
+
     return (
       <Tooltip
-        heading={t("outcome.dates.expired.title")}
-        paragraphOne={t("outcome.dates.expired.paragraphOne")}
-        paragraphTwo={t("outcome.dates.expired.paragraphTwo")}
+        heading={t(`${tooltipTranslationKey}.title`)}
+        paragraphOne={t(`${tooltipTranslationKey}.paragraphOne`)}
+        paragraphTwo={
+          dateDisplayInfo.tooltipType === "expiry"
+            ? t(`${tooltipTranslationKey}.paragraphTwo`)
+            : undefined
+        }
       >
         <Icon>
           <IconInformationCircle width={19} height={19} />
@@ -113,7 +151,7 @@ const GovActionDatesInfo = ({
         </Box>
       </Box>
       <Box
-        data-testid={`${idCIP129}-${isExpired ? "Expired" : "Expires"}-date`}
+        data-testid={`${idCIP129}-${dateDisplayInfo.label.replace(":", "")}-date`}
         sx={{
           display: "flex",
           alignItems: "center",
@@ -126,19 +164,12 @@ const GovActionDatesInfo = ({
         }}
       >
         <Typography variant="caption">
-          {isExpired
-            ? t("outcome.dates.expired.label")
-            : t("outcome.dates.expires")}{" "}
+          {dateDisplayInfo.label}{" "}
           <Typography component="span" fontWeight={600} variant="caption">
-            {action.status.expired_epoch !== null
-              ? formatTimeStamp(
-                  action.status_times.expired_time as string,
-                  isCard || isMobile ? "short" : "full"
-                )
-              : formatTimeStamp(
-                  action.expiry_date,
-                  isCard || isMobile ? "short" : "full"
-                )}
+            {formatTimeStamp(
+              dateDisplayInfo.date,
+              isCard || isMobile ? "short" : "full"
+            )}
           </Typography>
         </Typography>
         <Box
@@ -150,13 +181,9 @@ const GovActionDatesInfo = ({
           }}
         >
           <Typography variant="caption">
-            ({t("outcome.epoch")}{" "}
-            {action.status.expired_epoch !== null
-              ? action.status.expired_epoch
-              : action.expiration}
-            )
+            ({t("outcome.epoch")} {dateDisplayInfo.epoch})
           </Typography>
-          {renderExpirationInfoTooltip()}
+          {renderDateInfoTooltip()}
         </Box>
       </Box>
     </Box>
